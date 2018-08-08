@@ -1,0 +1,1373 @@
+
+<script>
+	const serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
+	import SelectInput from './SelectInput.html';
+
+	export default {
+		data() {
+			return {
+				params: {
+					layerId: {value: '', title: 'Выбор слоя'},
+					quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
+					reportType: {options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+					organizationName: {value: 'Наименование организации'},
+					inn: {value: '1234567890', title: 'ИНН'},
+					region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
+					forestry: {value: 'Лесничество'},
+					sectionForestry: {value: 'Участковое лесничество'},
+					quadrant: {value: 'Квартал'},
+					stratum: {value: 'Выдел'},
+					fellingForm: {value: '', title: 'Форма рубки'},
+					fellingType: {value: '', title: 'Тип рубки'},
+					recoveryEventType: {value: '', title: 'Тип мероприятия'},
+					siteArea: {value: 'Площадь'},
+					scale: {value: 'Масштаб'},
+					site: {value: 'Делянка'}
+				},
+				layerItems: [],
+				limit: 0,
+				layerId: '',
+				reportType: '',
+				layerIds: [], quadrantIds: [],
+				cols: []
+			}
+		},
+		// preload({ params, query }) {
+			// const { slug } = params;
+
+			// return this.fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo`)
+				// .then(r => r.json()).then(post => {
+					// return { post };
+				// });
+		// },
+		components: {
+			SelectInput,
+		},
+	
+		methods: {
+ 			loadFeatures(id) {
+ 				return fetch(`${serverBase}VectorLayer/Search.ashx?layer=${id}&WrapStyle=None`, {
+						mode: 'cors',
+						credentials: 'include'
+					})
+					.then(res => res.json())
+					.then(json => {
+// console.log(json)
+						if (json.Status === 'ok') {
+							this.set({cols: json.Result.fields, layerItems: json.Result.values});
+							// this.set({version: id});
+						}
+					})
+					.catch(err => console.log(err));
+			},
+			getReportsCount() {
+				// const url = `${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`,
+					// options = {
+						// body: JSON.stringify({WrapStyle: 'None'}),
+						// method: 'post',
+						// mode: 'cors',
+						// credentials: 'include'
+						// ,
+						// headers: {
+							// 'Accept': 'application/json'
+						// }
+					// };
+
+				return fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`, {
+						mode: 'cors',
+						credentials: 'include'
+					})
+					.then(res => res.json())
+					.then(json => {
+						if (json.Status === 'ok') {
+							let count = json.Result.limit - json.Result.used;
+							this.set({limit: count > 0 ? count : 0});
+						}
+					})
+					.catch(err => console.log(err));
+			}
+			// getParam(key) {
+				// const { params } = this.get();
+				// console.log('getParam', params);
+			// },
+			// chkLayer: function(sel) {
+				// console.log('chkLayer', sel, this);
+				// this.set({layerId: sel.options[sel.selectedIndex].value});
+			// },
+			// click(row) {
+				// dataGrid.click(this, row)
+			// },
+			// exportExcel() {
+				// dataGrid.exportExcel(this);
+			// },
+			// print() {
+				// dataGrid.print(this);
+			// },
+			// sort(index) {
+				// if (index > -1) {
+					// dataGrid.setSortIcon(this, index);
+					// const { columns, sortType } = this.get();
+					// this.getPaged({colName: columns[index].field, direction: sortType});				
+				// }
+			// },
+		},
+
+        helpers: {
+           // collect
+		},
+		onstate({ changed, current, previous }) {
+			console.log('in onstate', this);
+			if (changed.layerId && current.layerId) {
+				this.loadFeatures(current.layerId);
+				// this.set({cols: current.gmxMap.layersByID[current.layerId].getGmxProperties().attributes});
+			}
+		},
+		
+		oncreate() {
+			const { meta, gmxMap } = this.get();
+			this.getReportsCount();
+console.log('in oncreate', gmxMap);
+			let layerIds = [], quadrantIds = [];
+			gmxMap.layers.forEach((it) => {
+				if (it.getGmxProperties) {
+					let props = it.getGmxProperties(),
+						metaProps = props.MetaProperties || {};
+					if (
+						props.type.toLowerCase() === 'vector' &&
+						props.GeometryType.toLowerCase() === 'polygon' &&
+						!props.IsRasterCatalog &&
+						!props.Quicklook
+						) {
+						let hash = {id: props.name, title: props.title};
+						if (meta) {
+							if (metaProps.forest && metaProps.forest.Value === 'true') {
+								layerIds.push(hash);
+							}
+							if (metaProps.quadrant && metaProps.quadrant.Value === 'true') {
+								quadrantIds.push(hash);
+							}
+						} else {
+							layerIds.push(hash);
+							quadrantIds.push(hash);
+						}
+					}
+				}
+			});
+			this.set({layerIds: layerIds, quadrantIds: quadrantIds, cols: []});
+			// if (process== 'server') {
+				// grid = server.oncreate.call(this, server);
+			// } else {
+				// grid = local.oncreate.call(this, local);
+			// }
+			
+			// dataGrid.setPerPageOptions(grid);
+		},
+
+		onupdate({ changed, current, previous }) {
+			console.log('in onupdate', this);
+			var tt = 1;
+			const { currentPerPage, searchInput, selectedPage, rows } = current;
+			// if (changed.currentPerPage) {
+				// this.getPaged({size: currentPerPage});
+			// }	        
+			// if (changed.searchInput) {
+				// debounce((x) => {
+					// console.log('searchInput changed', x);
+					// this.getPaged({ searchText: x });
+				// }, 250)();
+			// }	        
+			// if (changed.selectedPage) {
+				// const newPage = selectedPage + 1;
+				// this.getPaged({ page: newPage }, x => x.page != newPage);
+			// }   	        
+		},
+		ondestroy() {
+			console.log('in ondestroy', this);
+		}
+	}
+</script>
+
+<div data-reactroot="" class="forest-plugin-container">
+	<div class="forest-plugin-header">Отчет об использовании лесов</div>
+	<div class="forest-plugin-header">Лимит отчетов: {limit}</div>
+	<div class="gmx-select-layer-container">
+		<span class="gmx-select-layer-container__label">Выбор слоя</span>
+		<select on:change="set({layerId: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-medium">
+			<option value=""></option>
+			{#if layerIds}
+				{#each layerIds as it}
+					<option value="{it.id}" selected="{layerId === it.id}">{it.title}</option>
+				{/each}
+			{/if}
+		</select>
+	</div>
+{#if layerId}
+	<div class="leftContent forest-plugin-content">
+		<div>
+			<div class="gmx-sidebar-label-medium">Ввод информации</div>
+			<div>
+				<div>
+					<div class="gmx-sidebar-labeled-block">
+						<div class="gmx-sidebar-label">{params.reportType.title}</div>
+						<select name="reportType" on:change="set({reportType: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-large">
+							{#each params.reportType.options as it}
+								<option value="{it}">{it}</option>
+							{/each}
+
+						</select>
+					</div>
+					{#if reportType !== 'о восстановлении лесов'}
+					<div>
+						<SelectInput key="fellingForm" cols="{cols}" />
+						<SelectInput key="fellingType" cols="{cols}" />
+					</div>
+					{/if}
+					<div class="gmx-sidebar-labeled-block">
+						<div class="gmx-sidebar-label-small">Наименование организации</div>
+						<input type="text" class="gmx-sidebar-input-large" value="Наименование организации">
+					</div>
+					<div class="gmx-sidebar-labeled-block">
+						<div class="gmx-sidebar-label-small">ИНН</div>
+						<input type="text" class="gmx-sidebar-input-large" value="1234567890">
+					</div>
+
+					<SelectInput key="region" cols="{cols}" />
+					<SelectInput key="forestry" cols="{cols}" />
+					<SelectInput key="sectionForestry" cols="{cols}" />
+					<SelectInput key="quadrant" cols="{cols}" />
+					<SelectInput key="stratum" cols="{cols}" />
+					<SelectInput key="site" cols="{cols}" />
+					<SelectInput key="recoveryEventType" cols="{cols}" />
+					<SelectInput key="siteArea" cols="{cols}" />
+					<SelectInput key="scale" cols="{cols}" />
+
+					<div class="gmx-sidebar-labeled-block">
+						<div class="gmx-sidebar-label">Слой квартальной сети</div>
+						<select on:click="set({quadrantId: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-large">
+							<option value=""></option>
+							{#if quadrantIds}
+								{#each quadrantIds as it}
+									<option
+										value="{it.id}"
+										selected="{quadrantId === it.id}"
+									>
+									{it.title}
+									</option>
+								{/each}
+							{/if}
+						</select>
+					</div>
+				</div>
+			</div>
+			<div class="gmx-sidebar-label-medium">Список объектов</div>
+			<div class="forest-features-block">
+				<div>
+					<div class="gmx-geometry-select-container"><button class="gmx-sidebar-button">Выделите участки полигоном</button></div>
+					<div class="gmx-sidebar-label-medium">Выделено: 0 / {layerItems.length}</div>
+					<div class="gmx-sidebar-label-small">
+						<div class="gmx-checkbox-container"><input type="checkbox" value="on">Инвертировать выделение</div>
+					</div>
+<div class="tableContect">
+	<table class="table">
+		<tr class="head">
+			<th class="c1"><input type="checkbox" value="on"></th>
+			<th class="c2"><span>Id</span></th>
+			<th class="c3"><span>Статус</span></th>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>1</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>2</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>1</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="pagination">
+			<td colspan="3">
+				<button type="button" disabled="" class="-btn">назад</button>
+				<span class="pageInfo">Стр. <input type="number" value="1"> из 6</span>
+				<button type="button" class="-btn">вперед</button>
+			</td>
+		
+		</tr>
+	</table>
+</div>
+
+<div class="ReactTable">
+	<div class="rt-table" role="grid">
+		<div class="rt-thead -header" style="min-width: 290px;">
+			<div class="rt-tr" role="row">
+				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
+					<div class="rt-resizable-header-content">
+						<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div>
+					</div>
+					<div class="rt-resizer"></div>
+				</div>
+				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 200 0 auto; width: 200px;">
+					<div class="rt-resizable-header-content"><span>Id</span></div>
+					<div class="rt-resizer"></div>
+				</div>
+				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
+					<div class="rt-resizable-header-content"><span>Статус</span></div>
+					<div class="rt-resizer"></div>
+				</div>
+				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
+					<div class="rt-resizable-header-content"></div>
+					<div class="rt-resizer"></div>
+				</div>
+			</div>
+		</div>
+		<div class="rt-tbody" style="min-width: 290px;">
+			<div class="rt-tr-group" role="rowgroup">
+				<div class="rt-tr -odd" role="row">
+					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+						<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div>
+					</div>
+					<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">1</div>
+					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+						<div class="gmx-status-indicator-good"></div>
+					</div>
+					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+						<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div>
+					</div>
+				</div>
+			</div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">2</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-good"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">3</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">4</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">5</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">6</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">7</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">8</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">9</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">10</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">11</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">12</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">13</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -even" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">14</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
+<div class="rt-tr-group" role="rowgroup">
+<div class="rt-tr -odd" role="row">
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">15</div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-status-indicator-bad"></div></div>
+<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
+<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div></div>
+</div>
+<div class="pagination-bottom">
+<div class="-pagination">
+<div class="-previous"><button type="button" disabled="" class="-btn">назад</button></div>
+<div class="-center"><span class="-pageInfo"><!-- react-text: 323 -->Стр.<!-- /react-text --><!-- react-text: 324 --> <!-- /react-text -->
+<div class="-pageJump"><input type="number" value="1"></div><!-- react-text: 327 --> <!-- /react-text --><!-- react-text: 328 -->из<!-- /react-text --><!-- react-text: 329 --> <!-- /react-text --><span class="-totalPages">6</span></span></div>
+<div class="-next"><button type="button" class="-btn">вперед</button></div></div></div>
+<div class="-loading">
+<div class="-loading-inner"></div></div></div></div></div>
+<div class="gmx-button-container"><button class="gmx-sidebar-button-disabled" disabled="">Создать отчеты</button></div>
+</div>
+</div>
+{/if}
+</div>
+
+
+<style>
+.tableContect table {
+	border: 1px solid #d7e1e7;
+	width: 100%;
+}
+.tableContect tr:nth-child(odd) {
+	/* background-color: lightgray;*/
+}
+.tableContect th {
+	border-right: 1px solid #d7e1e7;
+	border-bottom: 1px solid #d7e1e7;
+}
+
+.tableContect .c1 {
+	width: 20px;
+	text-align: center;
+}
+.tableContect .c2 {
+	/* font-weight: bold; */
+}
+.tableContect input {
+    vertical-align: sub;
+}
+.tableContect th.c3 {
+	border-right: inherit;
+	width: 50px;
+}
+.tableContect span.status {
+    width: 8px;
+    height: 8px;
+	display: inline-block;
+    border-radius: 50%;
+	background-color: #f96060;
+	margin-bottom: 3px;
+}
+.tableContect span.status.checked {
+	background-color: #4de371;
+}
+.tableContect .leaflet-gmx-iconSvg {
+    margin-top: -3px;
+    float: inherit;
+    display: inline-block;
+    box-shadow: inherit;
+	height: 16px;
+}
+.tableContect .leaflet-gmx-iconSvg svg {
+	height: 16px;
+}
+.tableContect .pagination td {
+	text-align: center;
+	font-family: Arial;
+}
+.tableContect .pagination input {
+	width: 60px;
+	vertical-align: inherit;
+}
+.tableContect .pagination .pageInfo {
+	margin: 2px;
+}
+    
+	h1 {
+		color: black;
+	}
+.gmx-sidebar-container {
+  width: 100%;
+  height: 40px;
+  margin: 10px 0;
+}
+.gmx-button-container {
+  width: 100%;
+  height: 40px;
+  margin: 10px 0;
+}
+
+.gmx-button-container button {
+  display: block;
+  margin: 0 auto;
+}.gmx-sidebar-select,
+.gmx-sidebar-select-medium,
+.gmx-sidebar-select-large,
+.gmx-sidebar-select-with-addon,
+.gmx-sidebar-select-with-addon-small {
+  box-sizing: border-box;
+  width: 100px;
+  height: 33px;
+  padding: 0 8px;
+  border-radius: 3px;
+  background-color: #f7fbff;
+  border: 1px solid #d7e1e7;
+}
+
+.gmx-sidebar-select-medium {
+  background-position-x: 99% !important;
+  background-size: 25px 25px !important;
+  width: 200px;
+  height: 30px;
+  float: right;
+  margin-right: 10px;
+  margin-top: 5px;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: left;
+  padding-right: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gmx-sidebar-select-large {
+  width: 100%;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.gmx-sidebar-select-with-addon,
+.gmx-sidebar-select-with-addon-small {
+  display: table-cell;
+  float: left;
+  width: 85%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.gmx-sidebar-select-with-addon-small {
+  width: 60%;
+}.gmx-select-layer-container {
+  width: 100%;
+  height: 40px;
+  background-color: #ebf1f5;
+  border-bottom: 1px solid #bbb;
+}
+
+.gmx-select-layer-container__label {
+  width: 30%;
+  height: 22px;
+  padding: 0 10px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 31px;
+  color: #5b7284;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 38px;
+  text-align: left;
+}.gmx-icon {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 24px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.gmx-icon:hover {
+  fill: red;
+}
+
+#zoom-to-feature polygon {
+  cursor: pointer;
+}
+
+#zoom-to-feature polygon:hover {
+  fill: red;
+}
+
+#show-preview {
+  cursor: pointer;
+}
+
+#show-preview:hover {
+  fill: black;
+}
+
+.forest-plugin-container {
+  font-family: "Roboto";
+  border-collapse: collapse;
+  padding-bottom: 17px;
+}
+
+.forest-plugin-header {
+  height: 40px;
+  line-height: 40px;
+  padding-left: 10px;
+  background-color: #ebf1f5;
+  font-size: 18px;
+  font-weight: bold;
+  color: #5b7284;
+  font-family: Arial;
+  color: #181f25;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: left;
+  border-bottom: 1px solid #bbb;
+}
+
+.gmx-sidebar-labeled-block {
+  margin-top: 4px;
+  padding: 0 10px;
+  width: auto;
+  display: grid;
+  text-align: left;
+}
+
+.forest-loader-holder {
+  font-family: "Roboto";
+  width: 100%;
+  text-align: center;
+}
+
+.forest-features-block {
+  padding: 0 10px;
+}
+
+div[data-pane-id="forest-project"] {
+  overflow-y: auto;
+}
+
+.forest-plugin-content {
+  width: 100%;
+  height: 90%;
+  background-color: #f5f8fa;
+  overflow-y: auto;
+}
+
+.forest-loader-holder {
+  padding: 10px;
+  text-align: center;
+}
+
+.width-setting {
+  vertical-align: middle;
+}
+
+.reset {
+  width: 120px;
+  margin: auto;
+}
+
+.div-table {
+  margin: 8 0;
+  display: table;
+  width: auto;
+}
+
+.div-table-row {
+  display: table-row;
+  width: auto;
+  clear: both;
+}
+
+.div-table-col {
+  float: left;
+  display: table-column;
+  width: 120px;
+  max-width: 120px;
+}
+
+.div-table-col input {
+  width: 120px;
+  margin: 0;
+}
+
+.div-table-col .width-type {
+  text-align: left;
+}
+
+.gmx-features-list {
+  max-height: 400px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  text-align: center;
+  width: 332px;
+}
+
+.gmx-features-list:focus {
+  outline: none;
+}
+
+.feature-list-item {
+  line-height: 20px;
+  height: 20px;
+}
+
+.feature-list-item.active {
+  background-color: #eee;
+  padding: 0;
+}
+
+.feature-list-item-part {
+  width: 33%;
+  text-align: center;
+}
+
+.forest-plugin-container .highlight.bottom-selection {
+  border-right: 5px dotted;
+}
+
+.forest-plugin-container .control-label {
+  font-size: 16px;
+  padding: 4px;
+}
+
+.forest-plugin-container select {
+  border: 1px solid rgba(27, 68, 97, 0.3) !important;
+  outline: 0px;
+  -moz-appearance: none;
+  /* Firefox */
+  -webkit-appearance: none;
+  /* Safari and Chrome */
+  appearance: none;
+  background: url(https://png.icons8.com/material/34/57798c/sort-down.png) no-repeat right #FFF !important;
+  background-position-x: 98% !important;
+}
+
+.forest-plugin-container select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #000;
+}
+
+.forest-plugin-container option:not(:checked) {
+  color: #49677d;
+}
+
+.forest-plugin-container .form-control {
+  padding: 0 10px;
+  line-height: 1.42857143;
+  color: #49677d;
+  font-weight: 500;
+  border: 1px solid rgba(27, 68, 97, 0.3) !important;
+  height: 34px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+  -webkit-transition: border-color ease-in-out .15s,-webkit-box-shadow ease-in-out .15s;
+  -o-transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+  transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+}
+
+.forest-plugin-container .input-group,
+.forest-plugin-container .form-control {
+  display: table-cell;
+}
+
+.forest-plugin-container .input-group {
+  display: block;
+  width: 100%;
+}
+
+.forest-plugin-container .btn {
+  margin: auto;
+  display: block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  -ms-touch-action: manipulation;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.forest-plugin-container .input-group .form-control {
+  display: inline-block;
+  width: 90%;
+  box-sizing: border-box;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+.forest-plugin-container .input-group .btn {
+  padding: 0;
+  display: inline-block;
+  line-height: 34px;
+  margin: 0;
+  width: 10%;
+  box-sizing: border-box;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
+}
+
+.forest-plugin-container .btn.active {
+  box-shadow: inset 0 1px 4px rgba(27, 31, 35, 0.55);
+}
+
+.input-group-addon {
+  font-weight: normal;
+  line-height: 1;
+  text-align: center;
+}
+
+.forest-plugin-container .glyphicon {
+  position: relative;
+  top: 1px;
+  display: inline-block;
+  font-family: 'Glyphicons Halflings';
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.forest-plugin-containeroption {
+  color: #49677d !important;
+}
+
+.forest-select-block {
+  padding: 0 10px;
+  margin: 10px 0;
+  width: auto;
+  display: grid;
+  text-align: left;
+}
+
+.forest-plugin-container .checkbox label,
+.forest-plugin-container .radio label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.forest-plugin-container .checkbox,
+.forest-plugin-container .radio {
+  position: relative;
+  display: block;
+}
+
+.feature-list-item.active {
+  background-color: #eee;
+}
+
+.feature-list-item-part {
+  width: 25%;
+  display: inline-block;
+}
+
+.forest-plugin-container .btn.btn-default.input-group-btn {
+  cursor: pointer;
+  border: 1px solid rgba(73, 103, 125, 0.2);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background: url(https://png.icons8.com/material/16/ffffff/outline.png) no-repeat right rgba(73, 103, 125, 0.7) !important;
+  background-position-x: 58% !important;
+  transition: all 0.23s ease;
+}
+
+.forest-plugin-container .btn.btn-default.input-group-btn:hover {
+  background: url(https://png.icons8.com/material/16/ffffff/outline.png) no-repeat right rgba(73, 103, 125, 0.5) !important;
+  background-position-x: 58% !important;
+}
+
+.forest-plugin-container .collapser-block {
+  padding: 10px;
+}
+
+.forest-plugin-container .opening-panel {
+  cursor: pointer;
+}
+
+.forest-plugin-container .opening-panel:hover {
+  background-color: #efefef;
+}
+
+.forest-plugin-container .panel {
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.forest-plugin-container .panel-default {
+  border-color: #ddd;
+}
+
+.forest-plugin-container .panel-body {
+  padding: 15px;
+}
+
+.ReactVirtualized__Grid.ReactVirtualized__List {
+  padding: 10px;
+  width: 100%;
+}
+
+.ReactVirtualized__Grid__innerScrollContainer {
+  width: 100%;
+  max-width: 100%;
+}.gmx-table-icon-container {
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  cursor: pointer;
+}
+
+.gmx-status-indicator,
+.gmx-status-indicator-bad,
+.gmx-status-indicator-mean,
+.gmx-status-indicator-good {
+  width: 8px;
+  height: 8px;
+  line-height: 24px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.gmx-status-indicator-bad {
+  background-color: #f96060;
+}
+
+.gmx-status-indicator-mean {
+  background-color: #f9de60;
+}
+
+.gmx-status-indicator-good {
+  background-color: #4de371;
+}
+
+.gmx-table-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.gmx-table-icon:hover {
+  fill: #70cbe0;
+}.gmx-geometry-select-container {
+  width: 100%;
+  height: 40px;
+}
+
+.gmx-geometry-select-container button {
+  display: block;
+  margin: 0 auto;
+  width: 100%;
+  margin-top: 15px;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 31.249px;
+  text-align: center;
+  border: 1px solid rgba(27, 68, 97, 0.3);
+  background: url(./ext/polygon.png) no-repeat #d8e1e8;
+  background-position: 4%;
+  padding-left: 30px;
+  transition: all 0.25s ease;
+}
+
+.gmx-geometry-select-container button:hover {
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+.gmx-checkbox-container {
+  margin: auto;
+  padding-top: 5px;
+  padding-left: 10px;
+  font-family: Arial;
+  color: #5baceb;
+  font-size: 13px;
+  font-weight: 600;
+  align-items: center;
+  display: flex;
+}.gmx-table-icon-container {
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  cursor: pointer;
+}
+
+.gmx-status-indicator,
+.gmx-status-indicator-bad,
+.gmx-status-indicator-mean,
+.gmx-status-indicator-good {
+  width: 8px;
+  height: 8px;
+  line-height: 24px;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+.gmx-status-indicator-bad {
+  background-color: #f96060;
+}
+
+.gmx-status-indicator-mean {
+  background-color: #f9de60;
+}
+
+.gmx-status-indicator-good {
+  background-color: #4de371;
+}
+
+.gmx-table-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.gmx-table-icon:hover {
+  fill: #70cbe0;
+}
+
+.ReactTable {
+  position: relative;
+  border: 1px solid #d7e1e7;
+  min-width: 100%;
+}
+
+.ReactTable * {
+  box-sizing: border-box;
+  margin-bottom: 3px;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ReactTable .rt-table {
+  -webkit-box-align: stretch;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+  width: 100%;
+  border-collapse: collapse;
+  overflow: auto;
+  background-color: #ffffff;
+}
+
+.ReactTable .rt-thead {
+  border-collapse: collapse;
+  cursor: pointer;
+  width: 100%;
+  height: 30px;
+  border-radius: 3px;
+  background-color: #f7fbff;
+}
+
+.ReactTable .rt-th {
+  border: 1px solid #d7e1e7;
+}
+
+.ReactTable .rt-th,
+.ReactTable .rt-td {
+  display: table-cell;
+}
+
+.ReactTable .rt-resizable-header-content {
+  text-align: center;
+}
+
+.ReactTable .rt-resizable-header-content,
+.ReactTable .rt-td {
+  padding: 0;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.ReactTable .-pagination {
+  display: table;
+  width: 100%;
+}
+
+.ReactTable .-pagination button {
+  padding: 0 6px;
+  margin-bottom: -6px;
+  margin-top: -3px;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ReactTable .-previous,
+.ReactTable .-center,
+.ReactTable .-next {
+  display: table-cell;
+}
+
+.ReactTable .-center {
+  padding: 0 10px;
+  text-align: center;
+}
+
+.ReactTable .-pageJump {
+  width: 40%;
+  display: inline-block;
+}
+
+.ReactTable .-pageJump input {
+  width: 70%;
+}
+
+.ReactTable .-pagination button {
+  height: 40px;
+  border-radius: 3px;
+  background-color: #d7e1e7;
+  border: 1px solid #d7e1e7;
+  cursor: pointer;
+}.gmx-sidebar-input,
+.gmx-sidebar-input-medium,
+.gmx-sidebar-input-large,
+.gmx-sidebar-input-with-addon,
+.gmx-sidebar-input-with-addon-small {
+  box-sizing: border-box;
+  width: 100px;
+  height: 33px;
+  padding: 0 8px;
+  border-radius: 3px;
+  background: #FFF;
+  border: 1px solid rgba(27, 68, 97, 0.3);
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.gmx-sidebar-input-medium {
+  width: 200px;
+}
+
+.gmx-sidebar-input-large {
+  width: 100%;
+  background: #FFF;
+  border: 1px solid rgba(27, 68, 97, 0.3) !important;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 31.249px;
+  text-align: left;
+}
+
+.gmx-sidebar-input-with-addon,
+.gmx-sidebar-input-with-addon-small {
+  display: table-cell;
+  float: left;
+  width: 85%;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.gmx-sidebar-input-with-addon-small {
+  width: 60%;
+}.gmx-sidebar-label,
+.gmx-sidebar-label-medium,
+.gmx-sidebar-label-small {
+  font-size: 13px;
+  line-height: 31px;
+  font-family: "Arial";
+  padding-left: 0px;
+  color: #777f85;
+}
+
+.gmx-sidebar-label-medium {
+  font-size: 16px;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 31.249px;
+  text-align: left;
+  top: 10px;
+  position: relative;
+  padding-left: 10px;
+}
+
+.gmx-sidebar-label-small {
+  font-size: 13px;
+}.gmx-addon-button,
+.gmx-addon-button-toggled,
+.gmx-addon-button-medium,
+.gmx-addon-button-medium-toggled {
+  padding: 0 6px;
+  box-sizing: border-box;
+  width: 15%;
+  height: 33px;
+  display: table-cell;
+  vertical-align: middle;
+  background-color: #d7e1e7;
+  border: none;
+  border-radius: 0 3px 3px 0;
+  cursor: pointer;
+  background: url(https://png.icons8.com/ios-glyphs/23/57717d/list.png) no-repeat right #d8e1e8 !important;
+  background-position-x: 50% !important;
+  border-right: 1px solid rgba(27, 68, 97, 0.3);
+  border-top: 1px solid rgba(27, 68, 97, 0.3);
+  border-bottom: 1px solid rgba(27, 68, 97, 0.3);
+}
+
+.gmx-addon-button:focus,
+.gmx-addon-button-toggled:focus,
+.gmx-addon-button-medium:focus,
+.gmx-addon-button-medium-toggled:focus {
+  outline: none;
+}
+
+.gmx-addon-button-toggled {
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+}
+
+.gmx-addon-button-medium {
+  background: none !important;
+  background-color: #d7e1e7;
+  width: 40%;
+  cursor: pointer;
+  font-family: Arial;
+  color: #5b7284;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gmx-addon-button-medium:focus {
+  outline: none;
+}
+
+.gmx-addon-button-medium-toggled {
+  background: none;
+  background-color: #d7e1e7;
+  box-shadow: inset 0 1px 4px rgba(27, 31, 35, 0.55);
+}
+
+.gmx-addon-button-medium[disabled] {
+  cursor: default;
+}
+
+.gmx-sidebar-button,
+.gmx-sidebar-button-toggled,
+.gmx-sidebar-button-error,
+.gmx-sidebar-button-disabled {
+  border-radius: 3px;
+  padding: 0 6px;
+  border: 1px solid #d7e1e7;
+  cursor: pointer;
+  background-color: #5baceb;
+  width: 94%;
+  height: 47px;
+  color: #FFF;
+  font-family: Arial;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.gmx-sidebar-button:focus,
+.gmx-sidebar-button-toggled:focus,
+.gmx-sidebar-button-error:focus,
+.gmx-sidebar-button-disabled:focus {
+  outline: none;
+}
+
+.gmx-sidebar-button-toggled {
+  box-shadow: inset 0 1px 4px rgba(27, 31, 35, 0.55);
+}
+
+.gmx-sidebar-button-error {
+  color: red;
+}
+
+.gmx-sidebar-button-disabled {
+  pointer-events: none;
+  background-color: #efefef;
+  cursor: default;
+}
+</style>

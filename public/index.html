@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset='utf8'>
+	<meta name='viewport' content='width=device-width'>
+    <style>
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+	}
+    </style>
+
+	<title>Svelte app</title>
+
+    <link rel="stylesheet" href="./ext/css-treeview.css">
+    <link rel="stylesheet" href="./ext/scrollbars.css">
+
+	<link rel='stylesheet' href='global.css'>
+	<link rel='stylesheet' href='forest.css'>
+
+	<link rel="stylesheet" href="//www.kosmosnimki.ru/lib/geomixer_1.3/geomixer.css" crossorigin=""/>
+	<script src="//www.kosmosnimki.ru/lib/geomixer_1.3/geomixer-src.js?1508146119421" crossorigin=""></script>
+
+	<script src="./ext/IconSidebarControl.js" charset="utf-8"></script>
+	<link rel="stylesheet" href="./ext/IconSidebarControl.css" charset="utf-8">
+
+	<script src ="./ext/L.Control.gmxTreeView.js"></script>
+	<link	href="./ext/L.Control.gmxTreeView.css" charset="utf-8" rel="stylesheet">
+
+	<script src='forest.js'></script>
+</head>
+
+<body>
+	<div id="map"></div>
+
+	<script>
+		var osm = L.tileLayer('//tilessputnik.ru/{z}/{x}/{y}.png', {
+			maxZoom: 18
+        });
+
+		var map = new L.Map('map', {layers: [osm], center: new L.LatLng(0, 60), zoom: 3});
+
+		//L.gmx.loadMap('78457D37D4104840B76257C72B931125').then(function(gmxMap) {
+		L.gmx.loadMap('22DB1B271A81413C8BF02D1A81491E56').then(function(gmxMap) {
+console.log('gmxMap', gmxMap)
+			var iconSidebar = L.control.iconSidebar({width111: 360});
+			map.addControl(iconSidebar);
+			var node = L.DomUtil.create('div', 'treeViewCont'),
+				tabIcon = L.DomUtil.create('div', 'tabIcon', node),
+				tabCont = L.DomUtil.create('div', 'tabCont', node);
+			tabIcon.innerHTML = '<svg role="img" class="svgIcon"><use xlink:href="#s-tree" href="#s-tree"></use></svg>';
+			// putSVGIcon(tabIcon, 's-tree');
+
+			var treePane = iconSidebar.setPane('treeView', {
+				createTab: function(state) {
+					// console.log('treeViewCont', state)
+					if (state === 'active') {
+						L.DomUtil.addClass(node, 'icon_active')
+					} else {
+						L.DomUtil.removeClass(node, 'icon_active')
+					}
+					return node
+				}
+			});
+			
+			var rawTree = gmxMap.rawTree;
+			var gmxTreeView = L.control.gmxTreeView({
+				iconSidebar: iconSidebar,
+				container: treePane,
+				rawTree: rawTree
+			});
+			gmxTreeView
+				.on('centerLayer infoLayer change:expanded change:visible title:click styles:click style:click', function(ev) {
+					var type = ev.type,
+						treeNodeID = ev.treeNodeID,
+						gmxLayer = gmxMap.layersByID[treeNodeID];
+
+					if (gmxLayer) {
+						if (type === 'centerLayer') {
+							map.fitBounds(gmxLayer.getBounds());
+						} else if (type === 'change:visible') {
+							if (ev.checked) {
+								map.addLayer(gmxLayer);
+							} else {
+								map.removeLayer(gmxLayer);
+							}
+						}
+					}
+console.log(ev);
+				});
+
+			var node1 = L.DomUtil.create('div', 'forestViewCont'),
+				tabIcon1 = L.DomUtil.create('div', 'tabIcon', node1),
+				tabCont1 = L.DomUtil.create('div', 'tabCont', node1);
+			tabIcon1.innerHTML = '<svg role="img" class="svgIcon"><use xlink:href="#s-forest-plugin" href="#s-forest-plugin"></use></svg>';
+			var forestPane = iconSidebar.setPane('forestView', {
+				createTab: function(state) {
+					// console.log('treeViewCont', state)
+					if (state === 'active') {
+						L.DomUtil.addClass(node1, 'icon_active')
+					} else {
+						L.DomUtil.removeClass(node1, 'icon_active')
+					}
+					return node1;
+				}
+			});
+				
+			var hworld = new forest.App({
+				target: forestPane,
+				data: {
+					// meta: true,		// фильтровать списки слоев по Meta
+					gmxMap: gmxMap
+					,
+					// layerId: 'F2EE4C559F614CDFA058D34FE3E4703E',	// слой делянок по умолчанию
+					quadrantId: '4CEAA401E3D540EEBD37AD6F01F06CF5'	// слой квадрантов по умолчанию
+					
+				}
+			});
+				
+		});
+		map.gmxControlsManager.setSvgSprites('//www.kosmosnimki.ru/lib/geomixer_1.3/img/svg-symbols2.svg');
+		map.gmxControlsManager.setSvgSprites('//maps.kosmosnimki.ru/api/plugins/forestproject/icons/sprite.svg');
+	</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+/*
+	for sidebar
+*/
+.leaflet-gmx-sidebar {
+    border: 1px solid rgba(0,0,0,0.25);
+    background: #efefef;
+    padding: 5px;
+}
+
+.iconSidebarControl.iconSidebarControl-right.leaflet-control.iconSidebarControl_opened.iconSidebarControl_expanded {
+    width: 390px;
+}
+
+.iconSidebarControl-pane.iconSidebarControl-pane-active[data-pane-id=treeView] {
+    width: inherit;
+}
+
+.treeViewCont.icon_active .tabIcon {
+	background-color: #0074d9;
+}
+.treeViewCont.icon_active .svgIcon {
+	fill: white;
+}
+
+.tabIcon .svgIcon {
+    width: 20px;
+    height: 20px;
+    padding-top: 10px;
+}
+
+.leaflet-gmx-sidebar_expanded {
+    position: absolute;
+    height: auto;
+    bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+/*
+	for treeview
+*/
+ul.css-treeview.node-props-root {
+    padding-left: 0px;
+}
+.node-root ul {
+    padding-left: 14px;
+}
+.node-root ul li { 
+  /* line-height: 34px; */
+	white-space: nowrap;
+	padding-left: 2px;
+	padding-top: 4px;
+    padding-bottom: 4px;
+}
+.css-treeview .cont {
+	/* padding: 6px; */
+    display: block;
+    margin-top: 14px;
+	margin-left: 14px;
+    /* align-items: center; */
+}
+.css-treeview .cont .title {
+	padding-left: 18px;
+    /* top: 5px; */
+    /* position: relative; */
+}
+
+
+.css-treeview input.check {
+    position: absolute;
+    /* top: 3px; */
+	/* margin: 0; */
+}
+
+.css-treeview expander {
+    margin-top: 12px;
+}
+
+.css-treeview input.expander {
+	margin-top: 17px;
+	display: list-item;
+    margin-left: 2px;
+	cursor: pointer;
+}
+.css-treeview span.cont-center, .css-treeview  span.cont-info {
+	cursor: pointer;
+}
+
+.css-treeview span.expander {
+    position: absolute;
+	pointer-events: none;
+	margin-top: 13px;
+	/* display: list-item; */
+    /* margin-left: 2px; */
+}
+
+.css-treeview .cont-overlays {
+	cursor: pointer;
+	left: 0px;
+	position: absolute;
+	display: inline-block;
+	padding-left: 2px;
+	margin-top: 14px;
+	width: max-content;
+}
+
+.icons div.cont-center {
+	right: 18px;
+}
+.borders div {
+    position: absolute;
+	right: 2px;
+	padding-top: 9px;
+}
+.css-treeview label.title {
+    margin-right: 12px;
+    margin-left: 4px;
+    white-space: pre-wrap;
+    width: 80%;
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.css-treeview .icons {
+/*	display: list-item; */
+    position: absolute;
+    right: 2px;
+	margin-top: 12px;
+}
+
+.css-treeview svg.svgIcon {
+    height: 16px;
+    width: 16px;
+	fill-opacity: 0.5;
+	pointer-events: none;
+}
+
+.css-treeview .borders {
+    width: 100%;
+	/* display: list-item; */
+    position: absolute;
+    right: 0px;
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+}
+.css-treeview label {
+    vertical-align: top;
+}
+.css-treeview .hidden {
+    visibility: hidden;
+}
+    /*
+	padding-top: 34px;
+	height: 30px;
+	*/
+	/*margin-top: -28px;*/
+
+.gmx-style-legend .polygon {
+    display: inline-block;
+}
+.gmx-style-legend .linestring {
+    border-bottom: unset;
+    border-top: unset;
+    border-right: unset;
+	border-radius: unset;
+    border-width: 2px;
+}
+.gmx-style-legend .point {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    top: 0px;
+}
+.gmx-style-legend .legendIconEye {
+    /* background: url(./eye-on.svg); */
+	cursor: pointer;
+    height: 16px;
+    width: 16px;
+    position: relative;
+    top: 4px;
+    margin-right: 2px;
+}
+
+.gmx-style-legend .legendIconCell {
+    width: 100%;
+    top: 2px;
+    position: relative;
+}
+.gmx-style-legend .styleName {
+    width: calc(100% - 44px);
+    display: inline-block;
+	position: relative;
+    top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.gmx-style-legend  .legendIconStyle {
+    width: 10px;
+    height: 10px;
+    position: relative;
+    top: 3px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.gmx-style-legend  .legendIconStyle {
+    border: solid;
+    border-width: 1px;
+    border-radius: 2px;
+}
+.gmx-style-legend .legendIconCell.style {
+    top: 0px;
+    position: relative;
+}
