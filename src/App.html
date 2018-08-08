@@ -2,6 +2,7 @@
 <script>
 	const serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
 	import SelectInput from './SelectInput.html';
+	import Table from './Table.html';
 
 	export default {
 		data() {
@@ -41,7 +42,8 @@
 				// });
 		// },
 		components: {
-			SelectInput,
+			Table,
+			SelectInput
 		},
 	
 		methods: {
@@ -267,279 +269,17 @@ console.log('in oncreate', gmxMap);
 					<div class="gmx-sidebar-label-small">
 						<div class="gmx-checkbox-container"><input type="checkbox" value="on">Инвертировать выделение</div>
 					</div>
-<div class="tableContect">
-	<table class="table">
-		<tr class="head">
-			<th class="c1"><input type="checkbox" value="on"></th>
-			<th class="c2"><span>Id</span></th>
-			<th class="c3"><span>Статус</span></th>
-		</tr>
-		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>1</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
-		</tr>
-		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>2</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
-		</tr>
-		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>1</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
-		</tr>
-		<tr class="pagination">
-			<td colspan="3">
-				<button type="button" disabled="" class="-btn">назад</button>
-				<span class="pageInfo">Стр. <input type="number" value="1"> из 6</span>
-				<button type="button" class="-btn">вперед</button>
-			</td>
-		
-		</tr>
-	</table>
-</div>
-
-<div class="ReactTable">
-	<div class="rt-table" role="grid">
-		<div class="rt-thead -header" style="min-width: 290px;">
-			<div class="rt-tr" role="row">
-				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
-					<div class="rt-resizable-header-content">
-						<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div>
-					</div>
-					<div class="rt-resizer"></div>
-				</div>
-				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 200 0 auto; width: 200px;">
-					<div class="rt-resizable-header-content"><span>Id</span></div>
-					<div class="rt-resizer"></div>
-				</div>
-				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
-					<div class="rt-resizable-header-content"><span>Статус</span></div>
-					<div class="rt-resizer"></div>
-				</div>
-				<div class="rt-th  rt-resizable-header -cursor-pointer" role="columnheader" tabindex="-1" style="flex: 30 0 auto; width: 30px;">
-					<div class="rt-resizable-header-content"></div>
-					<div class="rt-resizer"></div>
+					<Table key="scale" cols="{cols}" />
 				</div>
 			</div>
+			<div class="gmx-button-container"><button class="gmx-sidebar-button-disabled" disabled="">Создать отчеты</button></div>
 		</div>
-		<div class="rt-tbody" style="min-width: 290px;">
-			<div class="rt-tr-group" role="rowgroup">
-				<div class="rt-tr -odd" role="row">
-					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-						<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div>
-					</div>
-					<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">1</div>
-					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-						<div class="gmx-status-indicator-good"></div>
-					</div>
-					<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-						<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div>
-					</div>
-				</div>
-			</div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">2</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-good"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">3</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">4</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">5</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">6</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">7</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">8</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">9</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">10</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">11</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">12</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">13</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -even" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">14</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div>
-<div class="rt-tr-group" role="rowgroup">
-<div class="rt-tr -odd" role="row">
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-checkbox-container"><input type="checkbox" value="on"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 200 0 auto; width: 200px;">15</div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-status-indicator-bad"></div></div>
-<div class="rt-td" role="gridcell" style="flex: 30 0 auto; width: 30px;">
-<div class="gmx-table-icon-container"><svg class="gmx-table-icon"><use xlink:href="#zoom-to-feature"></use></svg></div></div></div></div></div>
-</div>
-<div class="pagination-bottom">
-<div class="-pagination">
-<div class="-previous"><button type="button" disabled="" class="-btn">назад</button></div>
-<div class="-center"><span class="-pageInfo"><!-- react-text: 323 -->Стр.<!-- /react-text --><!-- react-text: 324 --> <!-- /react-text -->
-<div class="-pageJump"><input type="number" value="1"></div><!-- react-text: 327 --> <!-- /react-text --><!-- react-text: 328 -->из<!-- /react-text --><!-- react-text: 329 --> <!-- /react-text --><span class="-totalPages">6</span></span></div>
-<div class="-next"><button type="button" class="-btn">вперед</button></div></div></div>
-<div class="-loading">
-<div class="-loading-inner"></div></div></div></div></div>
-<div class="gmx-button-container"><button class="gmx-sidebar-button-disabled" disabled="">Создать отчеты</button></div>
-</div>
-</div>
+	</div>
 {/if}
 </div>
 
 
 <style>
-.tableContect table {
-	border: 1px solid #d7e1e7;
-	width: 100%;
-}
-.tableContect tr:nth-child(odd) {
-	/* background-color: lightgray;*/
-}
-.tableContect th {
-	border-right: 1px solid #d7e1e7;
-	border-bottom: 1px solid #d7e1e7;
-}
-
-.tableContect .c1 {
-	width: 20px;
-	text-align: center;
-}
-.tableContect .c2 {
-	/* font-weight: bold; */
-}
-.tableContect input {
-    vertical-align: sub;
-}
-.tableContect th.c3 {
-	border-right: inherit;
-	width: 50px;
-}
-.tableContect span.status {
-    width: 8px;
-    height: 8px;
-	display: inline-block;
-    border-radius: 50%;
-	background-color: #f96060;
-	margin-bottom: 3px;
-}
-.tableContect span.status.checked {
-	background-color: #4de371;
-}
-.tableContect .leaflet-gmx-iconSvg {
-    margin-top: -3px;
-    float: inherit;
-    display: inline-block;
-    box-shadow: inherit;
-	height: 16px;
-}
-.tableContect .leaflet-gmx-iconSvg svg {
-	height: 16px;
-}
-.tableContect .pagination td {
-	text-align: center;
-	font-family: Arial;
-}
-.tableContect .pagination input {
-	width: 60px;
-	vertical-align: inherit;
-}
-.tableContect .pagination .pageInfo {
-	margin: 2px;
-}
     
 	h1 {
 		color: black;

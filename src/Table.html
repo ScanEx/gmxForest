@@ -1,0 +1,140 @@
+
+<script>
+export default {
+	data() {
+		return {
+			title: '',
+			value: '',
+			colName: '',
+			clicked: false,
+			cols: []
+		};
+	},
+	methods: {
+		updateCols() {
+			const { key } = this.get();
+			const { params } = this.root.get();
+			let attr = params[key];
+			//attr.cols = cols;
+			if (attr.title === undefined) { attr.title = attr.value; }
+			this.set(attr);
+		}
+	},
+	onstate({ changed, current, previous }) {
+		console.log('______ onstate', changed, current.clicked);
+		// if ((changed.clicked || changed.version) && current.clicked) {
+// console.log('__ddddd____ onstate', changed, current.clicked);
+			// this.updateCols();
+			// this.set({cols: current.gmxMap.layersByID[current.layerId].getGmxProperties().attributes});
+		// }
+	},
+	oncreate() {
+		this.updateCols();
+		// const { key } = this.get();
+		// const { params, cols } = this.root.get();
+		// let attr = params[key];
+		// attr.cols = cols;
+		// if (attr.title === undefined) { attr.title = attr.value; }
+		// this.set(attr);
+// console.log('_____', key, attr);
+	}
+};
+</script>
+
+<div class="tableContect">
+	<table class="table">
+		<tr class="head">
+			<th class="c1"><input type="checkbox" value="on"></th>
+			<th class="c2"><span>Id</span></th>
+			<th class="c3"><span>Статус</span></th>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>1</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>2</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="item">
+			<td class="c1"><input type="checkbox" value="on"></td>
+			<td class="c2"><span>1</span></td>
+			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+		</tr>
+		<tr class="pagination">
+			<td colspan="3">
+				<button type="button" disabled="" class="-btn">назад</button>
+				<span class="pageInfo">Стр. <input type="number" value="1"> из 6</span>
+				<button type="button" class="-btn">вперед</button>
+				<div class="-loading">
+					<div class="-loading-inner"></div>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+
+<style>
+
+.tableContect table {
+	border: 1px solid #d7e1e7;
+	width: 100%;
+}
+.tableContect tr:nth-child(odd) {
+	/* background-color: lightgray;*/
+}
+.tableContect th {
+	border-right: 1px solid #d7e1e7;
+	border-bottom: 1px solid #d7e1e7;
+}
+
+.tableContect .c1 {
+	width: 20px;
+	text-align: center;
+}
+.tableContect .c2 {
+	/* font-weight: bold; */
+}
+.tableContect input {
+    vertical-align: sub;
+}
+.tableContect th.c3 {
+	border-right: inherit;
+	width: 50px;
+}
+.tableContect span.status {
+    width: 8px;
+    height: 8px;
+	display: inline-block;
+    border-radius: 50%;
+	background-color: #f96060;
+	margin-bottom: 3px;
+}
+.tableContect span.status.checked {
+	background-color: #4de371;
+}
+.tableContect .leaflet-gmx-iconSvg {
+    margin-top: -3px;
+    float: inherit;
+    display: inline-block;
+    box-shadow: inherit;
+	height: 16px;
+}
+.tableContect .leaflet-gmx-iconSvg svg {
+	height: 16px;
+}
+.tableContect .pagination td {
+	text-align: center;
+	font-family: Arial;
+}
+.tableContect .pagination input {
+	width: 60px;
+	vertical-align: inherit;
+}
+.tableContect .pagination .pageInfo {
+	margin: 2px;
+}
+</style>
