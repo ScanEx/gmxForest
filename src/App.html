@@ -1,16 +1,14 @@
 
 <script>
 	const serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
-	import SelectInput from './SelectInput.html';
-	import Table from './Table.html';
 
 	export default {
 		data() {
 			return {
 				params: {
-					layerId: {value: '', title: 'Выбор слоя'},
+					layerID: {value: '', title: 'Выбор слоя'},
 					quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-					reportType: {options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+					reportType: {value: '', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
 					organizationName: {value: 'Наименование организации'},
 					inn: {value: '1234567890', title: 'ИНН'},
 					region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
@@ -27,26 +25,73 @@
 				},
 				layerItems: [],
 				limit: 0,
-				layerId: '',
+				layerID: '',
 				reportType: '',
+				checked: {},
 				layerIds: [], quadrantIds: [],
+				hashCols: {},
 				cols: []
 			}
 		},
-		// preload({ params, query }) {
-			// const { slug } = params;
-
-			// return this.fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo`)
-				// .then(r => r.json()).then(post => {
-					// return { post };
-				// });
-		// },
 		components: {
-			Table,
-			SelectInput
+			Table: './Table.html',
+			SelectInput: './SelectInput.html'
 		},
 	
 		methods: {
+			sendReport() {
+				const {checked, layerItems, hashCols, params, gmxMap} = this.get();
+				let groupRequest = [],
+					// idKey = hashCols.gmx_id,
+					satLayers = [];
+
+				gmxMap.layers.forEach((it) => {
+					if (it.getGmxProperties && it._map) {
+						let props = it.getGmxProperties(),
+							out = {layerId: props.name};
+						if (props.Temporal) {
+							var dt = it.getDateInterval();
+							if (dt.beginDate) { out.beginDate = dt.beginDate; }
+							if (dt.endDate) { out.endDate = dt.endDate; }
+						}
+						// out.type = 'оптическая';
+						// out.system = 'Sentinel-2';
+						// out.resolution = '10 м';
+						satLayers.push(out);
+					}
+				});
+
+				layerItems.forEach((it) => {
+					let id = it[hashCols.gmx_id];
+					if (checked[id]) {
+						let data = {featureID: id};
+						Object.entries(params).forEach(([key, val]) => {
+							let par = this.changedParams[key] || {};
+							data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+						});
+						data.satLayers = satLayers;
+						groupRequest.push(data);
+					}
+				});
+				console.log('sendReport ____ ', groupRequest, this.changedParams);
+			},
+			startDrawing() {
+				console.log('startDrawing ____ ', this);
+			},
+			setField(key, data) {
+				this.changedParams[key] = data;
+			},
+			setNodeField(node, setFlag) {
+				let val = node.options ? node.options[node.selectedIndex].value : node.value;
+				this.setField(node.name, val);
+				if (setFlag) {
+					this.set({[node.name]: val});
+				}
+				// console.log('setField ____ ', data);
+			},
+			colsToHash(arr) {
+				return arr.reduce((a, v, i) => { a[v] = i; return a; }, {});
+			},
  			loadFeatures(id) {
  				return fetch(`${serverBase}VectorLayer/Search.ashx?layer=${id}&WrapStyle=None`, {
 						mode: 'cors',
@@ -56,8 +101,8 @@
 					.then(json => {
 // console.log(json)
 						if (json.Status === 'ok') {
-							this.set({cols: json.Result.fields, layerItems: json.Result.values});
-							// this.set({version: id});
+							let cols = json.Result.fields;
+							this.set({cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values});
 						}
 					})
 					.catch(err => console.log(err));
@@ -88,44 +133,10 @@
 					})
 					.catch(err => console.log(err));
 			}
-			// getParam(key) {
-				// const { params } = this.get();
-				// console.log('getParam', params);
-			// },
-			// chkLayer: function(sel) {
-				// console.log('chkLayer', sel, this);
-				// this.set({layerId: sel.options[sel.selectedIndex].value});
-			// },
-			// click(row) {
-				// dataGrid.click(this, row)
-			// },
-			// exportExcel() {
-				// dataGrid.exportExcel(this);
-			// },
-			// print() {
-				// dataGrid.print(this);
-			// },
-			// sort(index) {
-				// if (index > -1) {
-					// dataGrid.setSortIcon(this, index);
-					// const { columns, sortType } = this.get();
-					// this.getPaged({colName: columns[index].field, direction: sortType});				
-				// }
-			// },
-		},
-
-        helpers: {
-           // collect
-		},
-		onstate({ changed, current, previous }) {
-			console.log('in onstate', this);
-			if (changed.layerId && current.layerId) {
-				this.loadFeatures(current.layerId);
-				// this.set({cols: current.gmxMap.layersByID[current.layerId].getGmxProperties().attributes});
-			}
 		},
 		
 		oncreate() {
+			this.changedParams = {};
 			const { meta, gmxMap } = this.get();
 			this.getReportsCount();
 console.log('in oncreate', gmxMap);
@@ -156,14 +167,31 @@ console.log('in oncreate', gmxMap);
 				}
 			});
 			this.set({layerIds: layerIds, quadrantIds: quadrantIds, cols: []});
-			// if (process== 'server') {
-				// grid = server.oncreate.call(this, server);
-			// } else {
-				// grid = local.oncreate.call(this, local);
-			// }
-			
-			// dataGrid.setPerPageOptions(grid);
 		},
+
+		onstate({ changed, current, previous }) {
+console.log('in onstate', this);
+			if (changed.layerID && current.layerID) {
+				this.loadFeatures(current.layerID);
+			}
+			// if (changed.reportType) {
+				// this.setField('reportType', {value: current.reportType});
+				//this.changedParams[key] = data;
+			// }
+		}
+/*
+		// preload({ params, query }) {
+			// const { slug } = params;
+
+			// return this.fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo`)
+				// .then(r => r.json()).then(post => {
+					// return { post };
+				// });
+		// },
+        helpers: {
+           // collect
+		},
+		,
 
 		onupdate({ changed, current, previous }) {
 			console.log('in onupdate', this);
@@ -186,6 +214,7 @@ console.log('in oncreate', gmxMap);
 		ondestroy() {
 			console.log('in ondestroy', this);
 		}
+*/
 	}
 </script>
 
@@ -194,16 +223,16 @@ console.log('in oncreate', gmxMap);
 	<div class="forest-plugin-header">Лимит отчетов: {limit}</div>
 	<div class="gmx-select-layer-container">
 		<span class="gmx-select-layer-container__label">Выбор слоя</span>
-		<select on:change="set({layerId: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-medium">
+		<select on:change="setNodeField(this, true)" name="layerID" class="gmx-sidebar-select-medium">
 			<option value=""></option>
 			{#if layerIds}
 				{#each layerIds as it}
-					<option value="{it.id}" selected="{layerId === it.id}">{it.title}</option>
+					<option value="{it.id}" selected="{layerID === it.id}">{it.title}</option>
 				{/each}
 			{/if}
 		</select>
 	</div>
-{#if layerId}
+{#if layerID}
 	<div class="leftContent forest-plugin-content">
 		<div>
 			<div class="gmx-sidebar-label-medium">Ввод информации</div>
@@ -211,26 +240,26 @@ console.log('in oncreate', gmxMap);
 				<div>
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label">{params.reportType.title}</div>
-						<select name="reportType" on:change="set({reportType: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-large">
-							{#each params.reportType.options as it}
+						<select on:change="setNodeField(this, true)" name="reportType" class="gmx-sidebar-select-large">
+{#each params.reportType.options as it}
 								<option value="{it}">{it}</option>
-							{/each}
+{/each}
 
 						</select>
 					</div>
-					{#if reportType !== 'о восстановлении лесов'}
+{#if reportType !== 'о восстановлении лесов'}
 					<div>
 						<SelectInput key="fellingForm" cols="{cols}" />
 						<SelectInput key="fellingType" cols="{cols}" />
 					</div>
-					{/if}
+{/if}
 					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label-small">Наименование организации</div>
-						<input type="text" class="gmx-sidebar-input-large" value="Наименование организации">
+						<div class="gmx-sidebar-label-small">{params.organizationName.title || params.organizationName.value}</div>
+						<input on:change="setNodeField(this)" name="organizationName" value="{params.organizationName.value}" type="text" class="gmx-sidebar-input-large">
 					</div>
 					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label-small">ИНН</div>
-						<input type="text" class="gmx-sidebar-input-large" value="1234567890">
+						<div class="gmx-sidebar-label-small">{params.inn.title || params.inn.value}</div>
+						<input on:change="setNodeField(this)" name="inn" value="{params.inn.value}" type="text" class="gmx-sidebar-input-large">
 					</div>
 
 					<SelectInput key="region" cols="{cols}" />
@@ -244,19 +273,19 @@ console.log('in oncreate', gmxMap);
 					<SelectInput key="scale" cols="{cols}" />
 
 					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label">Слой квартальной сети</div>
-						<select on:click="set({quadrantId: this.options[this.selectedIndex].value})" class="gmx-sidebar-select-large">
+						<div class="gmx-sidebar-label">{params.quadrantLayerId.title || params.quadrantLayerId.value}</div>
+						<select on:change="setNodeField(this, true)" name="quadrantLayerId" class="gmx-sidebar-select-large">
 							<option value=""></option>
-							{#if quadrantIds}
-								{#each quadrantIds as it}
+{#if quadrantIds}
+	{#each quadrantIds as it}
 									<option
 										value="{it.id}"
-										selected="{quadrantId === it.id}"
+										selected="{quadrantLayerId === it.id}"
 									>
 									{it.title}
 									</option>
-								{/each}
-							{/if}
+	{/each}
+{/if}
 						</select>
 					</div>
 				</div>
@@ -264,20 +293,16 @@ console.log('in oncreate', gmxMap);
 			<div class="gmx-sidebar-label-medium">Список объектов</div>
 			<div class="forest-features-block">
 				<div>
-					<div class="gmx-geometry-select-container"><button class="gmx-sidebar-button">Выделите участки полигоном</button></div>
-					<div class="gmx-sidebar-label-medium">Выделено: 0 / {layerItems.length}</div>
-					<div class="gmx-sidebar-label-small">
-						<div class="gmx-checkbox-container"><input type="checkbox" value="on">Инвертировать выделение</div>
-					</div>
-					<Table key="scale" cols="{cols}" />
+					<div class="gmx-geometry-select-container"><button on:click="startDrawing()" class="gmx-sidebar-button">Выделите участки полигоном</button></div>
+					<div class="gmx-sidebar-label-medium">Выделено: {Object.keys(checked).length} / {layerItems.length}</div>
+					<Table items="{layerItems}" hashCols="{hashCols}" />
 				</div>
 			</div>
-			<div class="gmx-button-container"><button class="gmx-sidebar-button-disabled" disabled="">Создать отчеты</button></div>
+			<div class="gmx-button-container"><button on:click="sendReport()" class="gmx-sidebar-button{Object.keys(checked).length ? '' : '-disabled'}">Создать отчеты</button></div>
 		</div>
 	</div>
 {/if}
 </div>
-
 
 <style>
     
@@ -1011,6 +1036,7 @@ div[data-pane-id="forest-project"] {
   text-align: left;
   top: 10px;
   position: relative;
+  padding-bottom: 10px;
   padding-left: 10px;
 }
 

@@ -3,40 +3,84 @@
 export default {
 	data() {
 		return {
-			title: '',
-			value: '',
-			colName: '',
-			clicked: false,
-			cols: []
+			sortType: 'desc',	// 'asc'
+			sortKey: 'gmx_id',	// 'FRSTAT'
+			reverse: false,
+			pageCurr: 1,
+			pagesize: 15,
+			pageFrom: 0,
+			tableItems: [],
+			items: [],
+			checked: {},
+			hashCols: []
 		};
 	},
 	methods: {
-		updateCols() {
-			const { key } = this.get();
-			const { params } = this.root.get();
-			let attr = params[key];
-			//attr.cols = cols;
-			if (attr.title === undefined) { attr.title = attr.value; }
-			this.set(attr);
+		sort(key) {
+			const { sortType } = this.get();
+			this.set({sortType: sortType === 'desc' ? 'asc' : 'desc', sortKey: key});
+			this.setCurrPage(1);
+		},
+		checkReverse(ev) {
+// console.log('checkReverse', ev.ctrlKey);
+
+			let nChecked = {};
+			let ctrlKey = ev.ctrlKey;
+			let isChecked = ev.target.checked;
+			
+			if (ctrlKey || isChecked) {
+				const { items, hashCols, checked } = this.get();
+				let nm = hashCols.gmx_id;
+				items.forEach((it) => {
+					let id = it[nm];
+					if (!ctrlKey || !checked[id]) {
+						nChecked[id] = true;
+					}
+				});
+			}
+			this.set({checked: nChecked});
+			this.root.set({checked: nChecked});
+		},
+		checkMe(id) {
+			const { checked } = this.get();
+			if (checked[id]) {
+				delete checked[id];
+			} else {
+				checked[id] = true;
+			}
+			this.set({checked: checked});
+			this.root.set({checked: checked});
+		},
+		sortMe(arr, sortKey, hashCols, sortType) {
+			let nm = hashCols[sortKey];
+			return arr.sort((a, b) => {
+				let x = b[nm];
+				let y = a[nm];
+                return (x < y ? -1 : (x > y ? 1 : 0)) * (sortType === 'desc' ? -1 : 1);
+			});
+		},
+		pageTo(nm) {
+			const { pageFrom } = this.get();
+			this.set({pageCurr: nm});
+			nm = nm < 1 ? 1 : (nm > pageFrom ? pageFrom : nm);
+			this.setCurrPage(nm);
+			return nm;
+		},
+		setCurrPage(nm) {
+			const { items, hashCols, pageCurr, pagesize, sortKey, sortType } = this.get();
+			nm = nm || pageCurr;
+			const beg = pagesize * (nm - 1);
+
+			let arr = (sortKey ? this.sortMe(items, sortKey, hashCols, sortType) : items)
+				.slice(beg, beg + pagesize);
+
+			const cnt = items.length / pagesize;
+			const pf = Math.floor(cnt);
+			this.set({tableItems: arr, pageCurr: nm, pageFrom: pf + (cnt > pf ? 1 : 0)});
 		}
 	},
 	onstate({ changed, current, previous }) {
-		console.log('______ onstate', changed, current.clicked);
-		// if ((changed.clicked || changed.version) && current.clicked) {
-// console.log('__ddddd____ onstate', changed, current.clicked);
-			// this.updateCols();
-			// this.set({cols: current.gmxMap.layersByID[current.layerId].getGmxProperties().attributes});
-		// }
-	},
-	oncreate() {
-		this.updateCols();
-		// const { key } = this.get();
-		// const { params, cols } = this.root.get();
-		// let attr = params[key];
-		// attr.cols = cols;
-		// if (attr.title === undefined) { attr.title = attr.value; }
-		// this.set(attr);
-// console.log('_____', key, attr);
+		this.setCurrPage();
 	}
 };
 </script>
@@ -44,30 +88,36 @@ export default {
 <div class="tableContect">
 	<table class="table">
 		<tr class="head">
-			<th class="c1"><input type="checkbox" value="on"></th>
-			<th class="c2"><span>Id</span></th>
-			<th class="c3"><span>Статус</span></th>
+			<th class="c1"><input on:click="checkReverse(event)" checked="{reverse}" type="checkbox" value="on"></th>
+			<th on:click="sort('gmx_id')"
+				class="c2 sorting 
+					{ sortKey === 'gmx_id' ?
+						(sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+						: '' }
+					">
+				<span>Id</span>
+			</th>
+			<th on:click="sort('FRSTAT')"
+				class="c3 sorting 
+					{ sortKey === 'FRSTAT' ?
+						(sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+						: '' }
+					">
+				<span>Статус</span>
+			</th>
 		</tr>
+{#each tableItems as it}
 		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>1</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
+			<td class="c1"><input on:change="checkMe(it[hashCols.gmx_id])" checked="{checked[it[hashCols.gmx_id]]}" type="checkbox"></td>
+			<td class="c2"><span>{it[hashCols.gmx_id]}</span></td>
+			<td class="c3"><span class="status {it[hashCols.FRSTAT] > 0 ? 'checked' : ''}"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
 		</tr>
-		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>2</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
-		</tr>
-		<tr class="item">
-			<td class="c1"><input type="checkbox" value="on"></td>
-			<td class="c2"><span>1</span></td>
-			<td class="c3"><span class="status"></span><span class="leaflet-gmx-iconSvg svgIcon"><svg class="svgIcon"><use xlink:href="#zoom-to-feature"></use></svg></span></td>
-		</tr>
+{/each}
 		<tr class="pagination">
 			<td colspan="3">
-				<button type="button" disabled="" class="-btn">назад</button>
-				<span class="pageInfo">Стр. <input type="number" value="1"> из 6</span>
-				<button type="button" class="-btn">вперед</button>
+				<button on:click="pageTo(pageCurr - 1)" disabled="{ pageCurr === 1 }">назад</button>
+				<span class="pageInfo">Стр. <input on:change="pageTo(this.value)" type="number" value="{ pageCurr }" /> из { pageFrom }</span>
+				<button on:click="pageTo(pageCurr + 1)" disabled="{ pageFrom === pageCurr }">вперед</button>
 				<div class="-loading">
 					<div class="-loading-inner"></div>
 				</div>
@@ -87,6 +137,7 @@ export default {
 	/* background-color: lightgray;*/
 }
 .tableContect th {
+	cursor: pointer;
 	border-right: 1px solid #d7e1e7;
 	border-bottom: 1px solid #d7e1e7;
 }
@@ -129,12 +180,45 @@ export default {
 .tableContect .pagination td {
 	text-align: center;
 	font-family: Arial;
+    border-top: 1px solid #d7e1e7;
+    padding-top: 10px;
 }
 .tableContect .pagination input {
 	width: 60px;
+	text-align: center;
 	vertical-align: inherit;
 }
 .tableContect .pagination .pageInfo {
 	margin: 2px;
+}
+.tableContect th.sorting-asc,
+.tableContect th.sorting-desc {
+	color: rgba(0, 0, 0, 0.87);
+}
+.tableContect th.sorting:after,
+.tableContect th.sorting-asc:after  {
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 16px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	word-wrap: normal;
+	-webkit-font-feature-settings: 'liga';
+	-webkit-font-smoothing: antialiased;
+	content: "arrow_back";
+	-webkit-transform: rotate(90deg);
+	visibility: hidden;
+	vertical-align: middle;
+}
+.tableContect th.sorting:hover:after,
+.tableContect th.sorting-asc:after,
+.tableContect th.sorting-desc:after {
+	visibility: visible;
+}
+.tableContect th.sorting-desc:after {
+	content: "arrow_forward";
 }
 </style>

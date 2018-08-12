@@ -11,32 +11,32 @@ export default {
 		};
 	},
 	methods: {
-		updateCols() {
+		setSelection(val) {
 			const { key } = this.get();
-			const { params } = this.root.get();
-			let attr = params[key];
-			//attr.cols = cols;
-			if (attr.title === undefined) { attr.title = attr.value; }
-			this.set(attr);
+			this.root.setField(key, {value: '', field: val});
+		},
+		setValue(val) {
+			const { key } = this.get();
+			this.root.setField(key, {value: val, field: ''});
 		}
 	},
 	onstate({ changed, current, previous }) {
-		console.log('______ onstate', changed, current.clicked);
-		// if ((changed.clicked || changed.version) && current.clicked) {
-// console.log('__ddddd____ onstate', changed, current.clicked);
-			// this.updateCols();
-			// this.set({cols: current.gmxMap.layersByID[current.layerId].getGmxProperties().attributes});
-		// }
+		if(changed.clicked) {
+			if(current.clicked) {
+				const { cols } = this.get();
+				this.setSelection(cols[0]);
+			} else {
+				const { value } = this.get();
+				this.setValue(value);
+			}
+		}
 	},
 	oncreate() {
-		this.updateCols();
-		// const { key } = this.get();
-		// const { params, cols } = this.root.get();
-		// let attr = params[key];
-		// attr.cols = cols;
-		// if (attr.title === undefined) { attr.title = attr.value; }
-		// this.set(attr);
-// console.log('_____', key, attr);
+		const { key } = this.get();
+		const { params } = this.root.get();
+		let attr = params[key];
+		if (attr.title === undefined) { attr.title = attr.value; }
+		this.set(attr);
 	}
 };
 </script>
@@ -46,13 +46,13 @@ export default {
 	<div>
 		<div>
 			{#if clicked}
-				<select on:change="set({colName: this.options[this.selectedIndex].value})" name="{key}" class="gmx-sidebar-select-with-addon">
+				<select on:change="setSelection(this.options[this.selectedIndex].value)" name="{key}" class="gmx-sidebar-select-with-addon">
 					{#each cols as it}
 						<option value="{it}" selected="{colName === it}">{it}</option>
 					{/each}
 				</select>
 			{:else}
-				<input type="text" class="gmx-sidebar-input-with-addon" name="{key}" value="{value}">
+				<input on:change="setValue(event.target.value)" type="text" class="gmx-sidebar-input-with-addon" name="{key}" value="{value}">
 			{/if}
 			<button on:click="set({clicked: !clicked})" class="gmx-addon-button" title="выбрать из таблицы атрибутов"></button>
 		</div>
