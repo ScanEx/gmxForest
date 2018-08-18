@@ -1,2 +1,2541 @@
-var forest=function(t){"use strict";function e(){}function a(t,e){for(var a in e)t[a]=e[a];return t}function n(t,e){for(var a in e)t[a]=1;return t}function s(t,e){return 0===e&&t(),function(){--e||t()}}function r(t,e){e.appendChild(t)}function o(t,e,a){e.insertBefore(t,a)}function i(t){t.parentNode.removeChild(t)}function l(t,e){for(var a=0;a<t.length;a+=1)t[a]&&t[a].d(e)}function c(t){return document.createElement(t)}function u(t){return document.createTextNode(t)}function d(){return document.createComment("")}function m(t,e,a){t.addEventListener(e,a,!1)}function h(t,e,a){t.removeEventListener(e,a,!1)}function v(t,e,a){t.setAttribute(e,a)}function f(t,e){t.data=""+e}function g(t,e){t._handlers=Object.create(null),t._bind=e._bind,t.options=e,t.root=e.root||t,t.store=e.store||t.root.store}function p(t){t()}function _(t){for(;t&&t.length;)t.shift()()}var y={destroy:function(t){this.destroy=e,this.fire("destroy"),this.set=e,this._fragment.d(!1!==t),this._fragment=null,this._state={}},get:function(){return this._state},fire:function(t,e){var a=t in this._handlers&&this._handlers[t].slice();if(a)for(var n=0;n<a.length;n+=1){var s=a[n];if(!s.__calling)try{s.__calling=!0,s.call(this,e)}finally{s.__calling=!1}}},on:function(t,e){var a=this._handlers[t]||(this._handlers[t]=[]);return a.push(e),{cancel:function(){var t=a.indexOf(e);~t&&a.splice(t,1)}}},set:function(t){this._set(a({},t)),this.root._lock||(this.root._lock=!0,_(this.root._beforecreate),_(this.root._oncreate),_(this.root._aftercreate),this.root._lock=!1)},_recompute:e,_set:function(t){var e=this._state,n={},s=!1;for(var r in t)this._differs(t[r],e[r])&&(n[r]=s=!0);s&&(this._state=a(a({},e),t),this._recompute(n,this._state),this._bind&&this._bind(n,this._state),this._fragment&&(this.fire("state",{changed:n,current:this._state,previous:e}),this._fragment.p(n,this._state),this.fire("update",{changed:n,current:this._state,previous:e})))},_mount:function(t,e){this._fragment[this._fragment.i?"i":"m"](t,e||null)},_differs:function(t,e){return t!=t?e==e:t!==e||t&&"object"==typeof t||"function"==typeof t}};var k={sort:function(t){var e=this.get().sortType;this.set({sortType:"desc"===e?"asc":"desc",sortKey:t}),this.setCurrPage(1)},checkReverse:function(t){var e={},a=t.ctrlKey,n=t.target.checked;if(a||n){var s=this.get(),r=s.items,o=s.hashCols,i=s.checked,l=o.gmx_id;r.forEach(function(t){var n=t[l];a&&i[n]||(e[n]=!0)})}this.set({checked:e}),this.root.set({checked:e})},checkMe:function(t){var e=this.get().checked;e[t]?delete e[t]:e[t]=!0,this.set({checked:e}),this.root.set({checked:e})},sortMe:function(t,e,a,n){var s=a[e];return t.sort(function(t,e){var a=e[s],r=t[s];return(a<r?-1:a>r?1:0)*("desc"===n?-1:1)})},pageTo:function(t){var e=this.get().pageFrom;return this.set({pageCurr:t}),t=t<1?1:t>e?e:t,this.setCurrPage(t),t},setCurrPage:function(t){var e=this.get(),a=e.items,n=e.hashCols,s=e.pageCurr,r=e.pagesize,o=e.sortKey,i=e.sortType,l=r*((t=t||s)-1),c=(o?this.sortMe(a,o,n,i):a).slice(l,l+r),u=a.length/r,d=Math.floor(u);this.set({tableItems:c,pageCurr:t,pageFrom:d+(u>d?1:0)})}};function b(t){t.changed,t.current,t.previous;this.setCurrPage()}function N(t,e){var a,n,s,l,d,g,p,_,y,k,b,N,x,C=e.it[e.hashCols.gmx_id];return{c:function(){a=c("tr"),n=c("td"),s=c("input"),d=u("\n\t\t\t"),g=c("td"),p=c("span"),_=u(C),y=u("\n\t\t\t"),k=c("td"),b=c("span"),(x=c("span")).innerHTML='<svg class="svgIcon svelte-zkpsa2"><use xlink:href="#zoom-to-feature"></use></svg>',s._svelte={component:t,ctx:e},m(s,"change",I),s.checked=l=e.checked[e.it[e.hashCols.gmx_id]],v(s,"type","checkbox"),s.className="svelte-zkpsa2",n.className="c1 svelte-zkpsa2",g.className="c2 svelte-zkpsa2",b.className=N="status "+(e.it[e.hashCols.FRSTAT]>0?"checked":"")+" svelte-zkpsa2",x.className="leaflet-gmx-iconSvg svgIcon svelte-zkpsa2",k.className="c3",a.className="item svelte-zkpsa2"},m:function(t,e){o(a,t,e),r(n,a),r(s,n),r(d,a),r(g,a),r(p,g),r(_,p),r(y,a),r(k,a),r(b,k),r(x,k)},p:function(t,e){s._svelte.ctx=e,(t.checked||t.tableItems||t.hashCols)&&l!==(l=e.checked[e.it[e.hashCols.gmx_id]])&&(s.checked=l),(t.tableItems||t.hashCols)&&C!==(C=e.it[e.hashCols.gmx_id])&&f(_,C),(t.tableItems||t.hashCols)&&N!==(N="status "+(e.it[e.hashCols.FRSTAT]>0?"checked":"")+" svelte-zkpsa2")&&(b.className=N)},d:function(t){t&&i(a),h(s,"change",I)}}}function x(t,e,a){var n=Object.create(t);return n.it=e[a],n.each_value=e,n.it_index=a,n}function I(t){var e=this._svelte,a=e.component,n=e.ctx;a.checkMe(n.it[n.hashCols.gmx_id])}function C(t){var e=this;g(this,t),this._state=a({sortType:"desc",sortKey:"gmx_id",reverse:!1,pageCurr:1,pagesize:15,pageFrom:0,tableItems:[],items:[],checked:{},hashCols:[]},t.data),this._intro=!!t.intro,this._handlers.state=[b],t.root||(this._oncreate=[]),this._fragment=function(t,e){var a,n,s,d,g,_,y,k,b,I,C,w,T,q,z,F,j,D,L,R,O,S,P,M,E,K,A,G,H;function V(e){t.checkReverse(e)}function B(e){t.sort("gmx_id")}function W(e){t.sort("FRSTAT")}for(var Q=e.tableItems,U=[],J=0;J<Q.length;J+=1)U[J]=N(t,x(e,Q,J));function X(a){t.pageTo(e.pageCurr-1)}function Y(e){t.pageTo(this.value)}function Z(a){t.pageTo(e.pageCurr+1)}return{c:function(){a=c("div"),n=c("table"),s=c("tr"),d=c("th"),g=c("input"),_=u("\n\t\t\t"),(y=c("th")).innerHTML="<span>Id</span>",b=u("\n\t\t\t"),(I=c("th")).innerHTML="<span>Статус</span>",w=u("\n");for(var t=0;t<U.length;t+=1)U[t].c();T=u("\n\t\t"),q=c("tr"),z=c("td"),(F=c("button")).textContent="назад",D=u("\n\t\t\t\t"),L=c("span"),R=u("Стр. "),O=c("input"),S=u(" из "),P=u(e.pageFrom),M=u("\n\t\t\t\t"),(E=c("button")).textContent="вперед",A=u("\n\t\t\t\t"),(G=c("div")).innerHTML='<div class="-loading-inner"></div>',m(g,"click",V),g.checked=e.reverse,v(g,"type","checkbox"),g.value="on",g.className="svelte-zkpsa2",d.className="c1 svelte-zkpsa2",m(y,"click",B),y.className=k="c2 sorting \n\t\t\t\t\t"+("gmx_id"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\n\t\t\t\t\t svelte-zkpsa2",m(I,"click",W),I.className=C="c3 sorting \n\t\t\t\t\t"+("FRSTAT"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\n\t\t\t\t\t svelte-zkpsa2",s.className="head svelte-zkpsa2",m(F,"click",X),F.disabled=j=1===e.pageCurr,m(O,"change",Y),v(O,"type","number"),O.value=e.pageCurr,O.className="svelte-zkpsa2",L.className="pageInfo svelte-zkpsa2",m(E,"click",Z),E.disabled=K=e.pageFrom===e.pageCurr,G.className="-loading",z.colSpan="3",z.className="svelte-zkpsa2",q.className="pagination svelte-zkpsa2",n.className="table svelte-zkpsa2",a.className="tableContect svelte-zkpsa2"},m:function(t,e){o(a,t,e),r(n,a),r(s,n),r(d,s),r(g,d),r(_,s),r(y,s),r(b,s),r(I,s),r(w,n);for(var i=0;i<U.length;i+=1)U[i].m(n,null);r(T,n),r(q,n),r(z,q),r(F,z),r(D,z),r(L,z),r(R,L),r(O,L),r(S,L),r(P,L),r(M,z),r(E,z),r(A,z),r(G,z),H=!0},p:function(a,s){if(e=s,a.reverse&&(g.checked=e.reverse),(a.sortKey||a.sortType)&&k!==(k="c2 sorting \n\t\t\t\t\t"+("gmx_id"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\n\t\t\t\t\t svelte-zkpsa2")&&(y.className=k),(a.sortKey||a.sortType)&&C!==(C="c3 sorting \n\t\t\t\t\t"+("FRSTAT"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\n\t\t\t\t\t svelte-zkpsa2")&&(I.className=C),a.checked||a.tableItems||a.hashCols){Q=e.tableItems;for(var r=0;r<Q.length;r+=1){var o=x(e,Q,r);U[r]?U[r].p(a,o):(U[r]=N(t,o),U[r].c(),U[r].m(n,T))}for(;r<U.length;r+=1)U[r].d(1);U.length=Q.length}a.pageCurr&&j!==(j=1===e.pageCurr)&&(F.disabled=j),a.pageCurr&&(O.value=e.pageCurr),a.pageFrom&&f(P,e.pageFrom),(a.pageFrom||a.pageCurr)&&K!==(K=e.pageFrom===e.pageCurr)&&(E.disabled=K)},i:function(t,e){H||this.m(t,e)},o:p,d:function(t){t&&i(a),h(g,"click",V),h(y,"click",B),h(I,"click",W),l(U,t),h(F,"click",X),h(O,"change",Y),h(E,"click",Z)}}}(this,this._state),this.root._oncreate.push(function(){b.call(e,{changed:n({},e._state),current:e._state}),e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),_(this._oncreate)),this._intro=!0}a(C.prototype,y),a(C.prototype,k);function w(t){var e=t.changed,a=t.current;t.previous;if(e.clicked)if(a.clicked){var n=this.get().cols;this.setSelection(n[0])}else{var s=this.get().value;this.setValue(s)}}function T(t,e){var a,n,s,l,d=e.it;return{c:function(){a=c("option"),n=u(d),a.__value=s=e.it,a.value=a.__value,a.selected=l=e.colName===e.it},m:function(t,e){o(a,t,e),r(n,a)},p:function(t,e){t.cols&&d!==(d=e.it)&&f(n,d),t.cols&&s!==(s=e.it)&&(a.__value=s),a.value=a.__value,(t.colName||t.cols)&&l!==(l=e.colName===e.it)&&(a.selected=l)},d:function(t){t&&i(a)}}}function q(t,e){for(var a,n=e.cols,s=[],r=0;r<n.length;r+=1)s[r]=T(0,F(e,n,r));function u(e){t.setSelection(this.options[this.selectedIndex].value)}return{c:function(){a=c("select");for(var t=0;t<s.length;t+=1)s[t].c();m(a,"change",u),a.name=e.key,a.className="gmx-sidebar-select-with-addon svelte-1qsv1jq"},m:function(t,e){o(a,t,e);for(var n=0;n<s.length;n+=1)s[n].m(a,null)},p:function(t,e){if(t.cols||t.colName){n=e.cols;for(var r=0;r<n.length;r+=1){var o=F(e,n,r);s[r]?s[r].p(t,o):(s[r]=T(0,o),s[r].c(),s[r].m(a,null))}for(;r<s.length;r+=1)s[r].d(1);s.length=n.length}t.key&&(a.name=e.key)},d:function(t){t&&i(a),l(s,t),h(a,"change",u)}}}function z(t,e){var a;function n(e){t.setValue(e.target.value)}return{c:function(){m(a=c("input"),"change",n),v(a,"type","text"),a.className="gmx-sidebar-input-with-addon svelte-1qsv1jq",a.name=e.key,a.value=e.value},m:function(t,e){o(a,t,e)},p:function(t,e){t.key&&(a.name=e.key),t.value&&(a.value=e.value)},d:function(t){t&&i(a),h(a,"change",n)}}}function F(t,e,a){var n=Object.create(t);return n.it=e[a],n.each_value=e,n.it_index=a,n}function j(t){var e=this;g(this,t),this._state=a({title:"",value:"",colName:"",clicked:!1,cols:[]},t.data),this._intro=!!t.intro,this._handlers.state=[w],t.root||(this._oncreate=[]),this._fragment=function(t,e){var a,n,s,l,d,v,g,_,y;function k(t){return t.clicked?q:z}var b=k(e),N=b(t,e);function x(a){t.set({clicked:!e.clicked})}return{c:function(){a=c("div"),n=c("div"),s=u(e.title),l=u("\n\t"),d=c("div"),v=c("div"),N.c(),g=u("\n\t\t\t"),_=c("button"),n.className="gmx-sidebar-label svelte-1qsv1jq",m(_,"click",x),_.className="gmx-addon-button svelte-1qsv1jq",_.title="выбрать из таблицы атрибутов",a.className="gmx-sidebar-labeled-block svelte-1qsv1jq"},m:function(t,e){o(a,t,e),r(n,a),r(s,n),r(l,a),r(d,a),r(v,d),N.m(v,null),r(g,v),r(_,v),y=!0},p:function(a,n){e=n,a.title&&f(s,e.title),b===(b=k(e))&&N?N.p(a,e):(N.d(1),(N=b(t,e)).c(),N.m(v,g))},i:function(t,e){y||this.m(t,e)},o:p,d:function(t){t&&i(a),N.d(),h(_,"click",x)}}}(this,this._state),this.root._oncreate.push(function(){w.call(e,{changed:n({},e._state),current:e._state}),function(){var t=this.get().key,e=this.root.get().params[t];void 0===e.title&&(e.title=e.value),this.set(e)}.call(e),e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),_(this._oncreate)),this._intro=!0}a(j.prototype,y),a(j.prototype,{setSelection:function(t){var e=this.get().key;this.root.setField(e,{value:"",field:t})},setValue:function(t){var e=this.get().key;this.root.setField(e,{value:t,field:""})}});var D=window.serverBase||"//maps.kosmosnimki.ru/";var L={sendReport:function(){var t=this,e=this.get(),a=e.checked,n=e.layerItems,s=e.hashCols,r=e.params,o=[],i=[];e.gmxMap.layers.forEach(function(t){if(t.getGmxProperties&&t._map){var e=t.getGmxProperties(),a={layerId:e.name};if(e.Temporal){var n=t.getDateInterval();n.beginDate&&(a.beginDate=n.beginDate),n.endDate&&(a.endDate=n.endDate)}i.push(a)}}),n.forEach(function(e){var n=e[s.gmx_id];if(a[n]){var l={featureID:n};Object.entries(r).forEach(function(a){var n=a[0],r=a[1],o=t.changedParams[n]||{};l[n]="string"==typeof o?o:o.field?e[s[o.field]]:o.value||r.value}),l.satLayers=i,o.push(l)}}),console.log("sendReport ____ ",o,this.changedParams)},startDrawing:function(){console.log("startDrawing ____ ",this)},setField:function(t,e){this.changedParams[t]=e},setNodeField:function(t,e){var a,n=t.options?t.options[t.selectedIndex].value:t.value;this.setField(t.name,n),e&&this.set(((a={})[t.name]=n,a))},colsToHash:function(t){return t.reduce(function(t,e,a){return t[e]=a,t},{})},loadFeatures:function(t){var e=this;return fetch(D+"VectorLayer/Search.ashx?layer="+t+"&WrapStyle=None",{mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(t){if("ok"===t.Status){var a=t.Result.fields;e.set({cols:a,hashCols:e.colsToHash(a),layerItems:t.Result.values})}}).catch(function(t){return console.log(t)})},getReportsCount:function(){var t=this;return fetch(D+"plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None",{mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(e){if("ok"===e.Status){var a=e.Result.limit-e.Result.used;t.set({limit:a>0?a:0})}}).catch(function(t){return console.log(t)})}};function R(t){var e=t.changed,a=t.current;t.previous;console.log("in onstate",this),e.layerID&&a.layerID&&this.loadFeatures(a.layerID)}function O(t,e){var a,n,s,l,d=e.it.title;return{c:function(){a=c("option"),n=u(d),a.__value=s=e.it.id,a.value=a.__value,a.selected=l=e.layerID===e.it.id,a.className="svelte-10wd7m9"},m:function(t,e){o(a,t,e),r(n,a)},p:function(t,e){t.layerIds&&d!==(d=e.it.title)&&f(n,d),t.layerIds&&s!==(s=e.it.id)&&(a.__value=s),a.value=a.__value,(t.layerID||t.layerIds)&&l!==(l=e.layerID===e.it.id)&&(a.selected=l)},d:function(t){t&&i(a)}}}function S(t,e){for(var a,n=e.layerIds,s=[],r=0;r<n.length;r+=1)s[r]=O(0,G(e,n,r));return{c:function(){for(var t=0;t<s.length;t+=1)s[t].c();a=d()},m:function(t,e){for(var n=0;n<s.length;n+=1)s[n].m(t,e);o(a,t,e)},p:function(t,e){if(t.layerIds||t.layerID){n=e.layerIds;for(var r=0;r<n.length;r+=1){var o=G(e,n,r);s[r]?s[r].p(t,o):(s[r]=O(0,o),s[r].c(),s[r].m(a.parentNode,a))}for(;r<s.length;r+=1)s[r].d(1);s.length=n.length}},d:function(t){l(s,t),t&&i(a)}}}function P(t,e){var a,n,s,l=e.it;return{c:function(){a=c("option"),n=u(l),a.__value=s=e.it,a.value=a.__value,a.className="svelte-10wd7m9"},m:function(t,e){o(a,t,e),r(n,a)},p:function(t,e){t.params&&l!==(l=e.it)&&f(n,l),t.params&&s!==(s=e.it)&&(a.__value=s),a.value=a.__value},d:function(t){t&&i(a)}}}function M(t,e){var a,n,l,d={key:"fellingForm",cols:e.cols},m=new j({root:t.root,store:t.store,data:d}),h={key:"fellingType",cols:e.cols},v=new j({root:t.root,store:t.store,data:h});return{c:function(){a=c("div"),m._fragment.c(),n=u("\n\t\t\t\t\t\t"),v._fragment.c()},m:function(t,e){o(a,t,e),m._mount(a,null),r(n,a),v._mount(a,null),l=!0},p:function(t,e){var a={};t.cols&&(a.cols=e.cols),m._set(a);var n={};t.cols&&(n.cols=e.cols),v._set(n)},i:function(t,e){l||this.m(t,e)},o:function(t){l&&(t=s(t,2),m._fragment.o(t),v._fragment.o(t),l=!1)},d:function(t){t&&i(a),m.destroy(),v.destroy()}}}function E(t,e){var a,n,s,l,d=e.it.title;return{c:function(){a=c("option"),n=u(d),a.__value=s=e.it.id,a.value=a.__value,a.selected=l=e.quadrantLayerId===e.it.id,a.className="svelte-10wd7m9"},m:function(t,e){o(a,t,e),r(n,a)},p:function(t,e){t.quadrantIds&&d!==(d=e.it.title)&&f(n,d),t.quadrantIds&&s!==(s=e.it.id)&&(a.__value=s),a.value=a.__value,(t.quadrantLayerId||t.quadrantIds)&&l!==(l=e.quadrantLayerId===e.it.id)&&(a.selected=l)},d:function(t){t&&i(a)}}}function K(t,e){for(var a,n=e.quadrantIds,s=[],r=0;r<n.length;r+=1)s[r]=E(0,V(e,n,r));return{c:function(){for(var t=0;t<s.length;t+=1)s[t].c();a=d()},m:function(t,e){for(var n=0;n<s.length;n+=1)s[n].m(t,e);o(a,t,e)},p:function(t,e){if(t.quadrantIds||t.quadrantLayerId){n=e.quadrantIds;for(var r=0;r<n.length;r+=1){var o=V(e,n,r);s[r]?s[r].p(t,o):(s[r]=E(0,o),s[r].c(),s[r].m(a.parentNode,a))}for(;r<s.length;r+=1)s[r].d(1);s.length=n.length}},d:function(t){l(s,t),t&&i(a)}}}function A(t,e){for(var a,n,d,g,p,_,y,k,b,N,x,I,w,T,q,z,F,D,L,R,O,S,E,A,G,V,B,W,Q,U,J,X,Y,Z,$,tt,et,at,nt,st,rt,ot,it,lt,ct,ut,dt,mt,ht,vt,ft,gt,pt,_t,yt,kt,bt,Nt,xt,It,Ct,wt=e.params.reportType.title,Tt=e.params.organizationName.title||e.params.organizationName.value,qt=e.params.inn.title||e.params.inn.value,zt=e.params.quadrantLayerId.title||e.params.quadrantLayerId.value,Ft=e.Object.keys(e.checked).length,jt=e.layerItems.length,Dt=e.params.reportType.options,Lt=[],Rt=0;Rt<Dt.length;Rt+=1)Lt[Rt]=P(0,H(e,Dt,Rt));function Ot(e){t.setNodeField(this,!0)}var St="о восстановлении лесов"!==e.reportType&&M(t,e);function Pt(e){t.setNodeField(this)}function Mt(e){t.setNodeField(this)}var Et={key:"region",cols:e.cols},Kt=new j({root:t.root,store:t.store,data:Et}),At={key:"forestry",cols:e.cols},Gt=new j({root:t.root,store:t.store,data:At}),Ht={key:"sectionForestry",cols:e.cols},Vt=new j({root:t.root,store:t.store,data:Ht}),Bt={key:"quadrant",cols:e.cols},Wt=new j({root:t.root,store:t.store,data:Bt}),Qt={key:"stratum",cols:e.cols},Ut=new j({root:t.root,store:t.store,data:Qt}),Jt={key:"site",cols:e.cols},Xt=new j({root:t.root,store:t.store,data:Jt}),Yt={key:"recoveryEventType",cols:e.cols},Zt=new j({root:t.root,store:t.store,data:Yt}),$t={key:"siteArea",cols:e.cols},te=new j({root:t.root,store:t.store,data:$t}),ee={key:"scale",cols:e.cols},ae=new j({root:t.root,store:t.store,data:ee}),ne=e.quadrantIds&&K(0,e);function se(e){t.setNodeField(this,!0)}function re(e){t.startDrawing()}var oe={items:e.layerItems,hashCols:e.hashCols},ie=new C({root:t.root,store:t.store,data:oe});function le(e){t.sendReport()}return{c:function(){a=c("div"),n=c("div"),(d=c("div")).textContent="Ввод информации",g=u("\n\t\t\t"),p=c("div"),_=c("div"),y=c("div"),k=c("div"),b=u(wt),N=u("\n\t\t\t\t\t\t"),x=c("select");for(var t=0;t<Lt.length;t+=1)Lt[t].c();I=u("\n"),St&&St.c(),w=u("\n\t\t\t\t\t"),T=c("div"),q=c("div"),z=u(Tt),F=u("\n\t\t\t\t\t\t"),D=c("input"),R=u("\n\t\t\t\t\t"),O=c("div"),S=c("div"),E=u(qt),A=u("\n\t\t\t\t\t\t"),G=c("input"),B=u("\n\n\t\t\t\t\t"),Kt._fragment.c(),W=u("\n\t\t\t\t\t"),Gt._fragment.c(),Q=u("\n\t\t\t\t\t"),Vt._fragment.c(),U=u("\n\t\t\t\t\t"),Wt._fragment.c(),J=u("\n\t\t\t\t\t"),Ut._fragment.c(),X=u("\n\t\t\t\t\t"),Xt._fragment.c(),Y=u("\n\t\t\t\t\t"),Zt._fragment.c(),Z=u("\n\t\t\t\t\t"),te._fragment.c(),$=u("\n\t\t\t\t\t"),ae._fragment.c(),tt=u("\n\n\t\t\t\t\t"),et=c("div"),at=c("div"),nt=u(zt),st=u("\n\t\t\t\t\t\t"),rt=c("select"),ot=c("option"),ne&&ne.c(),it=u("\n\t\t\t"),(lt=c("div")).textContent="Список объектов",ct=u("\n\t\t\t"),ut=c("div"),dt=c("div"),mt=c("div"),(ht=c("button")).textContent="Выделите участки полигоном",vt=u("\n\t\t\t\t\t"),ft=c("div"),gt=u("Выделено: "),pt=u(Ft),_t=u(" / "),yt=u(jt),kt=u("\n\t\t\t\t\t"),ie._fragment.c(),bt=u("\n\t\t\t"),Nt=c("div"),(xt=c("button")).textContent="Создать отчеты",d.className="gmx-sidebar-label-medium svelte-10wd7m9",k.className="gmx-sidebar-label svelte-10wd7m9",m(x,"change",Ot),x.name="reportType",x.className="gmx-sidebar-select-large svelte-10wd7m9",y.className="gmx-sidebar-labeled-block svelte-10wd7m9",q.className="gmx-sidebar-label-small svelte-10wd7m9",m(D,"change",Pt),D.name="organizationName",D.value=L=e.params.organizationName.value,v(D,"type","text"),D.className="gmx-sidebar-input-large svelte-10wd7m9",T.className="gmx-sidebar-labeled-block svelte-10wd7m9",S.className="gmx-sidebar-label-small svelte-10wd7m9",m(G,"change",Mt),G.name="inn",G.value=V=e.params.inn.value,v(G,"type","text"),G.className="gmx-sidebar-input-large svelte-10wd7m9",O.className="gmx-sidebar-labeled-block svelte-10wd7m9",at.className="gmx-sidebar-label svelte-10wd7m9",ot.__value="",ot.value=ot.__value,ot.className="svelte-10wd7m9",m(rt,"change",se),rt.name="quadrantLayerId",rt.className="gmx-sidebar-select-large svelte-10wd7m9",et.className="gmx-sidebar-labeled-block svelte-10wd7m9",lt.className="gmx-sidebar-label-medium svelte-10wd7m9",m(ht,"click",re),ht.className="gmx-sidebar-button svelte-10wd7m9",mt.className="gmx-geometry-select-container svelte-10wd7m9",ft.className="gmx-sidebar-label-medium svelte-10wd7m9",ut.className="forest-features-block svelte-10wd7m9",m(xt,"click",le),xt.className=It="gmx-sidebar-button"+(e.Object.keys(e.checked).length?"":"-disabled")+" svelte-10wd7m9",Nt.className="gmx-button-container svelte-10wd7m9",a.className="leftContent forest-plugin-content svelte-10wd7m9"},m:function(t,e){o(a,t,e),r(n,a),r(d,n),r(g,n),r(p,n),r(_,p),r(y,_),r(k,y),r(b,k),r(N,y),r(x,y);for(var s=0;s<Lt.length;s+=1)Lt[s].m(x,null);r(I,_),St&&St.m(_,null),r(w,_),r(T,_),r(q,T),r(z,q),r(F,T),r(D,T),r(R,_),r(O,_),r(S,O),r(E,S),r(A,O),r(G,O),r(B,_),Kt._mount(_,null),r(W,_),Gt._mount(_,null),r(Q,_),Vt._mount(_,null),r(U,_),Wt._mount(_,null),r(J,_),Ut._mount(_,null),r(X,_),Xt._mount(_,null),r(Y,_),Zt._mount(_,null),r(Z,_),te._mount(_,null),r($,_),ae._mount(_,null),r(tt,_),r(et,_),r(at,et),r(nt,at),r(st,et),r(rt,et),r(ot,rt),ne&&ne.m(rt,null),r(it,n),r(lt,n),r(ct,n),r(ut,n),r(dt,ut),r(mt,dt),r(ht,mt),r(vt,dt),r(ft,dt),r(gt,ft),r(pt,ft),r(_t,ft),r(yt,ft),r(kt,dt),ie._mount(dt,null),r(bt,n),r(Nt,n),r(xt,Nt),Ct=!0},p:function(e,a){if(Ct&&!e.params||wt===(wt=a.params.reportType.title)||f(b,wt),e.params){Dt=a.params.reportType.options;for(var n=0;n<Dt.length;n+=1){var s=H(a,Dt,n);Lt[n]?Lt[n].p(e,s):(Lt[n]=P(0,s),Lt[n].c(),Lt[n].m(x,null))}for(;n<Lt.length;n+=1)Lt[n].d(1);Lt.length=Dt.length}"о восстановлении лесов"!==a.reportType?(St?St.p(e,a):(St=M(t,a))&&St.c(),St.i(_,w)):St&&St.o(function(){St.d(1),St=null}),Ct&&!e.params||Tt===(Tt=a.params.organizationName.title||a.params.organizationName.value)||f(z,Tt),Ct&&!e.params||L===(L=a.params.organizationName.value)||(D.value=L),Ct&&!e.params||qt===(qt=a.params.inn.title||a.params.inn.value)||f(E,qt),Ct&&!e.params||V===(V=a.params.inn.value)||(G.value=V);var r={};e.cols&&(r.cols=a.cols),Kt._set(r);var o={};e.cols&&(o.cols=a.cols),Gt._set(o);var i={};e.cols&&(i.cols=a.cols),Vt._set(i);var l={};e.cols&&(l.cols=a.cols),Wt._set(l);var c={};e.cols&&(c.cols=a.cols),Ut._set(c);var u={};e.cols&&(u.cols=a.cols),Xt._set(u);var d={};e.cols&&(d.cols=a.cols),Zt._set(d);var m={};e.cols&&(m.cols=a.cols),te._set(m);var h={};e.cols&&(h.cols=a.cols),ae._set(h),Ct&&!e.params||zt===(zt=a.params.quadrantLayerId.title||a.params.quadrantLayerId.value)||f(nt,zt),a.quadrantIds?ne?ne.p(e,a):((ne=K(0,a)).c(),ne.m(rt,null)):ne&&(ne.d(1),ne=null),Ct&&!e.Object&&!e.checked||Ft===(Ft=a.Object.keys(a.checked).length)||f(pt,Ft),Ct&&!e.layerItems||jt===(jt=a.layerItems.length)||f(yt,jt);var v={};e.layerItems&&(v.items=a.layerItems),e.hashCols&&(v.hashCols=a.hashCols),ie._set(v),Ct&&!e.Object&&!e.checked||It===(It="gmx-sidebar-button"+(a.Object.keys(a.checked).length?"":"-disabled")+" svelte-10wd7m9")||(xt.className=It)},i:function(t,e){Ct||this.m(t,e)},o:function(t){Ct&&(t=s(t,11),St?St.o(t):t(),Kt._fragment.o(t),Gt._fragment.o(t),Vt._fragment.o(t),Wt._fragment.o(t),Ut._fragment.o(t),Xt._fragment.o(t),Zt._fragment.o(t),te._fragment.o(t),ae._fragment.o(t),ie._fragment.o(t),Ct=!1)},d:function(t){t&&i(a),l(Lt,t),h(x,"change",Ot),St&&St.d(),h(D,"change",Pt),h(G,"change",Mt),Kt.destroy(),Gt.destroy(),Vt.destroy(),Wt.destroy(),Ut.destroy(),Xt.destroy(),Zt.destroy(),te.destroy(),ae.destroy(),ne&&ne.d(),h(rt,"change",se),h(ht,"click",re),ie.destroy(),h(xt,"click",le)}}}function G(t,e,a){var n=Object.create(t);return n.it=e[a],n.each_value=e,n.it_index=a,n}function H(t,e,a){var n=Object.create(t);return n.it=e[a],n.each_value_1=e,n.it_index_1=a,n}function V(t,e,a){var n=Object.create(t);return n.it=e[a],n.each_value_2=e,n.it_index_2=a,n}function B(t){var e=this;g(this,t),this._state=a(a({Object:Object},{params:{layerID:{value:"",title:"Выбор слоя"},quadrantLayerId:{value:"",title:"Слой квартальной сети"},reportType:{value:"",options:["об использовании лесов","о восстановлении лесов"],title:"Тип отчета"},organizationName:{value:"Наименование организации"},inn:{value:"1234567890",title:"ИНН"},region:{value:"Субъект",title:"Субъект Российской Федерации"},forestry:{value:"Лесничество"},sectionForestry:{value:"Участковое лесничество"},quadrant:{value:"Квартал"},stratum:{value:"Выдел"},fellingForm:{value:"",title:"Форма рубки"},fellingType:{value:"",title:"Тип рубки"},recoveryEventType:{value:"",title:"Тип мероприятия"},siteArea:{value:"Площадь"},scale:{value:"Масштаб"},site:{value:"Делянка"}},layerItems:[],limit:0,layerID:"",reportType:"",checked:{},layerIds:[],quadrantIds:[],hashCols:{},cols:[]}),t.data),this._intro=!!t.intro,this._handlers.state=[R],t.root||(this._oncreate=[],this._beforecreate=[],this._aftercreate=[]),this._fragment=function(t,e){var a,n,s,l,d,v,g,p,_,y,k,b,N,x,I=e.layerIds&&S(0,e);function C(e){t.setNodeField(this,!0)}var w=e.layerID&&A(t,e);return{c:function(){a=c("div"),(n=c("div")).textContent="Отчет об использовании лесов",s=u("\n\t"),l=c("div"),d=u("Лимит отчетов: "),v=u(e.limit),g=u("\n\t"),p=c("div"),(_=c("span")).textContent="Выбор слоя",y=u("\n\t\t"),k=c("select"),b=c("option"),I&&I.c(),N=u("\n"),w&&w.c(),n.className="forest-plugin-header svelte-10wd7m9",l.className="forest-plugin-header svelte-10wd7m9",_.className="gmx-select-layer-container__label svelte-10wd7m9",b.__value="",b.value=b.__value,b.className="svelte-10wd7m9",m(k,"change",C),k.name="layerID",k.className="gmx-sidebar-select-medium svelte-10wd7m9",p.className="gmx-select-layer-container svelte-10wd7m9",a.dataset.reactroot="",a.className="forest-plugin-container svelte-10wd7m9"},m:function(t,e){o(a,t,e),r(n,a),r(s,a),r(l,a),r(d,l),r(v,l),r(g,a),r(p,a),r(_,p),r(y,p),r(k,p),r(b,k),I&&I.m(k,null),r(N,a),w&&w.m(a,null),x=!0},p:function(e,n){x&&!e.limit||f(v,n.limit),n.layerIds?I?I.p(e,n):((I=S(0,n)).c(),I.m(k,null)):I&&(I.d(1),I=null),n.layerID?(w?w.p(e,n):(w=A(t,n))&&w.c(),w.i(a,null)):w&&w.o(function(){w.d(1),w=null})},i:function(t,e){x||this.m(t,e)},o:function(t){x&&(w?w.o(t):t(),x=!1)},d:function(t){t&&i(a),I&&I.d(),h(k,"change",C),w&&w.d()}}}(this,this._state),this.root._oncreate.push(function(){R.call(e,{changed:n({},e._state),current:e._state}),function(){this.changedParams={};var t=this.get(),e=t.meta,a=t.gmxMap;this.getReportsCount(),console.log("in oncreate",a);var n=[],s=[];a.layers.forEach(function(t){if(t.getGmxProperties){var a=t.getGmxProperties(),r=a.MetaProperties||{};if("vector"===a.type.toLowerCase()&&"polygon"===a.GeometryType.toLowerCase()&&!a.IsRasterCatalog&&!a.Quicklook){var o={id:a.name,title:a.title};e?(r.forest&&"true"===r.forest.Value&&n.push(o),r.quadrant&&"true"===r.quadrant.Value&&s.push(o)):(n.push(o),s.push(o))}}}),this.set({layerIds:n,quadrantIds:s,cols:[]})}.call(e),e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),this._lock=!0,_(this._beforecreate),_(this._oncreate),_(this._aftercreate),this._lock=!1),this._intro=!0}return a(B.prototype,y),a(B.prototype,L),t.App=B,t}({});
+var forest = (function (exports) {
+	'use strict';
+
+	function noop() {}
+
+	function assign(tar, src) {
+		for (var k in src) tar[k] = src[k];
+		return tar;
+	}
+
+	function assignTrue(tar, src) {
+		for (var k in src) tar[k] = 1;
+		return tar;
+	}
+
+	function callAfter(fn, i) {
+		if (i === 0) fn();
+		return () => {
+			if (!--i) fn();
+		};
+	}
+
+	function addLoc(element, file, line, column, char) {
+		element.__svelte_meta = {
+			loc: { file, line, column, char }
+		};
+	}
+
+	function appendNode(node, target) {
+		target.appendChild(node);
+	}
+
+	function insertNode(node, target, anchor) {
+		target.insertBefore(node, anchor);
+	}
+
+	function detachNode(node) {
+		node.parentNode.removeChild(node);
+	}
+
+	function destroyEach(iterations, detach) {
+		for (var i = 0; i < iterations.length; i += 1) {
+			if (iterations[i]) iterations[i].d(detach);
+		}
+	}
+
+	function createElement(name) {
+		return document.createElement(name);
+	}
+
+	function createSvgElement(name) {
+		return document.createElementNS('http://www.w3.org/2000/svg', name);
+	}
+
+	function createText(data) {
+		return document.createTextNode(data);
+	}
+
+	function createComment() {
+		return document.createComment('');
+	}
+
+	function addListener(node, event, handler) {
+		node.addEventListener(event, handler, false);
+	}
+
+	function removeListener(node, event, handler) {
+		node.removeEventListener(event, handler, false);
+	}
+
+	function setAttribute(node, attribute, value) {
+		node.setAttribute(attribute, value);
+	}
+
+	function setXlinkAttribute(node, attribute, value) {
+		node.setAttributeNS('http://www.w3.org/1999/xlink', attribute, value);
+	}
+
+	function setData(text, data) {
+		text.data = '' + data;
+	}
+
+	function blankObject() {
+		return Object.create(null);
+	}
+
+	function destroy(detach) {
+		this.destroy = noop;
+		this.fire('destroy');
+		this.set = noop;
+
+		this._fragment.d(detach !== false);
+		this._fragment = null;
+		this._state = {};
+	}
+
+	function destroyDev(detach) {
+		destroy.call(this, detach);
+		this.destroy = function() {
+			console.warn('Component was already destroyed');
+		};
+	}
+
+	function _differs(a, b) {
+		return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
+	}
+
+	function fire(eventName, data) {
+		var handlers =
+			eventName in this._handlers && this._handlers[eventName].slice();
+		if (!handlers) return;
+
+		for (var i = 0; i < handlers.length; i += 1) {
+			var handler = handlers[i];
+
+			if (!handler.__calling) {
+				try {
+					handler.__calling = true;
+					handler.call(this, data);
+				} finally {
+					handler.__calling = false;
+				}
+			}
+		}
+	}
+
+	function get() {
+		return this._state;
+	}
+
+	function init(component, options) {
+		component._handlers = blankObject();
+		component._bind = options._bind;
+
+		component.options = options;
+		component.root = options.root || component;
+		component.store = options.store || component.root.store;
+	}
+
+	function on(eventName, handler) {
+		var handlers = this._handlers[eventName] || (this._handlers[eventName] = []);
+		handlers.push(handler);
+
+		return {
+			cancel: function() {
+				var index = handlers.indexOf(handler);
+				if (~index) handlers.splice(index, 1);
+			}
+		};
+	}
+
+	function run(fn) {
+		fn();
+	}
+
+	function set(newState) {
+		this._set(assign({}, newState));
+		if (this.root._lock) return;
+		this.root._lock = true;
+		callAll(this.root._beforecreate);
+		callAll(this.root._oncreate);
+		callAll(this.root._aftercreate);
+		this.root._lock = false;
+	}
+
+	function _set(newState) {
+		var oldState = this._state,
+			changed = {},
+			dirty = false;
+
+		for (var key in newState) {
+			if (this._differs(newState[key], oldState[key])) changed[key] = dirty = true;
+		}
+		if (!dirty) return;
+
+		this._state = assign(assign({}, oldState), newState);
+		this._recompute(changed, this._state);
+		if (this._bind) this._bind(changed, this._state);
+
+		if (this._fragment) {
+			this.fire("state", { changed: changed, current: this._state, previous: oldState });
+			this._fragment.p(changed, this._state);
+			this.fire("update", { changed: changed, current: this._state, previous: oldState });
+		}
+	}
+
+	function setDev(newState) {
+		if (typeof newState !== 'object') {
+			throw new Error(
+				this._debugName + '.set was called without an object of data key-values to update.'
+			);
+		}
+
+		this._checkReadOnly(newState);
+		set.call(this, newState);
+	}
+
+	function callAll(fns) {
+		while (fns && fns.length) fns.shift()();
+	}
+
+	function _mount(target, anchor) {
+		this._fragment[this._fragment.i ? 'i' : 'm'](target, anchor || null);
+	}
+
+	var protoDev = {
+		destroy: destroyDev,
+		get,
+		fire,
+		on,
+		set: setDev,
+		_recompute: noop,
+		_set,
+		_mount,
+		_differs
+	};
+
+	/* src\Table.html generated by Svelte v2.9.10 */
+
+	function data() {
+		return {
+			sortType: 'desc',	// 'asc'
+			sortKey: 'gmx_id',	// 'FRSTAT'
+			reverse: false,
+			pageCurr: 1,
+			pagesize: 15,
+			pageFrom: 0,
+			tableItems: [],
+			items: [],
+			checked: {},
+			hashCols: []
+		};
+	}
+	var methods = {
+		sort(key) {
+			const { sortType } = this.get();
+			this.set({sortType: sortType === 'desc' ? 'asc' : 'desc', sortKey: key});
+			this.setCurrPage(1);
+		},
+		checkReverse(ev) {
+	// console.log('checkReverse', ev.ctrlKey);
+
+			let nChecked = {};
+			let ctrlKey = ev.ctrlKey;
+			let isChecked = ev.target.checked;
+			
+			if (ctrlKey || isChecked) {
+				const { items, hashCols, checked } = this.get();
+				let nm = hashCols.gmx_id;
+				items.forEach((it) => {
+					let id = it[nm];
+					if (!ctrlKey || !checked[id]) {
+						nChecked[id] = true;
+					}
+				});
+			}
+			this.set({checked: nChecked});
+			this.root.set({checked: nChecked});
+		},
+		checkMe(id) {
+			const { checked } = this.get();
+			if (checked[id]) {
+				delete checked[id];
+			} else {
+				checked[id] = true;
+			}
+			this.set({checked: checked});
+			this.root.set({checked: checked});
+		},
+		sortMe(arr, sortKey, hashCols, sortType) {
+			let nm = hashCols[sortKey];
+			return arr.sort((a, b) => {
+				let x = b[nm];
+				let y = a[nm];
+	                return (x < y ? -1 : (x > y ? 1 : 0)) * (sortType === 'desc' ? -1 : 1);
+			});
+		},
+		pageTo(nm) {
+			const { pageFrom } = this.get();
+			this.set({pageCurr: nm});
+			nm = nm < 1 ? 1 : (nm > pageFrom ? pageFrom : nm);
+			this.setCurrPage(nm);
+			return nm;
+		},
+		viewItem(id) {
+			this.root.viewItem(id);
+		},
+		setCurrPage(nm) {
+			const { items, hashCols, pageCurr, pagesize, sortKey, sortType } = this.get();
+			nm = nm || pageCurr;
+			const beg = pagesize * (nm - 1);
+
+			let arr = (sortKey ? this.sortMe(items, sortKey, hashCols, sortType) : items)
+				.slice(beg, beg + pagesize);
+
+			const cnt = items.length / pagesize;
+			const pf = Math.floor(cnt);
+			this.set({tableItems: arr, pageCurr: nm, pageFrom: pf + (cnt > pf ? 1 : 0)});
+		}
+	};
+
+	function onstate({ changed, current, previous }) {
+		this.setCurrPage();
+	}
+	const file = "src\\Table.html";
+
+	function create_main_fragment(component, ctx) {
+		var div, table, tr, th, input, text, th_1, span, text_1, th_1_class_value, text_3, th_2, span_1, text_4, th_2_class_value, text_7, text_8, tr_1, td, button, text_9, button_disabled_value, text_10, span_2, text_11, input_1, text_12, text_13, text_14, button_1, text_15, button_1_disabled_value, text_16, div_1, div_2, current;
+
+		function click_handler(event) {
+			component.checkReverse(event);
+		}
+
+		function click_handler_1(event) {
+			component.sort('gmx_id');
+		}
+
+		function click_handler_2(event) {
+			component.sort('FRSTAT');
+		}
+
+		var each_value = ctx.tableItems;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block(component, get_each_context(ctx, each_value, i));
+		}
+
+		function click_handler_3(event) {
+			component.pageTo(ctx.pageCurr - 1);
+		}
+
+		function change_handler_1(event) {
+			component.pageTo(this.value);
+		}
+
+		function click_handler_4(event) {
+			component.pageTo(ctx.pageCurr + 1);
+		}
+
+		return {
+			c: function create() {
+				div = createElement("div");
+				table = createElement("table");
+				tr = createElement("tr");
+				th = createElement("th");
+				input = createElement("input");
+				text = createText("\n\t\t\t");
+				th_1 = createElement("th");
+				span = createElement("span");
+				text_1 = createText("Id");
+				text_3 = createText("\n\t\t\t");
+				th_2 = createElement("th");
+				span_1 = createElement("span");
+				text_4 = createText("Статус");
+				text_7 = createText("\n");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				text_8 = createText("\n\t\t");
+				tr_1 = createElement("tr");
+				td = createElement("td");
+				button = createElement("button");
+				text_9 = createText("назад");
+				text_10 = createText("\n\t\t\t\t");
+				span_2 = createElement("span");
+				text_11 = createText("Стр. ");
+				input_1 = createElement("input");
+				text_12 = createText(" из ");
+				text_13 = createText(ctx.pageFrom);
+				text_14 = createText("\n\t\t\t\t");
+				button_1 = createElement("button");
+				text_15 = createText("вперед");
+				text_16 = createText("\n\t\t\t\t");
+				div_1 = createElement("div");
+				div_2 = createElement("div");
+				addListener(input, "click", click_handler);
+				input.checked = ctx.reverse;
+				setAttribute(input, "type", "checkbox");
+				input.value = "on";
+				input.className = "svelte-96vpnl";
+				addLoc(input, file, 93, 18, 2201);
+				th.className = "c1 svelte-96vpnl";
+				addLoc(th, file, 93, 3, 2186);
+				addLoc(span, file, 100, 4, 2464);
+				addListener(th_1, "click", click_handler_1);
+				th_1.className = th_1_class_value = "c2 sorting \n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\n\t\t\t\t\t" + " svelte-96vpnl";
+				addLoc(th_1, file, 94, 3, 2295);
+				addLoc(span_1, file, 108, 4, 2661);
+				addListener(th_2, "click", click_handler_2);
+				th_2.className = th_2_class_value = "c3 sorting \n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\n\t\t\t\t\t" + " svelte-96vpnl";
+				addLoc(th_2, file, 102, 3, 2492);
+				tr.className = "head svelte-96vpnl";
+				addLoc(tr, file, 92, 2, 2165);
+				addListener(button, "click", click_handler_3);
+				button.disabled = button_disabled_value = ctx.pageCurr === 1;
+				addLoc(button, file, 120, 4, 3249);
+				addListener(input_1, "change", change_handler_1);
+				setAttribute(input_1, "type", "number");
+				input_1.value = ctx.pageCurr;
+				input_1.className = "svelte-96vpnl";
+				addLoc(input_1, file, 121, 32, 3366);
+				span_2.className = "pageInfo svelte-96vpnl";
+				addLoc(span_2, file, 121, 4, 3338);
+				addListener(button_1, "click", click_handler_4);
+				button_1.disabled = button_1_disabled_value = ctx.pageFrom === ctx.pageCurr;
+				addLoc(button_1, file, 122, 4, 3469);
+				div_2.className = "-loading-inner";
+				addLoc(div_2, file, 124, 5, 3594);
+				div_1.className = "-loading";
+				addLoc(div_1, file, 123, 4, 3566);
+				td.colSpan = "3";
+				td.className = "svelte-96vpnl";
+				addLoc(td, file, 119, 3, 3228);
+				tr_1.className = "pagination svelte-96vpnl";
+				addLoc(tr_1, file, 118, 2, 3201);
+				table.className = "table svelte-96vpnl";
+				addLoc(table, file, 91, 1, 2141);
+				div.className = "tableContect svelte-96vpnl";
+				addLoc(div, file, 90, 0, 2113);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(div, target, anchor);
+				appendNode(table, div);
+				appendNode(tr, table);
+				appendNode(th, tr);
+				appendNode(input, th);
+				appendNode(text, tr);
+				appendNode(th_1, tr);
+				appendNode(span, th_1);
+				appendNode(text_1, span);
+				appendNode(text_3, tr);
+				appendNode(th_2, tr);
+				appendNode(span_1, th_2);
+				appendNode(text_4, span_1);
+				appendNode(text_7, table);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(table, null);
+				}
+
+				appendNode(text_8, table);
+				appendNode(tr_1, table);
+				appendNode(td, tr_1);
+				appendNode(button, td);
+				appendNode(text_9, button);
+				appendNode(text_10, td);
+				appendNode(span_2, td);
+				appendNode(text_11, span_2);
+				appendNode(input_1, span_2);
+				appendNode(text_12, span_2);
+				appendNode(text_13, span_2);
+				appendNode(text_14, td);
+				appendNode(button_1, td);
+				appendNode(text_15, button_1);
+				appendNode(text_16, td);
+				appendNode(div_1, td);
+				appendNode(div_2, div_1);
+				current = true;
+			},
+
+			p: function update(changed, _ctx) {
+				ctx = _ctx;
+				if (changed.reverse) {
+					input.checked = ctx.reverse;
+				}
+
+				if ((changed.sortKey || changed.sortType) && th_1_class_value !== (th_1_class_value = "c2 sorting \n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\n\t\t\t\t\t" + " svelte-96vpnl")) {
+					th_1.className = th_1_class_value;
+				}
+
+				if ((changed.sortKey || changed.sortType) && th_2_class_value !== (th_2_class_value = "c3 sorting \n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\n\t\t\t\t\t" + " svelte-96vpnl")) {
+					th_2.className = th_2_class_value;
+				}
+
+				if (changed.checked || changed.tableItems || changed.hashCols) {
+					each_value = ctx.tableItems;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						const child_ctx = get_each_context(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(table, text_8);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+
+				if ((changed.pageCurr) && button_disabled_value !== (button_disabled_value = ctx.pageCurr === 1)) {
+					button.disabled = button_disabled_value;
+				}
+
+				if (changed.pageCurr) {
+					input_1.value = ctx.pageCurr;
+				}
+
+				if (changed.pageFrom) {
+					setData(text_13, ctx.pageFrom);
+				}
+
+				if ((changed.pageFrom || changed.pageCurr) && button_1_disabled_value !== (button_1_disabled_value = ctx.pageFrom === ctx.pageCurr)) {
+					button_1.disabled = button_1_disabled_value;
+				}
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: run,
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				removeListener(input, "click", click_handler);
+				removeListener(th_1, "click", click_handler_1);
+				removeListener(th_2, "click", click_handler_2);
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(button, "click", click_handler_3);
+				removeListener(input_1, "change", change_handler_1);
+				removeListener(button_1, "click", click_handler_4);
+			}
+		};
+	}
+
+	// (112:0) {#each tableItems as it}
+	function create_each_block(component, ctx) {
+		var tr, td, input, input_checked_value, text, td_1, span, text_1_value = ctx.it[ctx.hashCols.gmx_id], text_1, text_2, td_2, span_1, span_1_class_value, span_2, svg, use;
+
+		return {
+			c: function create() {
+				tr = createElement("tr");
+				td = createElement("td");
+				input = createElement("input");
+				text = createText("\n\t\t\t");
+				td_1 = createElement("td");
+				span = createElement("span");
+				text_1 = createText(text_1_value);
+				text_2 = createText("\n\t\t\t");
+				td_2 = createElement("td");
+				span_1 = createElement("span");
+				span_2 = createElement("span");
+				svg = createSvgElement("svg");
+				use = createSvgElement("use");
+				input._svelte = { component, ctx };
+
+				addListener(input, "change", change_handler);
+				input.checked = input_checked_value = ctx.checked[ctx.it[ctx.hashCols.gmx_id]];
+				setAttribute(input, "type", "checkbox");
+				input.className = "svelte-96vpnl";
+				addLoc(input, file, 113, 18, 2761);
+				td.className = "c1 svelte-96vpnl";
+				addLoc(td, file, 113, 3, 2746);
+				addLoc(span, file, 114, 18, 2890);
+				td_1.className = "c2 svelte-96vpnl";
+				addLoc(td_1, file, 114, 3, 2875);
+				span_1.className = span_1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-96vpnl";
+				addLoc(span_1, file, 115, 18, 2948);
+				setXlinkAttribute(use, "xlink:href", "#zoom-to-feature");
+				addLoc(use, file, 115, 193, 3123);
+				setAttribute(svg, "class", "svgIcon svelte-96vpnl");
+				addLoc(svg, file, 115, 172, 3102);
+
+				span_2._svelte = { component, ctx };
+
+				addListener(span_2, "click", click_handler);
+				span_2.className = "leaflet-gmx-iconSvg svgIcon svelte-96vpnl";
+				addLoc(span_2, file, 115, 89, 3019);
+				td_2.className = "c3";
+				addLoc(td_2, file, 115, 3, 2933);
+				tr.className = "item svelte-96vpnl";
+				addLoc(tr, file, 112, 2, 2725);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(tr, target, anchor);
+				appendNode(td, tr);
+				appendNode(input, td);
+				appendNode(text, tr);
+				appendNode(td_1, tr);
+				appendNode(span, td_1);
+				appendNode(text_1, span);
+				appendNode(text_2, tr);
+				appendNode(td_2, tr);
+				appendNode(span_1, td_2);
+				appendNode(span_2, td_2);
+				appendNode(svg, span_2);
+				appendNode(use, svg);
+			},
+
+			p: function update(changed, ctx) {
+				input._svelte.ctx = ctx;
+				if ((changed.checked || changed.tableItems || changed.hashCols) && input_checked_value !== (input_checked_value = ctx.checked[ctx.it[ctx.hashCols.gmx_id]])) {
+					input.checked = input_checked_value;
+				}
+
+				if ((changed.tableItems || changed.hashCols) && text_1_value !== (text_1_value = ctx.it[ctx.hashCols.gmx_id])) {
+					setData(text_1, text_1_value);
+				}
+
+				if ((changed.tableItems || changed.hashCols) && span_1_class_value !== (span_1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-96vpnl")) {
+					span_1.className = span_1_class_value;
+				}
+
+				span_2._svelte.ctx = ctx;
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(tr);
+				}
+
+				removeListener(input, "change", change_handler);
+				removeListener(span_2, "click", click_handler);
+			}
+		};
+	}
+
+	function get_each_context(ctx, list, i) {
+		const child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		child_ctx.each_value = list;
+		child_ctx.it_index = i;
+		return child_ctx;
+	}
+
+	function change_handler(event) {
+		const { component, ctx } = this._svelte;
+
+		component.checkMe(ctx.it[ctx.hashCols.gmx_id]);
+	}
+
+	function click_handler(event) {
+		const { component, ctx } = this._svelte;
+
+		component.viewItem(ctx.it[ctx.hashCols.gmx_id]);
+	}
+
+	function Table(options) {
+		this._debugName = '<Table>';
+		if (!options || (!options.target && !options.root)) throw new Error("'target' is a required option");
+		init(this, options);
+		this._state = assign(data(), options.data);
+		if (!('reverse' in this._state)) console.warn("<Table> was created without expected data property 'reverse'");
+		if (!('sortKey' in this._state)) console.warn("<Table> was created without expected data property 'sortKey'");
+		if (!('sortType' in this._state)) console.warn("<Table> was created without expected data property 'sortType'");
+		if (!('tableItems' in this._state)) console.warn("<Table> was created without expected data property 'tableItems'");
+		if (!('hashCols' in this._state)) console.warn("<Table> was created without expected data property 'hashCols'");
+		if (!('checked' in this._state)) console.warn("<Table> was created without expected data property 'checked'");
+		if (!('pageCurr' in this._state)) console.warn("<Table> was created without expected data property 'pageCurr'");
+		if (!('pageFrom' in this._state)) console.warn("<Table> was created without expected data property 'pageFrom'");
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate];
+
+		if (!options.root) {
+			this._oncreate = [];
+		}
+
+		this._fragment = create_main_fragment(this, this._state);
+
+		this.root._oncreate.push(() => {
+			onstate.call(this, { changed: assignTrue({}, this._state), current: this._state });
+			this.fire("update", { changed: assignTrue({}, this._state), current: this._state });
+		});
+
+		if (options.target) {
+			if (options.hydrate) throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			callAll(this._oncreate);
+		}
+
+		this._intro = true;
+	}
+
+	assign(Table.prototype, protoDev);
+	assign(Table.prototype, methods);
+
+	Table.prototype._checkReadOnly = function _checkReadOnly(newState) {
+	};
+
+	/* src\SelectInput.html generated by Svelte v2.9.10 */
+
+	function data$1() {
+		return {
+			title: '',
+			value: '',
+			colName: '',
+			clicked: false,
+			cols: []
+		};
+	}
+	var methods$1 = {
+		setSelection(val) {
+			const { key } = this.get();
+			this.root.setField(key, {value: '', field: val});
+		},
+		setValue(val) {
+			const { key } = this.get();
+			this.root.setField(key, {value: val, field: ''});
+		}
+	};
+
+	function oncreate() {
+		const { key } = this.get();
+		const { params } = this.root.get();
+		let attr = params[key];
+		if (attr.title === undefined) { attr.title = attr.value; }
+		this.set(attr);
+	}
+	function onstate$1({ changed, current, previous }) {
+		if(changed.clicked) {
+			if(current.clicked) {
+				const { cols } = this.get();
+				this.setSelection(cols[0]);
+			} else {
+				const { value } = this.get();
+				this.setValue(value);
+			}
+		}
+	}
+	const file$1 = "src\\SelectInput.html";
+
+	function create_main_fragment$1(component, ctx) {
+		var div, div_1, text, text_1, div_2, div_3, text_2, button, current;
+
+		function select_block_type(ctx) {
+			if (ctx.clicked) return create_if_block;
+			return create_if_block_1;
+		}
+
+		var current_block_type = select_block_type(ctx);
+		var if_block = current_block_type(component, ctx);
+
+		function click_handler(event) {
+			component.set({clicked: !ctx.clicked});
+		}
+
+		return {
+			c: function create() {
+				div = createElement("div");
+				div_1 = createElement("div");
+				text = createText(ctx.title);
+				text_1 = createText("\n\t");
+				div_2 = createElement("div");
+				div_3 = createElement("div");
+				if_block.c();
+				text_2 = createText("\n\t\t\t");
+				button = createElement("button");
+				div_1.className = "gmx-sidebar-label svelte-1qsv1jq";
+				addLoc(div_1, file$1, 44, 1, 852);
+				addListener(button, "click", click_handler);
+				button.className = "gmx-addon-button svelte-1qsv1jq";
+				button.title = "выбрать из таблицы атрибутов";
+				addLoc(button, file$1, 56, 3, 1332);
+				addLoc(div_3, file$1, 46, 2, 906);
+				addLoc(div_2, file$1, 45, 1, 898);
+				div.className = "gmx-sidebar-labeled-block svelte-1qsv1jq";
+				addLoc(div, file$1, 43, 0, 811);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(div, target, anchor);
+				appendNode(div_1, div);
+				appendNode(text, div_1);
+				appendNode(text_1, div);
+				appendNode(div_2, div);
+				appendNode(div_3, div_2);
+				if_block.m(div_3, null);
+				appendNode(text_2, div_3);
+				appendNode(button, div_3);
+				current = true;
+			},
+
+			p: function update(changed, _ctx) {
+				ctx = _ctx;
+				if (changed.title) {
+					setData(text, ctx.title);
+				}
+
+				if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+					if_block.p(changed, ctx);
+				} else {
+					if_block.d(1);
+					if_block = current_block_type(component, ctx);
+					if_block.c();
+					if_block.m(div_3, text_2);
+				}
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: run,
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				if_block.d();
+				removeListener(button, "click", click_handler);
+			}
+		};
+	}
+
+	// (50:5) {#each cols as it}
+	function create_each_block$1(component, ctx) {
+		var option, text_value = ctx.it, text, option_value_value, option_selected_value;
+
+		return {
+			c: function create() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.colName === ctx.it;
+				addLoc(option, file$1, 50, 6, 1088);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(option, target, anchor);
+				appendNode(text, option);
+			},
+
+			p: function update(changed, ctx) {
+				if ((changed.cols) && text_value !== (text_value = ctx.it)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.cols) && option_value_value !== (option_value_value = ctx.it)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.colName || changed.cols) && option_selected_value !== (option_selected_value = ctx.colName === ctx.it)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (48:3) {#if clicked}
+	function create_if_block(component, ctx) {
+		var select;
+
+		var each_value = ctx.cols;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block$1(component, get_each_context$1(ctx, each_value, i));
+		}
+
+		function change_handler(event) {
+			component.setSelection(this.options[this.selectedIndex].value);
+		}
+
+		return {
+			c: function create() {
+				select = createElement("select");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+				addListener(select, "change", change_handler);
+				select.name = ctx.key;
+				select.className = "gmx-sidebar-select-with-addon svelte-1qsv1jq";
+				addLoc(select, file$1, 48, 4, 933);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(select, target, anchor);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(select, null);
+				}
+			},
+
+			p: function update(changed, ctx) {
+				if (changed.cols || changed.colName) {
+					each_value = ctx.cols;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						const child_ctx = get_each_context$1(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block$1(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(select, null);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+
+				if (changed.key) {
+					select.name = ctx.key;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(select);
+				}
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(select, "change", change_handler);
+			}
+		};
+	}
+
+	// (54:3) {:else}
+	function create_if_block_1(component, ctx) {
+		var input;
+
+		function change_handler(event) {
+			component.setValue(event.target.value);
+		}
+
+		return {
+			c: function create() {
+				input = createElement("input");
+				addListener(input, "change", change_handler);
+				setAttribute(input, "type", "text");
+				input.className = "gmx-sidebar-input-with-addon svelte-1qsv1jq";
+				input.name = ctx.key;
+				input.value = ctx.value;
+				addLoc(input, file$1, 54, 4, 1193);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(input, target, anchor);
+			},
+
+			p: function update(changed, ctx) {
+				if (changed.key) {
+					input.name = ctx.key;
+				}
+
+				if (changed.value) {
+					input.value = ctx.value;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(input);
+				}
+
+				removeListener(input, "change", change_handler);
+			}
+		};
+	}
+
+	function get_each_context$1(ctx, list, i) {
+		const child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		child_ctx.each_value = list;
+		child_ctx.it_index = i;
+		return child_ctx;
+	}
+
+	function SelectInput(options) {
+		this._debugName = '<SelectInput>';
+		if (!options || (!options.target && !options.root)) throw new Error("'target' is a required option");
+		init(this, options);
+		this._state = assign(data$1(), options.data);
+		if (!('title' in this._state)) console.warn("<SelectInput> was created without expected data property 'title'");
+		if (!('clicked' in this._state)) console.warn("<SelectInput> was created without expected data property 'clicked'");
+		if (!('key' in this._state)) console.warn("<SelectInput> was created without expected data property 'key'");
+		if (!('cols' in this._state)) console.warn("<SelectInput> was created without expected data property 'cols'");
+		if (!('colName' in this._state)) console.warn("<SelectInput> was created without expected data property 'colName'");
+		if (!('value' in this._state)) console.warn("<SelectInput> was created without expected data property 'value'");
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate$1];
+
+		if (!options.root) {
+			this._oncreate = [];
+		}
+
+		this._fragment = create_main_fragment$1(this, this._state);
+
+		this.root._oncreate.push(() => {
+			onstate$1.call(this, { changed: assignTrue({}, this._state), current: this._state });
+			oncreate.call(this);
+			this.fire("update", { changed: assignTrue({}, this._state), current: this._state });
+		});
+
+		if (options.target) {
+			if (options.hydrate) throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			callAll(this._oncreate);
+		}
+
+		this._intro = true;
+	}
+
+	assign(SelectInput.prototype, protoDev);
+	assign(SelectInput.prototype, methods$1);
+
+	SelectInput.prototype._checkReadOnly = function _checkReadOnly(newState) {
+	};
+
+	/* src\App.html generated by Svelte v2.9.10 */
+
+	const serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
+
+	function data$2() {
+		return {
+			params: {
+				layerID: {value: '', title: 'Выбор слоя'},
+				quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
+				reportType: {value: '', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+				organizationName: {value: 'Наименование организации'},
+				inn: {value: '1234567890', title: 'ИНН'},
+				region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
+				forestry: {value: 'Лесничество'},
+				sectionForestry: {value: 'Участковое лесничество'},
+				quadrant: {value: 'Квартал'},
+				stratum: {value: 'Выдел'},
+				fellingForm: {value: '', title: 'Форма рубки'},
+				fellingType: {value: '', title: 'Тип рубки'},
+				recoveryEventType: {value: '', title: 'Тип мероприятия'},
+				siteArea: {value: 'Площадь'},
+				scale: {value: 'Масштаб'},
+				site: {value: 'Делянка'}
+			},
+			layerItems: [],
+			limit: 0,
+			report: false,
+			drawstart: false,
+			layerID: '',
+			quadrantLayerId: '',
+			reportType: '',
+			checked: {},
+			layerIds: [], quadrantIds: [],
+			hashCols: {},
+			cols: []
+		}
+	}
+	var methods$2 = {
+		viewItem(id) {
+			const {layerItems, hashCols} = this.get();
+			
+			for (let i = 0, len = layerItems.length; i < len; i++) {
+				let it = layerItems[i];
+				if (id === it[hashCols.gmx_id]) {
+					let geo = it[hashCols.geomixergeojson];
+	console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
+					break;
+				}
+			}
+		},
+		sendReport() {
+			const {checked, layerItems, hashCols, params, layerID, gmxMap} = this.get();
+			let groupRequest = [],
+				features = [],
+				satLayers = [];
+
+			gmxMap.layers.forEach((it) => {
+				if (it.getGmxProperties && it._map) {
+					let props = it.getGmxProperties(),
+						out = {layerId: props.name};
+					if (props.Temporal) {
+						var dt = it.getDateInterval();
+						if (dt.beginDate) { out.beginDate = dt.beginDate; }
+						if (dt.endDate) { out.endDate = dt.endDate; }
+					}
+					// out.type = 'оптическая';
+					// out.system = 'Sentinel-2';
+					// out.resolution = '10 м';
+					satLayers.push(out);
+				}
+			});
+
+			layerItems.forEach((it) => {
+				let id = it[hashCols.gmx_id];
+				if (checked[id]) {
+					let data = {featureID: id};
+					Object.entries(params).forEach(([key, val]) => {
+						let par = this.changedParams[key] || {};
+						data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+					});
+					data.satLayers = satLayers;
+					groupRequest.push(data);
+					features.push({action:'update', id:id, properties:{FRSTAT:2}});
+				}
+			});
+			this.set({report: true});
+			return fetch(`${serverBase}Plugins/ForestReport/ForestReportImage`, {
+					method: 'post',
+					headers: {'Content-type': 'application/x-www-form-urlencoded'},
+					body: L.gmxUtil.getFormData({WrapStyle: 'None', groupRequest: groupRequest}),
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(res => res.json())
+				.then(json => {
+	// console.log('ForestReportImage ____ ', json, groupRequest, this.changedParams);
+					if (json.Status === 'ok') {
+						this.chkTask(json.Result.TaskID)
+							.then(json => {
+								if (json.Status === 'ok') {
+									let downloadFile = json.Result.Result.downloadFile,
+										name = downloadFile.split('name=')[1];
+
+									window.open(serverBase + downloadFile, '_self');
+									// fetch(serverBase + downloadFile, {
+										// headers:{
+											// 'Access-Control-Allow-Origin':'*'
+										// },
+										// mode: 'cors',
+										// credentials: 'include'
+									// })
+										// .then(async res => ({
+											// filename: name,
+											// blob: await res.blob()
+										// }))
+										// .catch(this.handleError)
+									this.modifyVectorObjects(layerID, features);
+									this.set({report: false});
+								}
+							})
+							.catch(err => console.log(err));
+					}
+				})
+				.catch(err => console.log(err));
+		},
+		chkTask(id) {
+			const UPDATE_INTERVAL = 2000;
+			return new Promise((resolve, reject) => {
+				let interval = setInterval(() => {
+					fetch(`${serverBase}AsyncTask.ashx?WrapStyle=None&TaskID=${id}`,
+					{
+						mode: 'cors',
+						credentials: 'include'
+					})
+						.then(res => res.json())
+						.then(json => {
+							const { Completed, ErrorInfo } = json.Result;
+							if (ErrorInfo) {
+								clearInterval(interval);
+								reject(json);
+							} else if (Completed) {
+								clearInterval(interval);
+								resolve(json);
+							}
+						});
+				}, UPDATE_INTERVAL);
+			});
+		},
+		modifyVectorObjects(layerId, features) {
+	// console.log('modifyVectorObjects ____ ', layerId, features);
+			const params = {
+				WrapStyle: 'None',
+				LayerName : layerId,
+				Objects: JSON.stringify(features)
+			};
+
+			return fetch(`${serverBase}VectorLayer/ModifyVectorObjects.ashx?${L.gmxUtil.getFormData(params)}`, {
+				mode: 'cors',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json'
+				}
+			})
+				.then(res => res.json())
+				.catch(err => console.log(err));
+		},
+		selectFeaturesWithDrawing(id, geometry) {
+	// console.log('selectFeaturesWithDrawing ____ ', id, geometry);
+			const params = {
+				WrapStyle: 'None',
+				layer: id,
+				page: 0,
+				pagesize: null,
+				geometry: true,
+				query: `STIntersects([gmx_geometry], GeometryFromGeoJson('${JSON.stringify(geometry)}', 4326))`
+			};
+	    
+			return fetch(`${window.serverBase}VectorLayer/Search.ashx?${L.gmxUtil.getFormData(params)}`, {
+				mode: 'cors',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json'
+				}
+			})
+			.then(res => res.json())
+			.catch(err => console.log(err))
+		},
+		startDrawing(ev) {
+	console.log('startDrawing ____ ', ev);
+			const { map, drawstart, layerID } = this.get();
+			this.set({drawstart: !drawstart});
+			if(!drawstart) {
+				map.gmxDrawing.create('Polygon');
+				map.gmxDrawing.on('drawstop', (e) => {
+					this.set({drawstart: false});
+					// map._gmxEventsManager._drawstart = true;
+					this.selectFeaturesWithDrawing(layerID, e.object.toGeoJSON().geometry)
+						.then(json => {
+	console.log('selectFeaturesWithDrawing ____ ', json);
+							// const { Completed, ErrorInfo } = json.Result;
+							// if (ErrorInfo) {
+								// clearInterval(interval);
+								// reject(json);
+							// } else if (Completed) {
+								// clearInterval(interval);
+								// resolve(json);
+							// }
+						});
+					// props.ondrawstop(e);
+					// this.setState({
+						// drawing: e.object
+					// });
+					// this.clearActive();
+				}, this);
+				map._gmxEventsManager._drawstart = true;
+			}
+
+		},
+		setField(key, data) {
+			this.changedParams[key] = data;
+		},
+		setNodeField(node, setFlag) {
+			let val = node.options ? node.options[node.selectedIndex].value : node.value;
+			this.setField(node.name, val);
+			if (setFlag) {
+				this.set({[node.name]: val});
+			}
+			// console.log('setField ____ ', data);
+		},
+		colsToHash(arr) {
+			return arr.reduce((a, v, i) => { a[v] = i; return a; }, {});
+		},
+	 			loadFeatures(id) {
+			// let url = serverBase + 'rest/ver1/layers/'+ id +'/search?WrapStyle=None';
+			// return fetch(url, {
+			return fetch(`${serverBase}VectorLayer/Search.ashx?layer=${id}&geometry=true&out_cs =EPSG:4326&WrapStyle=None`, {
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(res => res.json())
+				.then(json => {
+	// console.log(json)
+					if (json.Status === 'ok') {
+						let cols = json.Result.fields;
+						this.set({cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values});
+					}
+				})
+				.catch(err => console.log(err));
+		},
+		getReportsCount() {
+			// const url = `${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`,
+				// options = {
+					// body: JSON.stringify({WrapStyle: 'None'}),
+					// method: 'post',
+					// mode: 'cors',
+					// credentials: 'include'
+					// ,
+					// headers: {
+						// 'Accept': 'application/json'
+					// }
+				// };
+
+			return fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`, {
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(res => res.json())
+				.then(json => {
+					if (json.Status === 'ok') {
+						let count = json.Result.limit - json.Result.used;
+						this.set({limit: count > 0 ? count : 0});
+					}
+				})
+				.catch(err => console.log(err));
+		}
+	};
+
+	function oncreate$1() {
+		this.changedParams = {};
+		const { meta, gmxMap } = this.get();
+		this.getReportsCount();
+	// console.log('in oncreate', gmxMap);
+		let layerIds = [], quadrantIds = [];
+		gmxMap.layers.forEach((it) => {
+			if (it.getGmxProperties) {
+				let props = it.getGmxProperties(),
+					metaProps = props.MetaProperties || {};
+				if (
+					props.type.toLowerCase() === 'vector' &&
+					props.GeometryType.toLowerCase() === 'polygon' &&
+					!props.IsRasterCatalog &&
+					!props.Quicklook
+					) {
+					let hash$$1 = {id: props.name, title: props.title};
+					if (meta) {
+						if (metaProps.forest && metaProps.forest.Value === 'true') {
+							layerIds.push(hash$$1);
+						}
+						if (metaProps.quadrant && metaProps.quadrant.Value === 'true') {
+							quadrantIds.push(hash$$1);
+						}
+					} else {
+						layerIds.push(hash$$1);
+						quadrantIds.push(hash$$1);
+					}
+				}
+			}
+		});
+		this.set({layerIds: layerIds, quadrantIds: quadrantIds, cols: []});
+	}
+	function onstate$2({ changed, current, previous }) {
+	// console.log('in onstate', this);
+		if (changed.layerID && current.layerID) {
+			this.loadFeatures(current.layerID);
+		}
+		// if (changed.reportType) {
+			// this.setField('reportType', {value: current.reportType});
+			//this.changedParams[key] = data;
+		// }
+	}
+	const file$2 = "src\\App.html";
+
+	function create_main_fragment$2(component, ctx) {
+		var div, div_1, text, text_1, div_2, text_2, text_3, text_4, div_3, span, text_5, text_6, select, option, text_8, current;
+
+		var if_block = (ctx.layerIds) && create_if_block$1(component, ctx);
+
+		function change_handler(event) {
+			component.setNodeField(this, true);
+		}
+
+		var if_block_1 = (ctx.layerID) && create_if_block_1$1(component, ctx);
+
+		return {
+			c: function create() {
+				div = createElement("div");
+				div_1 = createElement("div");
+				text = createText("Отчет об использовании лесов");
+				text_1 = createText("\n\t");
+				div_2 = createElement("div");
+				text_2 = createText("Лимит отчетов: ");
+				text_3 = createText(ctx.limit);
+				text_4 = createText("\n\t");
+				div_3 = createElement("div");
+				span = createElement("span");
+				text_5 = createText("Выбор слоя");
+				text_6 = createText("\n\t\t");
+				select = createElement("select");
+				option = createElement("option");
+				if (if_block) if_block.c();
+				text_8 = createText("\n");
+				if (if_block_1) if_block_1.c();
+				div_1.className = "forest-plugin-header svelte-1xjsjwo";
+				addLoc(div_1, file$2, 367, 1, 11053);
+				div_2.className = "forest-plugin-header svelte-1xjsjwo";
+				addLoc(div_2, file$2, 368, 1, 11123);
+				span.className = "gmx-select-layer-container__label svelte-1xjsjwo";
+				addLoc(span, file$2, 370, 2, 11230);
+				option.__value = "";
+				option.value = option.__value;
+				option.className = "svelte-1xjsjwo";
+				addLoc(option, file$2, 372, 3, 11396);
+				addListener(select, "change", change_handler);
+				select.name = "layerID";
+				select.className = "gmx-sidebar-select-medium svelte-1xjsjwo";
+				addLoc(select, file$2, 371, 2, 11298);
+				div_3.className = "gmx-select-layer-container svelte-1xjsjwo";
+				addLoc(div_3, file$2, 369, 1, 11187);
+				div.dataset.reactroot = "";
+				div.className = "forest-plugin-container svelte-1xjsjwo";
+				addLoc(div, file$2, 366, 0, 10996);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(div, target, anchor);
+				appendNode(div_1, div);
+				appendNode(text, div_1);
+				appendNode(text_1, div);
+				appendNode(div_2, div);
+				appendNode(text_2, div_2);
+				appendNode(text_3, div_2);
+				appendNode(text_4, div);
+				appendNode(div_3, div);
+				appendNode(span, div_3);
+				appendNode(text_5, span);
+				appendNode(text_6, div_3);
+				appendNode(select, div_3);
+				appendNode(option, select);
+				if (if_block) if_block.m(select, null);
+				appendNode(text_8, div);
+				if (if_block_1) if_block_1.m(div, null);
+				current = true;
+			},
+
+			p: function update(changed, ctx) {
+				if (!current || changed.limit) {
+					setData(text_3, ctx.limit);
+				}
+
+				if (ctx.layerIds) {
+					if (if_block) {
+						if_block.p(changed, ctx);
+					} else {
+						if_block = create_if_block$1(component, ctx);
+						if_block.c();
+						if_block.m(select, null);
+					}
+				} else if (if_block) {
+					if_block.d(1);
+					if_block = null;
+				}
+
+				if (ctx.layerID) {
+					if (if_block_1) {
+						if_block_1.p(changed, ctx);
+					} else {
+						if_block_1 = create_if_block_1$1(component, ctx);
+						if (if_block_1) if_block_1.c();
+					}
+
+					if_block_1.i(div, null);
+				} else if (if_block_1) {
+					if_block_1.o(function() {
+						if_block_1.d(1);
+						if_block_1 = null;
+					});
+				}
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: function outro(outrocallback) {
+				if (!current) return;
+
+				if (if_block_1) if_block_1.o(outrocallback);
+				else outrocallback();
+
+				current = false;
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				if (if_block) if_block.d();
+				removeListener(select, "change", change_handler);
+				if (if_block_1) if_block_1.d();
+			}
+		};
+	}
+
+	// (375:4) {#each layerIds as it}
+	function create_each_block$2(component, ctx) {
+		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
+
+		return {
+			c: function create() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it.id;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.layerID === ctx.it.id;
+				option.className = "svelte-1xjsjwo";
+				addLoc(option, file$2, 375, 5, 11473);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(option, target, anchor);
+				appendNode(text, option);
+			},
+
+			p: function update(changed, ctx) {
+				if ((changed.layerIds) && text_value !== (text_value = ctx.it.title)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.layerIds) && option_value_value !== (option_value_value = ctx.it.id)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.layerID || changed.layerIds) && option_selected_value !== (option_selected_value = ctx.layerID === ctx.it.id)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (374:3) {#if layerIds}
+	function create_if_block$1(component, ctx) {
+		var each_anchor;
+
+		var each_value = ctx.layerIds;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block$2(component, get_each_context$2(ctx, each_value, i));
+		}
+
+		return {
+			c: function create() {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				each_anchor = createComment();
+			},
+
+			m: function mount(target, anchor) {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(target, anchor);
+				}
+
+				insertNode(each_anchor, target, anchor);
+			},
+
+			p: function update(changed, ctx) {
+				if (changed.layerIds || changed.layerID) {
+					each_value = ctx.layerIds;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						const child_ctx = get_each_context$2(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block$2(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(each_anchor.parentNode, each_anchor);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				destroyEach(each_blocks, detach);
+
+				if (detach) {
+					detachNode(each_anchor);
+				}
+			}
+		};
+	}
+
+	// (389:0) {#each params.reportType.options as it}
+	function create_each_block_1(component, ctx) {
+		var option, text_value = ctx.it, text, option_value_value;
+
+		return {
+			c: function create() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it;
+				option.value = option.__value;
+				option.className = "svelte-1xjsjwo";
+				addLoc(option, file$2, 389, 8, 11999);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(option, target, anchor);
+				appendNode(text, option);
+			},
+
+			p: function update(changed, ctx) {
+				if ((changed.params) && text_value !== (text_value = ctx.it)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.params) && option_value_value !== (option_value_value = ctx.it)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (395:0) {#if reportType !== 'о восстановлении лесов'}
+	function create_if_block_2(component, ctx) {
+		var div, text, current;
+
+		var selectinput_initial_data = {
+		 	key: "fellingForm",
+		 	cols: ctx.cols
+		 };
+		var selectinput = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_initial_data
+		});
+
+		var selectinput_1_initial_data = {
+		 	key: "fellingType",
+		 	cols: ctx.cols
+		 };
+		var selectinput_1 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_1_initial_data
+		});
+
+		return {
+			c: function create() {
+				div = createElement("div");
+				selectinput._fragment.c();
+				text = createText("\n\t\t\t\t\t\t");
+				selectinput_1._fragment.c();
+				addLoc(div, file$2, 395, 5, 12122);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(div, target, anchor);
+				selectinput._mount(div, null);
+				appendNode(text, div);
+				selectinput_1._mount(div, null);
+				current = true;
+			},
+
+			p: function update(changed, ctx) {
+				var selectinput_changes = {};
+				if (changed.cols) selectinput_changes.cols = ctx.cols;
+				selectinput._set(selectinput_changes);
+
+				var selectinput_1_changes = {};
+				if (changed.cols) selectinput_1_changes.cols = ctx.cols;
+				selectinput_1._set(selectinput_1_changes);
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: function outro(outrocallback) {
+				if (!current) return;
+
+				outrocallback = callAfter(outrocallback, 2);
+
+				selectinput._fragment.o(outrocallback);
+				selectinput_1._fragment.o(outrocallback);
+				current = false;
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				selectinput.destroy();
+				selectinput_1.destroy();
+			}
+		};
+	}
+
+	// (425:1) {#each quadrantIds as it}
+	function create_each_block_2(component, ctx) {
+		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
+
+		return {
+			c: function create() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it.id;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.quadrantLayerId === ctx.it.id;
+				option.className = "svelte-1xjsjwo";
+				addLoc(option, file$2, 425, 9, 13655);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(option, target, anchor);
+				appendNode(text, option);
+			},
+
+			p: function update(changed, ctx) {
+				if ((changed.quadrantIds) && text_value !== (text_value = ctx.it.title)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.quadrantIds) && option_value_value !== (option_value_value = ctx.it.id)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.quadrantLayerId || changed.quadrantIds) && option_selected_value !== (option_selected_value = ctx.quadrantLayerId === ctx.it.id)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (424:0) {#if quadrantIds}
+	function create_if_block_3(component, ctx) {
+		var each_anchor;
+
+		var each_value_2 = ctx.quadrantIds;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value_2.length; i += 1) {
+			each_blocks[i] = create_each_block_2(component, get_each_context_2(ctx, each_value_2, i));
+		}
+
+		return {
+			c: function create() {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				each_anchor = createComment();
+			},
+
+			m: function mount(target, anchor) {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(target, anchor);
+				}
+
+				insertNode(each_anchor, target, anchor);
+			},
+
+			p: function update(changed, ctx) {
+				if (changed.quadrantIds || changed.quadrantLayerId) {
+					each_value_2 = ctx.quadrantIds;
+
+					for (var i = 0; i < each_value_2.length; i += 1) {
+						const child_ctx = get_each_context_2(ctx, each_value_2, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block_2(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(each_anchor.parentNode, each_anchor);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value_2.length;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				destroyEach(each_blocks, detach);
+
+				if (detach) {
+					detachNode(each_anchor);
+				}
+			}
+		};
+	}
+
+	// (447:0) {#if report}
+	function create_if_block_4(component, ctx) {
+		var button, div, div_1, div_2, div_3, div_4;
+
+		return {
+			c: function create() {
+				button = createElement("button");
+				div = createElement("div");
+				div_1 = createElement("div");
+				div_2 = createElement("div");
+				div_3 = createElement("div");
+				div_4 = createElement("div");
+				div_1.className = "svelte-1xjsjwo";
+				addLoc(div_1, file$2, 447, 74, 14471);
+				div_2.className = "svelte-1xjsjwo";
+				addLoc(div_2, file$2, 447, 85, 14482);
+				div_3.className = "svelte-1xjsjwo";
+				addLoc(div_3, file$2, 447, 96, 14493);
+				div_4.className = "svelte-1xjsjwo";
+				addLoc(div_4, file$2, 447, 107, 14504);
+				div.className = "lds-ellipsis svelte-1xjsjwo";
+				addLoc(div, file$2, 447, 48, 14445);
+				button.className = "gmx-sidebar-button-disabled svelte-1xjsjwo";
+				addLoc(button, file$2, 447, 4, 14401);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(button, target, anchor);
+				appendNode(div, button);
+				appendNode(div_1, div);
+				appendNode(div_2, div);
+				appendNode(div_3, div);
+				appendNode(div_4, div);
+			},
+
+			p: noop,
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(button);
+				}
+			}
+		};
+	}
+
+	// (449:0) {:else}
+	function create_if_block_5(component, ctx) {
+		var button, text, button_class_value;
+
+		function click_handler(event) {
+			component.sendReport();
+		}
+
+		return {
+			c: function create() {
+				button = createElement("button");
+				text = createText("Создать отчеты");
+				addListener(button, "click", click_handler);
+				button.className = button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-1xjsjwo";
+				addLoc(button, file$2, 449, 4, 14543);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(button, target, anchor);
+				appendNode(text, button);
+			},
+
+			p: function update(changed, ctx) {
+				if ((changed.Object || changed.checked) && button_class_value !== (button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-1xjsjwo")) {
+					button.className = button_class_value;
+				}
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(button);
+				}
+
+				removeListener(button, "click", click_handler);
+			}
+		};
+	}
+
+	// (381:0) {#if layerID}
+	function create_if_block_1$1(component, ctx) {
+		var div, div_1, text, text_1, div_2, div_3, div_4, div_5, text_2_value = ctx.params.reportType.title, text_2, text_3, select, text_5, text_6, div_6, div_7, text_7_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text_7, text_8, input, input_value_value, text_10, div_8, div_9, text_11_value = ctx.params.inn.title || ctx.params.inn.value, text_11, text_12, input_1, input_1_value_value, text_14, text_15, text_16, text_17, text_18, text_19, text_20, text_21, text_22, text_23, div_10, div_11, text_24_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text_24, text_25, select_1, option, text_29, div_12, text_30, text_31, div_13, div_14, div_15, button, text_32_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text_32, text_33, div_16, text_34, text_35_value = ctx.Object.keys(ctx.checked).length, text_35, text_36, text_37_value = ctx.layerItems.length, text_37, text_38, text_41, div_17, current;
+
+		var each_value_1 = ctx.params.reportType.options;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value_1.length; i += 1) {
+			each_blocks[i] = create_each_block_1(component, get_each_context_1(ctx, each_value_1, i));
+		}
+
+		function change_handler(event) {
+			component.setNodeField(this, true);
+		}
+
+		var if_block = (ctx.reportType !== 'о восстановлении лесов') && create_if_block_2(component, ctx);
+
+		function change_handler_1(event) {
+			component.setNodeField(this);
+		}
+
+		function change_handler_2(event) {
+			component.setNodeField(this);
+		}
+
+		var selectinput_initial_data = { key: "region", cols: ctx.cols };
+		var selectinput = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_initial_data
+		});
+
+		var selectinput_1_initial_data = { key: "forestry", cols: ctx.cols };
+		var selectinput_1 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_1_initial_data
+		});
+
+		var selectinput_2_initial_data = {
+		 	key: "sectionForestry",
+		 	cols: ctx.cols
+		 };
+		var selectinput_2 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_2_initial_data
+		});
+
+		var selectinput_3_initial_data = { key: "quadrant", cols: ctx.cols };
+		var selectinput_3 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_3_initial_data
+		});
+
+		var selectinput_4_initial_data = { key: "stratum", cols: ctx.cols };
+		var selectinput_4 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_4_initial_data
+		});
+
+		var selectinput_5_initial_data = { key: "site", cols: ctx.cols };
+		var selectinput_5 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_5_initial_data
+		});
+
+		var selectinput_6_initial_data = {
+		 	key: "recoveryEventType",
+		 	cols: ctx.cols
+		 };
+		var selectinput_6 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_6_initial_data
+		});
+
+		var selectinput_7_initial_data = { key: "siteArea", cols: ctx.cols };
+		var selectinput_7 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_7_initial_data
+		});
+
+		var selectinput_8_initial_data = { key: "scale", cols: ctx.cols };
+		var selectinput_8 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput_8_initial_data
+		});
+
+		var if_block_1 = (ctx.quadrantIds) && create_if_block_3(component, ctx);
+
+		function change_handler_3(event) {
+			component.setNodeField(this, true);
+		}
+
+		function click_handler(event) {
+			component.startDrawing(event);
+		}
+
+		var table_initial_data = {
+		 	items: ctx.layerItems,
+		 	hashCols: ctx.hashCols
+		 };
+		var table = new Table({
+			root: component.root,
+			store: component.store,
+			data: table_initial_data
+		});
+
+		function select_block_type(ctx) {
+			if (ctx.report) return create_if_block_4;
+			return create_if_block_5;
+		}
+
+		var current_block_type = select_block_type(ctx);
+		var if_block_2 = current_block_type(component, ctx);
+
+		return {
+			c: function create() {
+				div = createElement("div");
+				div_1 = createElement("div");
+				text = createText("Ввод информации");
+				text_1 = createText("\n\t\t\t");
+				div_2 = createElement("div");
+				div_3 = createElement("div");
+				div_4 = createElement("div");
+				div_5 = createElement("div");
+				text_2 = createText(text_2_value);
+				text_3 = createText("\n\t\t\t\t\t\t");
+				select = createElement("select");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				text_5 = createText("\n");
+				if (if_block) if_block.c();
+				text_6 = createText("\n\t\t\t\t\t");
+				div_6 = createElement("div");
+				div_7 = createElement("div");
+				text_7 = createText(text_7_value);
+				text_8 = createText("\n\t\t\t\t\t\t");
+				input = createElement("input");
+				text_10 = createText("\n\t\t\t\t\t");
+				div_8 = createElement("div");
+				div_9 = createElement("div");
+				text_11 = createText(text_11_value);
+				text_12 = createText("\n\t\t\t\t\t\t");
+				input_1 = createElement("input");
+				text_14 = createText("\n\n\t\t\t\t\t");
+				selectinput._fragment.c();
+				text_15 = createText("\n\t\t\t\t\t");
+				selectinput_1._fragment.c();
+				text_16 = createText("\n\t\t\t\t\t");
+				selectinput_2._fragment.c();
+				text_17 = createText("\n\t\t\t\t\t");
+				selectinput_3._fragment.c();
+				text_18 = createText("\n\t\t\t\t\t");
+				selectinput_4._fragment.c();
+				text_19 = createText("\n\t\t\t\t\t");
+				selectinput_5._fragment.c();
+				text_20 = createText("\n\t\t\t\t\t");
+				selectinput_6._fragment.c();
+				text_21 = createText("\n\t\t\t\t\t");
+				selectinput_7._fragment.c();
+				text_22 = createText("\n\t\t\t\t\t");
+				selectinput_8._fragment.c();
+				text_23 = createText("\n\n\t\t\t\t\t");
+				div_10 = createElement("div");
+				div_11 = createElement("div");
+				text_24 = createText(text_24_value);
+				text_25 = createText("\n\t\t\t\t\t\t");
+				select_1 = createElement("select");
+				option = createElement("option");
+				if (if_block_1) if_block_1.c();
+				text_29 = createText("\n\t\t\t");
+				div_12 = createElement("div");
+				text_30 = createText("Список объектов");
+				text_31 = createText("\n\t\t\t");
+				div_13 = createElement("div");
+				div_14 = createElement("div");
+				div_15 = createElement("div");
+				button = createElement("button");
+				text_32 = createText(text_32_value);
+				text_33 = createText("\n\t\t\t\t\t");
+				div_16 = createElement("div");
+				text_34 = createText("Выделено: ");
+				text_35 = createText(text_35_value);
+				text_36 = createText(" / ");
+				text_37 = createText(text_37_value);
+				text_38 = createText("\n\t\t\t\t\t");
+				table._fragment.c();
+				text_41 = createText("\n\t\t\t");
+				div_17 = createElement("div");
+				if_block_2.c();
+				div_1.className = "gmx-sidebar-label-medium svelte-1xjsjwo";
+				addLoc(div_1, file$2, 382, 3, 11655);
+				div_5.className = "gmx-sidebar-label svelte-1xjsjwo";
+				addLoc(div_5, file$2, 386, 6, 11785);
+				addListener(select, "change", change_handler);
+				select.name = "reportType";
+				select.className = "gmx-sidebar-select-large svelte-1xjsjwo";
+				addLoc(select, file$2, 387, 6, 11854);
+				div_4.className = "gmx-sidebar-labeled-block svelte-1xjsjwo";
+				addLoc(div_4, file$2, 385, 5, 11739);
+				div_7.className = "gmx-sidebar-label-small svelte-1xjsjwo";
+				addLoc(div_7, file$2, 401, 6, 12305);
+				addListener(input, "change", change_handler_1);
+				input.name = "organizationName";
+				input.value = input_value_value = ctx.params.organizationName.value;
+				setAttribute(input, "type", "text");
+				input.className = "gmx-sidebar-input-large svelte-1xjsjwo";
+				addLoc(input, file$2, 402, 6, 12419);
+				div_6.className = "gmx-sidebar-labeled-block svelte-1xjsjwo";
+				addLoc(div_6, file$2, 400, 5, 12259);
+				div_9.className = "gmx-sidebar-label-small svelte-1xjsjwo";
+				addLoc(div_9, file$2, 405, 6, 12629);
+				addListener(input_1, "change", change_handler_2);
+				input_1.name = "inn";
+				input_1.value = input_1_value_value = ctx.params.inn.value;
+				setAttribute(input_1, "type", "text");
+				input_1.className = "gmx-sidebar-input-large svelte-1xjsjwo";
+				addLoc(input_1, file$2, 406, 6, 12717);
+				div_8.className = "gmx-sidebar-labeled-block svelte-1xjsjwo";
+				addLoc(div_8, file$2, 404, 5, 12583);
+				div_11.className = "gmx-sidebar-label svelte-1xjsjwo";
+				addLoc(div_11, file$2, 420, 6, 13359);
+				option.__value = "";
+				option.value = option.__value;
+				option.className = "svelte-1xjsjwo";
+				addLoc(option, file$2, 422, 7, 13574);
+				addListener(select_1, "change", change_handler_3);
+				select_1.name = "quadrantLayerId";
+				select_1.className = "gmx-sidebar-select-large svelte-1xjsjwo";
+				addLoc(select_1, file$2, 421, 6, 13465);
+				div_10.className = "gmx-sidebar-labeled-block svelte-1xjsjwo";
+				addLoc(div_10, file$2, 419, 5, 13313);
+				addLoc(div_3, file$2, 384, 4, 11728);
+				addLoc(div_2, file$2, 383, 3, 11718);
+				div_12.className = "gmx-sidebar-label-medium svelte-1xjsjwo";
+				addLoc(div_12, file$2, 437, 3, 13855);
+				addListener(button, "click", click_handler);
+				button.className = "gmx-sidebar-button svelte-1xjsjwo";
+				addLoc(button, file$2, 440, 48, 14012);
+				div_15.className = "gmx-geometry-select-container svelte-1xjsjwo";
+				addLoc(div_15, file$2, 440, 5, 13969);
+				div_16.className = "gmx-sidebar-label-medium svelte-1xjsjwo";
+				addLoc(div_16, file$2, 441, 5, 14161);
+				addLoc(div_14, file$2, 439, 4, 13958);
+				div_13.className = "forest-features-block svelte-1xjsjwo";
+				addLoc(div_13, file$2, 438, 3, 13918);
+				div_17.className = "gmx-button-container svelte-1xjsjwo";
+				addLoc(div_17, file$2, 445, 3, 14349);
+				div.className = "leftContent forest-plugin-content svelte-1xjsjwo";
+				addLoc(div, file$2, 381, 1, 11604);
+			},
+
+			m: function mount(target, anchor) {
+				insertNode(div, target, anchor);
+				appendNode(div_1, div);
+				appendNode(text, div_1);
+				appendNode(text_1, div);
+				appendNode(div_2, div);
+				appendNode(div_3, div_2);
+				appendNode(div_4, div_3);
+				appendNode(div_5, div_4);
+				appendNode(text_2, div_5);
+				appendNode(text_3, div_4);
+				appendNode(select, div_4);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(select, null);
+				}
+
+				appendNode(text_5, div_3);
+				if (if_block) if_block.m(div_3, null);
+				appendNode(text_6, div_3);
+				appendNode(div_6, div_3);
+				appendNode(div_7, div_6);
+				appendNode(text_7, div_7);
+				appendNode(text_8, div_6);
+				appendNode(input, div_6);
+				appendNode(text_10, div_3);
+				appendNode(div_8, div_3);
+				appendNode(div_9, div_8);
+				appendNode(text_11, div_9);
+				appendNode(text_12, div_8);
+				appendNode(input_1, div_8);
+				appendNode(text_14, div_3);
+				selectinput._mount(div_3, null);
+				appendNode(text_15, div_3);
+				selectinput_1._mount(div_3, null);
+				appendNode(text_16, div_3);
+				selectinput_2._mount(div_3, null);
+				appendNode(text_17, div_3);
+				selectinput_3._mount(div_3, null);
+				appendNode(text_18, div_3);
+				selectinput_4._mount(div_3, null);
+				appendNode(text_19, div_3);
+				selectinput_5._mount(div_3, null);
+				appendNode(text_20, div_3);
+				selectinput_6._mount(div_3, null);
+				appendNode(text_21, div_3);
+				selectinput_7._mount(div_3, null);
+				appendNode(text_22, div_3);
+				selectinput_8._mount(div_3, null);
+				appendNode(text_23, div_3);
+				appendNode(div_10, div_3);
+				appendNode(div_11, div_10);
+				appendNode(text_24, div_11);
+				appendNode(text_25, div_10);
+				appendNode(select_1, div_10);
+				appendNode(option, select_1);
+				if (if_block_1) if_block_1.m(select_1, null);
+				appendNode(text_29, div);
+				appendNode(div_12, div);
+				appendNode(text_30, div_12);
+				appendNode(text_31, div);
+				appendNode(div_13, div);
+				appendNode(div_14, div_13);
+				appendNode(div_15, div_14);
+				appendNode(button, div_15);
+				appendNode(text_32, button);
+				appendNode(text_33, div_14);
+				appendNode(div_16, div_14);
+				appendNode(text_34, div_16);
+				appendNode(text_35, div_16);
+				appendNode(text_36, div_16);
+				appendNode(text_37, div_16);
+				appendNode(text_38, div_14);
+				table._mount(div_14, null);
+				appendNode(text_41, div);
+				appendNode(div_17, div);
+				if_block_2.m(div_17, null);
+				current = true;
+			},
+
+			p: function update(changed, ctx) {
+				if ((!current || changed.params) && text_2_value !== (text_2_value = ctx.params.reportType.title)) {
+					setData(text_2, text_2_value);
+				}
+
+				if (changed.params) {
+					each_value_1 = ctx.params.reportType.options;
+
+					for (var i = 0; i < each_value_1.length; i += 1) {
+						const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block_1(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(select, null);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value_1.length;
+				}
+
+				if (ctx.reportType !== 'о восстановлении лесов') {
+					if (if_block) {
+						if_block.p(changed, ctx);
+					} else {
+						if_block = create_if_block_2(component, ctx);
+						if (if_block) if_block.c();
+					}
+
+					if_block.i(div_3, text_6);
+				} else if (if_block) {
+					if_block.o(function() {
+						if_block.d(1);
+						if_block = null;
+					});
+				}
+
+				if ((!current || changed.params) && text_7_value !== (text_7_value = ctx.params.organizationName.title || ctx.params.organizationName.value)) {
+					setData(text_7, text_7_value);
+				}
+
+				if ((!current || changed.params) && input_value_value !== (input_value_value = ctx.params.organizationName.value)) {
+					input.value = input_value_value;
+				}
+
+				if ((!current || changed.params) && text_11_value !== (text_11_value = ctx.params.inn.title || ctx.params.inn.value)) {
+					setData(text_11, text_11_value);
+				}
+
+				if ((!current || changed.params) && input_1_value_value !== (input_1_value_value = ctx.params.inn.value)) {
+					input_1.value = input_1_value_value;
+				}
+
+				var selectinput_changes = {};
+				if (changed.cols) selectinput_changes.cols = ctx.cols;
+				selectinput._set(selectinput_changes);
+
+				var selectinput_1_changes = {};
+				if (changed.cols) selectinput_1_changes.cols = ctx.cols;
+				selectinput_1._set(selectinput_1_changes);
+
+				var selectinput_2_changes = {};
+				if (changed.cols) selectinput_2_changes.cols = ctx.cols;
+				selectinput_2._set(selectinput_2_changes);
+
+				var selectinput_3_changes = {};
+				if (changed.cols) selectinput_3_changes.cols = ctx.cols;
+				selectinput_3._set(selectinput_3_changes);
+
+				var selectinput_4_changes = {};
+				if (changed.cols) selectinput_4_changes.cols = ctx.cols;
+				selectinput_4._set(selectinput_4_changes);
+
+				var selectinput_5_changes = {};
+				if (changed.cols) selectinput_5_changes.cols = ctx.cols;
+				selectinput_5._set(selectinput_5_changes);
+
+				var selectinput_6_changes = {};
+				if (changed.cols) selectinput_6_changes.cols = ctx.cols;
+				selectinput_6._set(selectinput_6_changes);
+
+				var selectinput_7_changes = {};
+				if (changed.cols) selectinput_7_changes.cols = ctx.cols;
+				selectinput_7._set(selectinput_7_changes);
+
+				var selectinput_8_changes = {};
+				if (changed.cols) selectinput_8_changes.cols = ctx.cols;
+				selectinput_8._set(selectinput_8_changes);
+
+				if ((!current || changed.params) && text_24_value !== (text_24_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value)) {
+					setData(text_24, text_24_value);
+				}
+
+				if (ctx.quadrantIds) {
+					if (if_block_1) {
+						if_block_1.p(changed, ctx);
+					} else {
+						if_block_1 = create_if_block_3(component, ctx);
+						if_block_1.c();
+						if_block_1.m(select_1, null);
+					}
+				} else if (if_block_1) {
+					if_block_1.d(1);
+					if_block_1 = null;
+				}
+
+				if ((!current || changed.drawstart) && text_32_value !== (text_32_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном')) {
+					setData(text_32, text_32_value);
+				}
+
+				if ((!current || changed.Object || changed.checked) && text_35_value !== (text_35_value = ctx.Object.keys(ctx.checked).length)) {
+					setData(text_35, text_35_value);
+				}
+
+				if ((!current || changed.layerItems) && text_37_value !== (text_37_value = ctx.layerItems.length)) {
+					setData(text_37, text_37_value);
+				}
+
+				var table_changes = {};
+				if (changed.layerItems) table_changes.items = ctx.layerItems;
+				if (changed.hashCols) table_changes.hashCols = ctx.hashCols;
+				table._set(table_changes);
+
+				if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block_2) {
+					if_block_2.p(changed, ctx);
+				} else {
+					if_block_2.d(1);
+					if_block_2 = current_block_type(component, ctx);
+					if_block_2.c();
+					if_block_2.m(div_17, null);
+				}
+			},
+
+			i: function intro(target, anchor) {
+				if (current) return;
+
+				this.m(target, anchor);
+			},
+
+			o: function outro(outrocallback) {
+				if (!current) return;
+
+				outrocallback = callAfter(outrocallback, 11);
+
+				if (if_block) if_block.o(outrocallback);
+				else outrocallback();
+
+				selectinput._fragment.o(outrocallback);
+				selectinput_1._fragment.o(outrocallback);
+				selectinput_2._fragment.o(outrocallback);
+				selectinput_3._fragment.o(outrocallback);
+				selectinput_4._fragment.o(outrocallback);
+				selectinput_5._fragment.o(outrocallback);
+				selectinput_6._fragment.o(outrocallback);
+				selectinput_7._fragment.o(outrocallback);
+				selectinput_8._fragment.o(outrocallback);
+				table._fragment.o(outrocallback);
+				current = false;
+			},
+
+			d: function destroy$$1(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(select, "change", change_handler);
+				if (if_block) if_block.d();
+				removeListener(input, "change", change_handler_1);
+				removeListener(input_1, "change", change_handler_2);
+				selectinput.destroy();
+				selectinput_1.destroy();
+				selectinput_2.destroy();
+				selectinput_3.destroy();
+				selectinput_4.destroy();
+				selectinput_5.destroy();
+				selectinput_6.destroy();
+				selectinput_7.destroy();
+				selectinput_8.destroy();
+				if (if_block_1) if_block_1.d();
+				removeListener(select_1, "change", change_handler_3);
+				removeListener(button, "click", click_handler);
+				table.destroy();
+				if_block_2.d();
+			}
+		};
+	}
+
+	function get_each_context$2(ctx, list, i) {
+		const child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		child_ctx.each_value = list;
+		child_ctx.it_index = i;
+		return child_ctx;
+	}
+
+	function get_each_context_1(ctx, list, i) {
+		const child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		child_ctx.each_value_1 = list;
+		child_ctx.it_index_1 = i;
+		return child_ctx;
+	}
+
+	function get_each_context_2(ctx, list, i) {
+		const child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		child_ctx.each_value_2 = list;
+		child_ctx.it_index_2 = i;
+		return child_ctx;
+	}
+
+	function App(options) {
+		this._debugName = '<App>';
+		if (!options || (!options.target && !options.root)) throw new Error("'target' is a required option");
+		init(this, options);
+		this._state = assign(assign({ Object : Object }, data$2()), options.data);
+		if (!('limit' in this._state)) console.warn("<App> was created without expected data property 'limit'");
+		if (!('layerIds' in this._state)) console.warn("<App> was created without expected data property 'layerIds'");
+		if (!('layerID' in this._state)) console.warn("<App> was created without expected data property 'layerID'");
+		if (!('params' in this._state)) console.warn("<App> was created without expected data property 'params'");
+		if (!('reportType' in this._state)) console.warn("<App> was created without expected data property 'reportType'");
+		if (!('cols' in this._state)) console.warn("<App> was created without expected data property 'cols'");
+		if (!('quadrantIds' in this._state)) console.warn("<App> was created without expected data property 'quadrantIds'");
+		if (!('quadrantLayerId' in this._state)) console.warn("<App> was created without expected data property 'quadrantLayerId'");
+		if (!('drawstart' in this._state)) console.warn("<App> was created without expected data property 'drawstart'");
+
+		if (!('checked' in this._state)) console.warn("<App> was created without expected data property 'checked'");
+		if (!('layerItems' in this._state)) console.warn("<App> was created without expected data property 'layerItems'");
+		if (!('hashCols' in this._state)) console.warn("<App> was created without expected data property 'hashCols'");
+		if (!('report' in this._state)) console.warn("<App> was created without expected data property 'report'");
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate$2];
+
+		if (!options.root) {
+			this._oncreate = [];
+			this._beforecreate = [];
+			this._aftercreate = [];
+		}
+
+		this._fragment = create_main_fragment$2(this, this._state);
+
+		this.root._oncreate.push(() => {
+			onstate$2.call(this, { changed: assignTrue({}, this._state), current: this._state });
+			oncreate$1.call(this);
+			this.fire("update", { changed: assignTrue({}, this._state), current: this._state });
+		});
+
+		if (options.target) {
+			if (options.hydrate) throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			this._lock = true;
+			callAll(this._beforecreate);
+			callAll(this._oncreate);
+			callAll(this._aftercreate);
+			this._lock = false;
+		}
+
+		this._intro = true;
+	}
+
+	assign(App.prototype, protoDev);
+	assign(App.prototype, methods$2);
+
+	App.prototype._checkReadOnly = function _checkReadOnly(newState) {
+	};
+
+	exports.App = App;
+
+	return exports;
+
+}({}));
 //# sourceMappingURL=forest.js.map

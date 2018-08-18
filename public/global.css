@@ -24,4 +24,6 @@
 .iconSidebarControl-pane.iconSidebarControl-pane-active {
   width: 100%;
 }
-
+table {
+	table-layout: fixed;
+}

@@ -42,9 +42,9 @@
 
 		var map = new L.Map('map', {layers: [osm], center: new L.LatLng(0, 60), zoom: 3});
 
-		//L.gmx.loadMap('78457D37D4104840B76257C72B931125').then(function(gmxMap) {
-		L.gmx.loadMap('22DB1B271A81413C8BF02D1A81491E56').then(function(gmxMap) {
-console.log('gmxMap', gmxMap)
+		L.gmx.loadMap('87418FB0B17148EAA1D0B26F2ECCDA8A').then(function(gmxMap) {
+		//L.gmx.loadMap('22DB1B271A81413C8BF02D1A81491E56').then(function(gmxMap) {
+//console.log('gmxMap', gmxMap)
 			var iconSidebar = L.control.iconSidebar({width111: 360});
 			map.addControl(iconSidebar);
 			var node = L.DomUtil.create('div', 'treeViewCont'),
@@ -88,7 +88,6 @@ console.log('gmxMap', gmxMap)
 							}
 						}
 					}
-console.log(ev);
 				});
 
 			var node1 = L.DomUtil.create('div', 'forestViewCont'),
@@ -106,11 +105,19 @@ console.log(ev);
 					return node1;
 				}
 			});
-				
+			let beg = new Date(2018, 7, 10);
+			let end = new Date(2018, 7, 11);
+			gmxMap.layers.forEach((it) => {
+				if (it.setDateInterval) {
+					it.setDateInterval(beg, end);
+				}
+			});
+
 			var hworld = new forest.App({
 				target: forestPane,
 				data: {
 					// meta: true,		// фильтровать списки слоев по Meta
+					map: map,
 					gmxMap: gmxMap
 					,
 					// layerId: 'F2EE4C559F614CDFA058D34FE3E4703E',	// слой делянок по умолчанию
