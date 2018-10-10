@@ -8,7 +8,7 @@
 				params: {
 					layerID: {value: '', title: 'Выбор слоя'},
 					quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-					reportType: {value: '', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+					reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
 					organizationName: {value: 'Наименование организации'},
 					inn: {value: '1234567890', title: 'ИНН'},
 					region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
@@ -43,13 +43,16 @@
 	
 		methods: {
 			viewItem(id) {
-				const {layerItems, hashCols} = this.get();
+				const { map, layerItems, hashCols} = this.get();
 				
 				for (let i = 0, len = layerItems.length; i < len; i++) {
 					let it = layerItems[i];
 					if (id === it[hashCols.gmx_id]) {
-						let geo = it[hashCols.geomixergeojson];
-console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
+						let geo = it[hashCols.geomixergeojson],
+							bbox = L.gmxUtil.getGeometryBounds(geo),
+							latlngBbox = L.latLngBounds([[bbox.min.y, bbox.min.x], [bbox.max.y, bbox.max.x]]);
+						map.fitBounds(latlngBbox);
+						// console.log('viewItem ____ ', geo, latlngBbox, L.latLngBounds(bbox.coordinates));
 						break;
 					}
 				}
@@ -63,15 +66,22 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 				gmxMap.layers.forEach((it) => {
 					if (it.getGmxProperties && it._map) {
 						let props = it.getGmxProperties(),
-							out = {layerId: props.name};
+							metaProps = props.MetaProperties || {},
+							out = {layerId: props.name, type: 'оптическая'};
 						if (props.Temporal) {
 							var dt = it.getDateInterval();
-							if (dt.beginDate) { out.beginDate = dt.beginDate; }
-							if (dt.endDate) { out.endDate = dt.endDate; }
+							if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
+							if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
 						}
-						// out.type = 'оптическая';
-						// out.system = 'Sentinel-2';
-						// out.resolution = '10 м';
+						if (metaProps.type) {
+							out.type = metaProps.type.Value;
+						}
+						if (metaProps.system) {
+							out.system = metaProps.system.Value;
+						}
+						if (metaProps.resolution) {
+							out.resolution = metaProps.resolution.Value;
+						}
 						satLayers.push(out);
 					}
 				});
@@ -80,10 +90,12 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 					let id = it[hashCols.gmx_id];
 					if (checked[id]) {
 						let data = {featureID: id};
-						Object.entries(params).forEach(([key, val]) => {
+						// Object.entries(params).forEach(([key, val]) => {
+						for (let key in params) {
+							let val = params[key];
 							let par = this.changedParams[key] || {};
 							data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
-						});
+						}
 						data.satLayers = satLayers;
 						groupRequest.push(data);
 						features.push({action:'update', id:id, properties:{FRSTAT:2}});
@@ -99,7 +111,6 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 					})
 					.then(res => res.json())
 					.then(json => {
-// console.log('ForestReportImage ____ ', json, groupRequest, this.changedParams);
 						if (json.Status === 'ok') {
 							this.chkTask(json.Result.TaskID)
 								.then(json => {
@@ -153,7 +164,7 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 				});
 			},
 			modifyVectorObjects(layerId, features) {
-// console.log('modifyVectorObjects ____ ', layerId, features);
+				// console.log('modifyVectorObjects ____ ', layerId, features);
 				const params = {
 					WrapStyle: 'None',
 					LayerName : layerId,
@@ -171,17 +182,16 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 					.catch(err => console.log(err));
 			},
 			selectFeaturesWithDrawing(id, geometry) {
-// console.log('selectFeaturesWithDrawing ____ ', id, geometry);
 				const params = {
 					WrapStyle: 'None',
 					layer: id,
+					columns: '[{"Value":"[gmx_id]"}]',
 					page: 0,
-					pagesize: null,
-					geometry: true,
+					// pagesize: null,
 					query: `STIntersects([gmx_geometry], GeometryFromGeoJson('${JSON.stringify(geometry)}', 4326))`
 				};
     
-				return fetch(`${window.serverBase}VectorLayer/Search.ashx?${L.gmxUtil.getFormData(params)}`, {
+				return fetch(`${serverBase}VectorLayer/Search.ashx?${L.gmxUtil.getFormData(params)}`, {
 					mode: 'cors',
 					credentials: 'include',
 					headers: {
@@ -192,31 +202,24 @@ console.log('viewItem ____ ', geo, L.gmxUtil.getGeometryBounds(geo));
 				.catch(err => console.log(err))
 			},
 			startDrawing(ev) {
-console.log('startDrawing ____ ', ev);
-				const { map, drawstart, layerID } = this.get();
+				const { map, drawstart, layerID, checked } = this.get();
 				this.set({drawstart: !drawstart});
 				if(!drawstart) {
+					map.gmxDrawing.clear();
 					map.gmxDrawing.create('Polygon');
 					map.gmxDrawing.on('drawstop', (e) => {
 						this.set({drawstart: false});
-						// map._gmxEventsManager._drawstart = true;
 						this.selectFeaturesWithDrawing(layerID, e.object.toGeoJSON().geometry)
 							.then(json => {
-console.log('selectFeaturesWithDrawing ____ ', json);
-								// const { Completed, ErrorInfo } = json.Result;
-								// if (ErrorInfo) {
-									// clearInterval(interval);
-									// reject(json);
-								// } else if (Completed) {
-									// clearInterval(interval);
-									// resolve(json);
-								// }
+								if (json.Status === 'ok' && json.Result) {
+									var newChecked = json.Result.values.reduce((a, v) => {
+										a[v] = true;
+										return a;
+									}, {});
+									this.root.set({checked: L.extend(newChecked, checked)});
+									// console.log('checked ____ ', checked);
+								}
 							});
-						// props.ondrawstop(e);
-						// this.setState({
-							// drawing: e.object
-						// });
-						// this.clearActive();
 					}, this);
 					map._gmxEventsManager._drawstart = true;
 				}
@@ -237,15 +240,12 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 				return arr.reduce((a, v, i) => { a[v] = i; return a; }, {});
 			},
  			loadFeatures(id) {
-				// let url = serverBase + 'rest/ver1/layers/'+ id +'/search?WrapStyle=None';
-				// return fetch(url, {
-				return fetch(`${serverBase}VectorLayer/Search.ashx?layer=${id}&geometry=true&out_cs =EPSG:4326&WrapStyle=None`, {
+				return fetch(`${serverBase}VectorLayer/Search.ashx?layer=${id}&geometry=true&out_cs=EPSG:4326&WrapStyle=None`, {
 						mode: 'cors',
 						credentials: 'include'
 					})
 					.then(res => res.json())
 					.then(json => {
-// console.log(json)
 						if (json.Status === 'ok') {
 							let cols = json.Result.fields;
 							this.set({cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values});
@@ -254,18 +254,6 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 					.catch(err => console.log(err));
 			},
 			getReportsCount() {
-				// const url = `${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`,
-					// options = {
-						// body: JSON.stringify({WrapStyle: 'None'}),
-						// method: 'post',
-						// mode: 'cors',
-						// credentials: 'include'
-						// ,
-						// headers: {
-							// 'Accept': 'application/json'
-						// }
-					// };
-
 				return fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None`, {
 						mode: 'cors',
 						credentials: 'include'
@@ -278,6 +266,10 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 						}
 					})
 					.catch(err => console.log(err));
+			},
+			styleHook(it) {
+				const { checked } = this.get();
+				return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
 			}
 		},
 		
@@ -285,7 +277,6 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 			this.changedParams = {};
 			const { meta, gmxMap } = this.get();
 			this.getReportsCount();
-// console.log('in oncreate', gmxMap);
 			let layerIds = [], quadrantIds = [];
 			gmxMap.layers.forEach((it) => {
 				if (it.getGmxProperties) {
@@ -316,14 +307,18 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 		},
 
 		onstate({ changed, current, previous }) {
-// console.log('in onstate', this);
+			// console.log('in onstate', changed);
 			if (changed.layerID && current.layerID) {
+				const { gmxMap, checked } = this.get();
+				this.currentLayer = gmxMap.layersByID[current.layerID];
+				if (this.currentLayer) {
+					this.currentLayer.setStyleHook(this.styleHook.bind(this));
+				}
 				this.loadFeatures(current.layerID);
 			}
-			// if (changed.reportType) {
-				// this.setField('reportType', {value: current.reportType});
-				//this.changedParams[key] = data;
-			// }
+			if (changed.checked && this.currentLayer) {
+				this.currentLayer.repaint();
+			}
 		}
 /*
 		// preload({ params, query }) {
@@ -364,7 +359,7 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 	}
 </script>
 
-<div data-reactroot="" class="forest-plugin-container">
+<div class="forest-plugin-container">
 	<div class="forest-plugin-header">Отчет об использовании лесов</div>
 	<div class="forest-plugin-header">Лимит отчетов: {limit}</div>
 	<div class="gmx-select-layer-container">
@@ -415,8 +410,23 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 					<SelectInput key="site" cols="{cols}" />
 					<SelectInput key="recoveryEventType" cols="{cols}" />
 					<SelectInput key="siteArea" cols="{cols}" />
-					<SelectInput key="scale" cols="{cols}" />
 
+					<!-- SelectInput key="scale" cols="{cols}" /> -->
+					<div class="gmx-sidebar-labeled-block">
+						<div class="gmx-sidebar-label">{params.reportType.title}</div>
+						<select on:change="setNodeField(this, true)" name="scale" class="gmx-sidebar-select-large">
+								<option value="5000">1:5000</option>
+								<option value="10000">1:10000</option>
+								<option value="15000">1:15000</option>
+								<option value="20000">1:20000</option>
+								<option value="25000">1:25000</option>
+								<option value="30000">1:30000</option>
+								<option value="35000">1:35000</option>
+								<option value="40000">1:40000</option>
+								<option value="45000">1:45000</option>
+								<option value="50000">1:50000</option>
+						</select>
+					</div>
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label">{params.quadrantLayerId.title || params.quadrantLayerId.value}</div>
 						<select on:change="setNodeField(this, true)" name="quadrantLayerId" class="gmx-sidebar-select-large">
@@ -440,7 +450,7 @@ console.log('selectFeaturesWithDrawing ____ ', json);
 				<div>
 					<div class="gmx-geometry-select-container"><button on:click="startDrawing(event)" class="gmx-sidebar-button">{drawstart ? 'Полигон рисуется' :'Выделите участки полигоном'}</button></div>
 					<div class="gmx-sidebar-label-medium">Выделено: {Object.keys(checked).length} / {layerItems.length}</div>
-					<Table items="{layerItems}" hashCols="{hashCols}" />
+					<Table items="{layerItems}" hashCols="{hashCols}" bind:checked />
 				</div>
 			</div>
 			<div class="gmx-button-container">

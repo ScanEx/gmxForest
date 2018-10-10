@@ -11,18 +11,19 @@ export default {
 			pageFrom: 0,
 			tableItems: [],
 			items: [],
-			checked: {},
+			// checked: {},
 			hashCols: []
 		};
 	},
 	methods: {
 		sort(key) {
 			const { sortType } = this.get();
+			// console.log('sort', sortType);
 			this.set({sortType: sortType === 'desc' ? 'asc' : 'desc', sortKey: key});
 			this.setCurrPage(1);
 		},
 		checkReverse(ev) {
-// console.log('checkReverse', ev.ctrlKey);
+			// console.log('checkReverse', ev.ctrlKey);
 
 			let nChecked = {};
 			let ctrlKey = ev.ctrlKey;
@@ -39,9 +40,10 @@ export default {
 				});
 			}
 			this.set({checked: nChecked});
-			this.root.set({checked: nChecked});
+			// this.root.set({checked: nChecked});
 		},
 		checkMe(id) {
+			// console.log('checkMe', id);
 			const { checked } = this.get();
 			if (checked[id]) {
 				delete checked[id];
@@ -49,7 +51,7 @@ export default {
 				checked[id] = true;
 			}
 			this.set({checked: checked});
-			this.root.set({checked: checked});
+			// this.root.set({checked: checked});
 		},
 		sortMe(arr, sortKey, hashCols, sortType) {
 			let nm = hashCols[sortKey];
@@ -70,6 +72,7 @@ export default {
 			this.root.viewItem(id);
 		},
 		setCurrPage(nm) {
+			// console.log('setCurrPage', nm);
 			const { items, hashCols, pageCurr, pagesize, sortKey, sortType } = this.get();
 			nm = nm || pageCurr;
 			const beg = pagesize * (nm - 1);
@@ -79,11 +82,19 @@ export default {
 
 			const cnt = items.length / pagesize;
 			const pf = Math.floor(cnt);
+			// console.log('setCurrPage1', nm, arr, cnt);
 			this.set({tableItems: arr, pageCurr: nm, pageFrom: pf + (cnt > pf ? 1 : 0)});
 		}
 	},
 	onstate({ changed, current, previous }) {
-		this.setCurrPage();
+		// console.log('Table in onstate', changed, current);
+		if (changed.items && current.items.length) {
+			this.setCurrPage();
+		}
+	// },
+
+	// onupdate({ changed, current, previous }) {
+		// console.log('Table  in onupdate', changed);
 	}
 };
 </script>
@@ -158,7 +169,7 @@ export default {
 }
 .tableContect th.c3 {
 	border-right: inherit;
-	width: 50px;
+	width: 60px;
 }
 .tableContect span.status {
     width: 8px;
@@ -195,10 +206,61 @@ export default {
 .tableContect .pagination .pageInfo {
 	margin: 2px;
 }
+
+.tableContect th.sorting:after,
+.tableContect th.sorting-asc:after  {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+	transform: rotate(90deg);
+	direction: ltr;
+    -webkit-font-smoothing: antialiased;
+	content: "arrow_back";
+	visibility: hidden;
+/*
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 16px;
+	line-height: 1;
+	letter-spacing: normal;
+	text-transform: none;
+	display: inline-block;
+	word-wrap: normal;
+	-webkit-font-feature-settings: 'liga';
+	-webkit-font-smoothing: antialiased;
+	content: "arrow_back";
+	transform: rotate(90deg);
+	visibility: hidden;
+	vertical-align: middle;
+	*/
+}
 .tableContect th.sorting-asc,
 .tableContect th.sorting-desc {
 	color: rgba(0, 0, 0, 0.87);
 }
+
+.tableContect th.sorting-asc:after {
+	transform: rotate(-90deg);
+}
+
+.tableContect th.sorting:hover,
+.tableContect th.sorting-asc:after,
+.tableContect th.sorting-desc:after {
+	visibility: visible;
+}
+/*
+.tableContect th.sorting-desc .material-icons {
+	content: "arrow_forward";
+}
+
 .tableContect th.sorting:after,
 .tableContect th.sorting-asc:after  {
 	font-family: 'Material Icons';
@@ -213,7 +275,7 @@ export default {
 	-webkit-font-feature-settings: 'liga';
 	-webkit-font-smoothing: antialiased;
 	content: "arrow_back";
-	-webkit-transform: rotate(90deg);
+	transform: rotate(90deg);
 	visibility: hidden;
 	vertical-align: middle;
 }
@@ -225,4 +287,5 @@ export default {
 .tableContect th.sorting-desc:after {
 	content: "arrow_forward";
 }
+*/
 </style>

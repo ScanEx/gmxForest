@@ -11,8 +11,8 @@ export default {
 	output: {
 		sourcemap: true,
 		format: 'iife',
-		name: 'forest',
-		file: 'public/forest.js'
+		name: 'gmxForest',
+		file: 'public/gmxForest.js'
 	},
 	plugins: [
 		svelte({
@@ -25,7 +25,7 @@ export default {
 			// we'll extract any component CSS out into
 			// a separate file — better for performance
 			css: css => {
-				css.write('public/forest.css');
+				css.write('public/gmxForest.css');
 			}
 		}),
 
