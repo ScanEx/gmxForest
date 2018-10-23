@@ -11,7 +11,6 @@
 		locale: window.language === 'eng' ? 'en' : 'ru',
 
         afterViewer: function (params, map) {
-// console.log('afterViewer', params, map)
 			publicInterface.params = params;
 			publicInterface.map = map;
 
@@ -26,13 +25,11 @@
 				prefix + '.css',
 				publicInterface.path + 'global.css'
 			].map(function(href) {
-console.log('load', href)
 				return L.gmxUtil.requestLink(href);
 			})).then(function() {
 			
 				var iconSidebar =  window.iconSidebarWidget,
 					createTabFunction = window.createTabFunction;
-console.log('load______', iconSidebar)
 				if (iconSidebar) {
 					var menuId = 'forestView',
 						node = null,
@@ -51,6 +48,7 @@ console.log('load______', iconSidebar)
 										target: node,
 										data: {
 											// meta: true,		// фильтровать списки слоев по Meta
+											format: Number(publicInterface.params.format || 2),
 											map: publicInterface.map,
 											gmxMap: nsGmx.gmxMap
 											,

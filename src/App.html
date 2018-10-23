@@ -24,6 +24,7 @@
 					site: {value: 'Делянка'}
 				},
 				layerItems: [],
+				format: 2,
 				limit: 0,
 				report: false,
 				drawstart: false,
@@ -58,7 +59,7 @@
 				}
 			},
 			sendReport() {
-				const {checked, layerItems, hashCols, params, layerID, gmxMap} = this.get();
+				const {checked, layerItems, hashCols, params, format, layerID, gmxMap} = this.get();
 				let groupRequest = [],
 					features = [],
 					satLayers = [];
@@ -89,7 +90,7 @@
 				layerItems.forEach((it) => {
 					let id = it[hashCols.gmx_id];
 					if (checked[id]) {
-						let data = {featureID: id};
+						let data = {featureID: id, format: format};
 						// Object.entries(params).forEach(([key, val]) => {
 						for (let key in params) {
 							let val = params[key];
