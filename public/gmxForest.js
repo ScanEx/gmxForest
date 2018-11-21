@@ -1,2 +1,2512 @@
-var gmxForest=function(t){"use strict";function e(){}function a(t,e){for(var a in e)t[a]=e[a];return t}function n(t,e){for(var a in e)t[a]=1;return t}function s(t,e){return 0===e&&t(),function(){--e||t()}}function r(t){t()}function o(t,e){t.appendChild(e)}function l(t,e,a){t.insertBefore(e,a)}function i(t){t.parentNode.removeChild(t)}function c(t,e){for(var a=0;a<t.length;a+=1)t[a]&&t[a].d(e)}function u(t){return document.createElement(t)}function d(t){return document.createTextNode(t)}function h(){return document.createComment("")}function m(t,e,a,n){t.addEventListener(e,a,n)}function v(t,e,a,n){t.removeEventListener(e,a,n)}function g(t,e,a){null==a?t.removeAttribute(e):t.setAttribute(e,a)}function f(t,e){t.data=""+e}function p(){return Object.create(null)}function _(t){t._lock=!0,x(t._beforecreate),x(t._oncreate),x(t._aftercreate),t._lock=!1}function y(t,e){t._handlers=p(),t._slots=p(),t._bind=e._bind,t._staged={},t.options=e,t.root=e.root||t,t.store=e.store||t.root.store,e.root||(t._beforecreate=[],t._oncreate=[],t._aftercreate=[])}function x(t){for(;t&&t.length;)t.shift()()}var k={destroy:function(t){this.destroy=e,this.fire("destroy"),this.set=e,this._fragment.d(!1!==t),this._fragment=null,this._state={}},get:function(){return this._state},fire:function(t,e){var a=t in this._handlers&&this._handlers[t].slice();if(a)for(var n=0;n<a.length;n+=1){var s=a[n];if(!s.__calling)try{s.__calling=!0,s.call(this,e)}finally{s.__calling=!1}}},on:function(t,e){var a=this._handlers[t]||(this._handlers[t]=[]);return a.push(e),{cancel:function(){var t=a.indexOf(e);~t&&a.splice(t,1)}}},set:function(t){this._set(a({},t)),this.root._lock||_(this.root)},_recompute:e,_set:function(t){var e=this._state,n={},s=!1;for(var r in t=a(this._staged,t),this._staged={},t)this._differs(t[r],e[r])&&(n[r]=s=!0);s&&(this._state=a(a({},e),t),this._recompute(n,this._state),this._bind&&this._bind(n,this._state),this._fragment&&(this.fire("state",{changed:n,current:this._state,previous:e}),this._fragment.p(n,this._state),this.fire("update",{changed:n,current:this._state,previous:e})))},_stage:function(t){a(this._staged,t)},_mount:function(t,e){this._fragment[this._fragment.i?"i":"m"](t,e||null)},_differs:function(t,e){return t!=t?e==e:t!==e||t&&"object"==typeof t||"function"==typeof t}};var b={sort:function(t){var e=this.get().sortType;this.set({sortType:"desc"===e?"asc":"desc",sortKey:t}),this.setCurrPage(1)},checkReverse:function(t){var e={},a=t.ctrlKey,n=t.target.checked;if(a||n){var s=this.get(),r=s.items,o=s.hashCols,l=s.checked,i=o.gmx_id;r.forEach(function(t){var n=t[i];a&&l[n]||(e[n]=!0)})}this.set({checked:e})},checkMe:function(t){var e=this.get().checked;e[t]?delete e[t]:e[t]=!0,this.set({checked:e})},sortMe:function(t,e,a,n){var s=a[e];return t.sort(function(t,e){var a=e[s],r=t[s];return(a<r?-1:a>r?1:0)*("desc"===n?-1:1)})},pageTo:function(t){var e=this.get().pageFrom;return this.set({pageCurr:t}),t=t<1?1:t>e?e:t,this.setCurrPage(t),t},viewItem:function(t){this.root.viewItem(t)},setCurrPage:function(t){var e=this.get(),a=e.items,n=e.hashCols,s=e.pageCurr,r=e.pagesize,o=e.sortKey,l=e.sortType,i=r*((t=t||s)-1),c=(o?this.sortMe(a,o,n,l):a).slice(i,i+r),u=a.length/r,d=Math.floor(u);this.set({tableItems:c,pageCurr:t,pageFrom:d+(u>d?1:0)})}};function N(t){var e=t.changed,a=t.current;t.previous;e.items&&a.items.length&&this.setCurrPage()}function I(t){var e=this._svelte,a=e.component,n=e.ctx;a.viewItem(n.it[n.hashCols.gmx_id])}function j(t){var e=this._svelte,a=e.component,n=e.ctx;a.checkMe(n.it[n.hashCols.gmx_id])}function C(t,e,a){var n=Object.create(t);return n.it=e[a],n}function T(t,e){var a,n,s,r,c,h,p,_,y,x,k,b,N,C=e.it[e.hashCols.gmx_id];return{c:function(){a=u("tr"),n=u("td"),s=u("input"),c=d("\r\n\t\t\t"),h=u("td"),p=u("span"),_=d(C),y=d("\r\n\t\t\t"),x=u("td"),k=u("span"),(N=u("span")).innerHTML='<svg class="svgIcon svelte-1jj6zh"><use xlink:href="#zoom-to-feature"></use></svg>',s._svelte={component:t,ctx:e},m(s,"change",j),s.checked=r=e.checked[e.it[e.hashCols.gmx_id]],g(s,"type","checkbox"),s.className="svelte-1jj6zh",n.className="c1 svelte-1jj6zh",h.className="c2 svelte-1jj6zh",k.className=b="status "+(e.it[e.hashCols.FRSTAT]>0?"checked":"")+" svelte-1jj6zh",N._svelte={component:t,ctx:e},m(N,"click",I),N.className="leaflet-gmx-iconSvg svgIcon svelte-1jj6zh",x.className="c3",a.className="item svelte-1jj6zh"},m:function(t,e){l(t,a,e),o(a,n),o(n,s),o(a,c),o(a,h),o(h,p),o(p,_),o(a,y),o(a,x),o(x,k),o(x,N)},p:function(t,a){e=a,s._svelte.ctx=e,(t.checked||t.tableItems||t.hashCols)&&r!==(r=e.checked[e.it[e.hashCols.gmx_id]])&&(s.checked=r),(t.tableItems||t.hashCols)&&C!==(C=e.it[e.hashCols.gmx_id])&&f(_,C),(t.tableItems||t.hashCols)&&b!==(b="status "+(e.it[e.hashCols.FRSTAT]>0?"checked":"")+" svelte-1jj6zh")&&(k.className=b),N._svelte.ctx=e},d:function(t){t&&i(a),v(s,"change",j),v(N,"click",I)}}}function w(t){var e=this;y(this,t),this._state=a({sortType:"desc",sortKey:"gmx_id",reverse:!1,pageCurr:1,pagesize:15,pageFrom:0,tableItems:[],items:[],hashCols:[]},t.data),this._intro=!!t.intro,this._handlers.state=[N],N.call(this,{changed:n({},this._state),current:this._state}),this._fragment=function(t,e){var a,n,s,h,p,_,y,x,k,b,N,I,j,w,F,D,L,z,S,q,R,O,P,M,V,A,E,G,K,H,W,B,U;function J(e){t.checkReverse(e)}function Q(e){t.sort("gmx_id")}function X(e){t.sort("FRSTAT")}for(var Y=e.tableItems,Z=[],$=0;$<Y.length;$+=1)Z[$]=T(t,C(e,Y,$));function tt(a){t.pageTo(e.pageCurr-1)}function et(e){t.pageTo(this.value)}function at(a){t.pageTo(e.pageCurr+1)}return{c:function(){a=u("div"),n=u("table"),s=u("tr"),h=u("th"),p=u("input"),_=d("\r\n\t\t\t"),y=u("th"),(x=u("span")).textContent="Id",b=d("\r\n\t\t\t"),N=u("th"),(I=u("span")).textContent="Статус",w=d("\r\n");for(var t=0;t<Z.length;t+=1)Z[t].c();F=d("\r\n\t\t"),D=u("tr"),L=u("td"),z=u("button"),S=d("назад"),R=d("\r\n\t\t\t\t"),O=u("span"),P=d("Стр. "),M=u("input"),V=d(" из "),A=d(e.pageFrom),E=d("\r\n\t\t\t\t"),G=u("button"),K=d("вперед"),W=d("\r\n\t\t\t\t"),(B=u("div")).innerHTML='<div class="-loading-inner"></div>',m(p,"click",J),p.checked=e.reverse,g(p,"type","checkbox"),p.value="on",p.className="svelte-1jj6zh",h.className="c1 svelte-1jj6zh",m(y,"click",Q),y.className=k="c2 sorting \r\n\t\t\t\t\t"+("gmx_id"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\r\n\t\t\t\t\t svelte-1jj6zh",m(N,"click",X),N.className=j="c3 sorting \r\n\t\t\t\t\t"+("FRSTAT"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\r\n\t\t\t\t\t svelte-1jj6zh",s.className="head svelte-1jj6zh",m(z,"click",tt),z.disabled=q=1===e.pageCurr,m(M,"change",et),g(M,"type","number"),M.value=e.pageCurr,M.className="svelte-1jj6zh",O.className="pageInfo svelte-1jj6zh",m(G,"click",at),G.disabled=H=e.pageFrom===e.pageCurr,B.className="-loading",L.colSpan="3",L.className="svelte-1jj6zh",D.className="pagination svelte-1jj6zh",n.className="table svelte-1jj6zh",a.className="tableContect svelte-1jj6zh"},m:function(t,e){l(t,a,e),o(a,n),o(n,s),o(s,h),o(h,p),o(s,_),o(s,y),o(y,x),o(s,b),o(s,N),o(N,I),o(n,w);for(var r=0;r<Z.length;r+=1)Z[r].m(n,null);o(n,F),o(n,D),o(D,L),o(L,z),o(z,S),o(L,R),o(L,O),o(O,P),o(O,M),o(O,V),o(O,A),o(L,E),o(L,G),o(G,K),o(L,W),o(L,B),U=!0},p:function(a,s){if(e=s,a.reverse&&(p.checked=e.reverse),(a.sortKey||a.sortType)&&k!==(k="c2 sorting \r\n\t\t\t\t\t"+("gmx_id"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\r\n\t\t\t\t\t svelte-1jj6zh")&&(y.className=k),(a.sortKey||a.sortType)&&j!==(j="c3 sorting \r\n\t\t\t\t\t"+("FRSTAT"===e.sortKey?"desc"===e.sortType?"sorting-desc":"sorting-asc":"")+"\r\n\t\t\t\t\t svelte-1jj6zh")&&(N.className=j),a.tableItems||a.hashCols||a.checked){Y=e.tableItems;for(var r=0;r<Y.length;r+=1){var o=C(e,Y,r);Z[r]?Z[r].p(a,o):(Z[r]=T(t,o),Z[r].c(),Z[r].m(n,F))}for(;r<Z.length;r+=1)Z[r].d(1);Z.length=Y.length}a.pageCurr&&q!==(q=1===e.pageCurr)&&(z.disabled=q),a.pageCurr&&(M.value=e.pageCurr),a.pageFrom&&f(A,e.pageFrom),(a.pageFrom||a.pageCurr)&&H!==(H=e.pageFrom===e.pageCurr)&&(G.disabled=H)},i:function(t,e){U||this.m(t,e)},o:r,d:function(t){t&&i(a),v(p,"click",J),v(y,"click",Q),v(N,"click",X),c(Z,t),v(z,"click",tt),v(M,"change",et),v(G,"click",at)}}}(this,this._state),this.root._oncreate.push(function(){e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),_(this)),this._intro=!0}a(w.prototype,k),a(w.prototype,b);function F(t){var e=t.changed,a=t.current;t.previous;if(e.clicked)if(a.clicked){var n=this.get().cols;this.setSelection(n[0])}else{var s=this.get().value;this.setValue(s)}}function D(t,e,a){var n=Object.create(t);return n.it=e[a],n}function z(t,e){var a;function n(e){t.setValue(e.target.value)}return{c:function(){m(a=u("input"),"change",n),g(a,"type","text"),a.className="gmx-sidebar-input-with-addon svelte-1amu9hw",a.name=e.key,a.value=e.value},m:function(t,e){l(t,a,e)},p:function(t,e){t.key&&(a.name=e.key),t.value&&(a.value=e.value)},d:function(t){t&&i(a),v(a,"change",n)}}}function S(t,e){for(var a,n=e.cols,s=[],r=0;r<n.length;r+=1)s[r]=q(t,D(e,n,r));function o(e){t.setSelection(this.options[this.selectedIndex].value)}return{c:function(){a=u("select");for(var t=0;t<s.length;t+=1)s[t].c();m(a,"change",o),a.name=e.key,a.className="gmx-sidebar-select-with-addon svelte-1amu9hw"},m:function(t,e){l(t,a,e);for(var n=0;n<s.length;n+=1)s[n].m(a,null)},p:function(e,r){if(e.cols||e.colName){n=r.cols;for(var o=0;o<n.length;o+=1){var l=D(r,n,o);s[o]?s[o].p(e,l):(s[o]=q(t,l),s[o].c(),s[o].m(a,null))}for(;o<s.length;o+=1)s[o].d(1);s.length=n.length}e.key&&(a.name=r.key)},d:function(t){t&&i(a),c(s,t),v(a,"change",o)}}}function q(t,e){var a,n,s,r,c=e.it;return{c:function(){a=u("option"),n=d(c),a.__value=s=e.it,a.value=a.__value,a.selected=r=e.colName===e.it},m:function(t,e){l(t,a,e),o(a,n)},p:function(t,e){t.cols&&c!==(c=e.it)&&f(n,c),t.cols&&s!==(s=e.it)&&(a.__value=s),a.value=a.__value,(t.colName||t.cols)&&r!==(r=e.colName===e.it)&&(a.selected=r)},d:function(t){t&&i(a)}}}function R(t){var e=this;y(this,t),this._state=a({title:"",value:"",colName:"",clicked:!1,cols:[]},t.data),this._intro=!!t.intro,this._handlers.state=[F],F.call(this,{changed:n({},this._state),current:this._state}),this._fragment=function(t,e){var a,n,s,c,h,g,p,_,y;function x(t){return t.clicked?S:z}var k=x(e),b=k(t,e);function N(a){t.set({clicked:!e.clicked})}return{c:function(){a=u("div"),n=u("div"),s=d(e.title),c=d("\r\n\t"),h=u("div"),g=u("div"),b.c(),p=d("\r\n\t\t\t"),_=u("button"),n.className="gmx-sidebar-label svelte-1amu9hw",m(_,"click",N),_.className="gmx-addon-button svelte-1amu9hw",_.title="выбрать из таблицы атрибутов",a.className="gmx-sidebar-labeled-block svelte-1amu9hw"},m:function(t,e){l(t,a,e),o(a,n),o(n,s),o(a,c),o(a,h),o(h,g),b.m(g,null),o(g,p),o(g,_),y=!0},p:function(a,n){e=n,a.title&&f(s,e.title),k===(k=x(e))&&b?b.p(a,e):(b.d(1),(b=k(t,e)).c(),b.m(g,p))},i:function(t,e){y||this.m(t,e)},o:r,d:function(t){t&&i(a),b.d(),v(_,"click",N)}}}(this,this._state),this.root._oncreate.push(function(){(function(){var t=this.get().key,e=this.root.get().params[t];void 0===e.title&&(e.title=e.value),this.set(e)}).call(e),e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),_(this)),this._intro=!0}a(R.prototype,k),a(R.prototype,{setSelection:function(t){var e=this.get().key;this.root.setField(e,{value:"",field:t})},setValue:function(t){var e=this.get().key;this.root.setField(e,{value:t,field:""})}});var O=window.serverBase||"//maps.kosmosnimki.ru/";var P={viewItem:function(t){for(var e=this.get(),a=e.map,n=e.layerItems,s=e.hashCols,r=0,o=n.length;r<o;r++){var l=n[r];if(t===l[s.gmx_id]){var i=l[s.geomixergeojson],c=L.gmxUtil.getGeometryBounds(i),u=L.latLngBounds([[c.min.y,c.min.x],[c.max.y,c.max.x]]);a.fitBounds(u);break}}},sendReport:function(){var t=this,e=this.get(),a=e.checked,n=e.layerItems,s=e.hashCols,r=e.params,o=e.format,l=e.layerID,i=[],c=[],u=[];return e.gmxMap.layers.forEach(function(t){if(t.getGmxProperties&&t._map){var e=t.getGmxProperties(),a=e.MetaProperties||{},n={layerId:e.name,type:"оптическая"};if(e.Temporal){var s=t.getDateInterval();s.beginDate&&(n.beginDate=s.beginDate.getTime()/1e3),s.endDate&&(n.endDate=s.endDate.getTime()/1e3)}a.type&&(n.type=a.type.Value),a.system&&(n.system=a.system.Value),a.resolution&&(n.resolution=a.resolution.Value),u.push(n)}}),n.forEach(function(e){var n=e[s.gmx_id];if(a[n]){var l={featureID:n,format:o};for(var d in r){var h=r[d],m=t.changedParams[d]||{};l[d]="string"==typeof m?m:m.field?e[s[m.field]]:m.value||h.value}l.satLayers=u,i.push(l),c.push({action:"update",id:n,properties:{FRSTAT:2}})}}),this.set({report:!0}),fetch(O+"Plugins/ForestReport/ForestReportImage",{method:"post",headers:{"Content-type":"application/x-www-form-urlencoded"},body:L.gmxUtil.getFormData({WrapStyle:"None",groupRequest:i}),mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(e){"ok"===e.Status&&t.chkTask(e.Result.TaskID).then(function(e){if("ok"===e.Status){var a=e.Result.Result.downloadFile;a.split("name=")[1];window.open(O+a,"_self"),t.modifyVectorObjects(l,c),t.set({report:!1})}}).catch(function(t){return console.log(t)})}).catch(function(t){return console.log(t)})},chkTask:function(t){return new Promise(function(e,a){var n=setInterval(function(){fetch(O+"AsyncTask.ashx?WrapStyle=None&TaskID="+t,{mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(t){var s=t.Result,r=s.Completed;s.ErrorInfo?(clearInterval(n),a(t)):r&&(clearInterval(n),e(t))})},2e3)})},modifyVectorObjects:function(t,e){var a={WrapStyle:"None",LayerName:t,Objects:JSON.stringify(e)};return fetch(O+"VectorLayer/ModifyVectorObjects.ashx?"+L.gmxUtil.getFormData(a),{mode:"cors",credentials:"include",headers:{Accept:"application/json"}}).then(function(t){return t.json()}).catch(function(t){return console.log(t)})},selectFeaturesWithDrawing:function(t,e){var a={WrapStyle:"None",layer:t,columns:'[{"Value":"[gmx_id]"}]',page:0,query:"STIntersects([gmx_geometry], GeometryFromGeoJson('"+JSON.stringify(e)+"', 4326))"};return fetch(O+"VectorLayer/Search.ashx?"+L.gmxUtil.getFormData(a),{mode:"cors",credentials:"include",headers:{Accept:"application/json"}}).then(function(t){return t.json()}).catch(function(t){return console.log(t)})},startDrawing:function(t){var e=this,a=this.get(),n=a.map,s=a.drawstart,r=a.layerID,o=a.checked;this.set({drawstart:!s}),s||(n.gmxDrawing.clear(),n.gmxDrawing.create("Polygon"),n.gmxDrawing.on("drawstop",function(t){e.set({drawstart:!1}),e.selectFeaturesWithDrawing(r,t.object.toGeoJSON().geometry).then(function(t){if("ok"===t.Status&&t.Result){var a=t.Result.values.reduce(function(t,e){return t[e]=!0,t},{});e.root.set({checked:L.extend(a,o)})}})},this),n._gmxEventsManager._drawstart=!0)},setField:function(t,e){this.changedParams[t]=e},setNodeField:function(t,e){var a,n=t.options?t.options[t.selectedIndex].value:t.value;this.setField(t.name,n),e&&this.set(((a={})[t.name]=n,a))},colsToHash:function(t){return t.reduce(function(t,e,a){return t[e]=a,t},{})},loadFeatures:function(t){var e=this;return fetch(O+"VectorLayer/Search.ashx?layer="+t+"&geometry=true&out_cs=EPSG:4326&WrapStyle=None",{mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(t){if("ok"===t.Status){var a=t.Result.fields;e.set({cols:a,hashCols:e.colsToHash(a),layerItems:t.Result.values})}}).catch(function(t){return console.log(t)})},getReportsCount:function(){var t=this;return fetch(O+"plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None",{mode:"cors",credentials:"include"}).then(function(t){return t.json()}).then(function(e){if("ok"===e.Status){var a=e.Result.limit-e.Result.used;t.set({limit:a>0?a:0})}}).catch(function(t){return console.log(t)})},styleHook:function(t){return this.get().checked[t.id]?{strokeStyle:"#00ffff"}:{}}};function M(t){var e=t.changed,a=t.current;t.previous;if(e.layerID&&a.layerID){var n=this.get(),s=n.gmxMap;n.checked;this.currentLayer=s.layersByID[a.layerID],this.currentLayer&&this.currentLayer.setStyleHook(this.styleHook.bind(this)),this.loadFeatures(a.layerID)}e.checked&&this.currentLayer&&this.currentLayer.repaint()}function V(t,e,a){var n=Object.create(t);return n.it=e[a],n}function A(t,e,a){var n=Object.create(t);return n.it=e[a],n}function E(t,e,a){var n=Object.create(t);return n.it=e[a],n}function G(t,e){for(var a,n=e.layerIds,s=[],r=0;r<n.length;r+=1)s[r]=K(t,E(e,n,r));return{c:function(){for(var t=0;t<s.length;t+=1)s[t].c();a=h()},m:function(t,e){for(var n=0;n<s.length;n+=1)s[n].m(t,e);l(t,a,e)},p:function(e,r){if(e.layerIds||e.layerID){n=r.layerIds;for(var o=0;o<n.length;o+=1){var l=E(r,n,o);s[o]?s[o].p(e,l):(s[o]=K(t,l),s[o].c(),s[o].m(a.parentNode,a))}for(;o<s.length;o+=1)s[o].d(1);s.length=n.length}},d:function(t){c(s,t),t&&i(a)}}}function K(t,e){var a,n,s,r,c=e.it.title;return{c:function(){a=u("option"),n=d(c),a.__value=s=e.it.id,a.value=a.__value,a.selected=r=e.layerID===e.it.id,a.className="svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n)},p:function(t,e){t.layerIds&&c!==(c=e.it.title)&&f(n,c),t.layerIds&&s!==(s=e.it.id)&&(a.__value=s),a.value=a.__value,(t.layerID||t.layerIds)&&r!==(r=e.layerID===e.it.id)&&(a.selected=r)},d:function(t){t&&i(a)}}}function H(t,e){for(var a,n,r,h,p,_,y,x,k,b,N,I,j,C,T,F,D,L,z,S,q,O,P,M,V,E,G,K,H,J,Y,Z,$,tt,et,at,nt,st,rt,ot,lt,it,ct,ut,dt,ht,mt,vt,gt,ft,pt,_t,yt,xt,kt,bt,Nt,It,jt,Ct,Tt,wt,Ft,Dt,Lt,zt,St,qt,Rt,Ot,Pt,Mt,Vt,At,Et=e.params.reportType.title,Gt=e.params.organizationName.title||e.params.organizationName.value,Kt=e.params.inn.title||e.params.inn.value,Ht=e.params.reportType.title,Wt=e.params.quadrantLayerId.title||e.params.quadrantLayerId.value,Bt=e.drawstart?"Полигон рисуется":"Выделите участки полигоном",Ut=e.Object.keys(e.checked).length,Jt=e.layerItems.length,Qt={},Xt=e.params.reportType.options,Yt=[],Zt=0;Zt<Xt.length;Zt+=1)Yt[Zt]=W(t,A(e,Xt,Zt));function $t(e){t.setNodeField(this,!0)}var te="о восстановлении лесов"!==e.reportType&&B(t,e);function ee(e){t.setNodeField(this)}function ae(e){t.setNodeField(this)}var ne={key:"region",cols:e.cols},se=new R({root:t.root,store:t.store,data:ne}),re={key:"forestry",cols:e.cols},oe=new R({root:t.root,store:t.store,data:re}),le={key:"sectionForestry",cols:e.cols},ie=new R({root:t.root,store:t.store,data:le}),ce={key:"quadrant",cols:e.cols},ue=new R({root:t.root,store:t.store,data:ce}),de={key:"stratum",cols:e.cols},he=new R({root:t.root,store:t.store,data:de}),me={key:"site",cols:e.cols},ve=new R({root:t.root,store:t.store,data:me}),ge={key:"recoveryEventType",cols:e.cols},fe=new R({root:t.root,store:t.store,data:ge}),pe={key:"siteArea",cols:e.cols},_e=new R({root:t.root,store:t.store,data:pe});function ye(e){t.setNodeField(this,!0)}var xe=e.quadrantIds&&U(t,e);function ke(e){t.setNodeField(this,!0)}function be(e){t.startDrawing(e)}var Ne={items:e.layerItems,hashCols:e.hashCols};void 0!==e.checked&&(Ne.checked=e.checked,Qt.checked=!0);var Ie=new w({root:t.root,store:t.store,data:Ne,_bind:function(e,a){var n={};!Qt.checked&&e.checked&&(n.checked=a.checked),t._set(n),Qt={}}});function je(t){return t.report?X:Q}t.root._beforecreate.push(function(){Ie._bind({checked:1},Ie.get())});var Ce=je(e),Te=Ce(t,e);return{c:function(){a=u("div"),(n=u("div")).textContent="Ввод информации",r=d("\r\n\t\t\t"),h=u("div"),p=u("div"),_=u("div"),y=u("div"),x=d(Et),k=d("\r\n\t\t\t\t\t\t"),b=u("select");for(var t=0;t<Yt.length;t+=1)Yt[t].c();N=d("\r\n"),te&&te.c(),I=d("\r\n\t\t\t\t\t"),j=u("div"),C=u("div"),T=d(Gt),F=d("\r\n\t\t\t\t\t\t"),D=u("input"),z=d("\r\n\t\t\t\t\t"),S=u("div"),q=u("div"),O=d(Kt),P=d("\r\n\t\t\t\t\t\t"),M=u("input"),E=d("\r\n\r\n\t\t\t\t\t"),se._fragment.c(),G=d("\r\n\t\t\t\t\t"),oe._fragment.c(),K=d("\r\n\t\t\t\t\t"),ie._fragment.c(),H=d("\r\n\t\t\t\t\t"),ue._fragment.c(),J=d("\r\n\t\t\t\t\t"),he._fragment.c(),Y=d("\r\n\t\t\t\t\t"),ve._fragment.c(),Z=d("\r\n\t\t\t\t\t"),fe._fragment.c(),$=d("\r\n\t\t\t\t\t"),_e._fragment.c(),tt=d("\r\n\r\n\t\t\t\t\t\r\n\t\t\t\t\t"),et=u("div"),at=u("div"),nt=d(Ht),st=d("\r\n\t\t\t\t\t\t"),rt=u("select"),(ot=u("option")).textContent="1:5000",(lt=u("option")).textContent="1:10000",(it=u("option")).textContent="1:15000",(ct=u("option")).textContent="1:20000",(ut=u("option")).textContent="1:25000",(dt=u("option")).textContent="1:30000",(ht=u("option")).textContent="1:35000",(mt=u("option")).textContent="1:40000",(vt=u("option")).textContent="1:45000",(gt=u("option")).textContent="1:50000",ft=d("\r\n\t\t\t\t\t"),pt=u("div"),_t=u("div"),yt=d(Wt),xt=d("\r\n\t\t\t\t\t\t"),kt=u("select"),bt=u("option"),xe&&xe.c(),Nt=d("\r\n\t\t\t"),(It=u("div")).textContent="Список объектов",jt=d("\r\n\t\t\t"),Ct=u("div"),Tt=u("div"),wt=u("div"),Ft=u("button"),Dt=d(Bt),Lt=d("\r\n\t\t\t\t\t"),zt=u("div"),St=d("Выделено: "),qt=d(Ut),Rt=d(" / "),Ot=d(Jt),Pt=d("\r\n\t\t\t\t\t"),Ie._fragment.c(),Mt=d("\r\n\t\t\t"),Vt=u("div"),Te.c(),n.className="gmx-sidebar-label-medium svelte-gt11xl",y.className="gmx-sidebar-label svelte-gt11xl",m(b,"change",$t),b.name="reportType",b.className="gmx-sidebar-select-large svelte-gt11xl",_.className="gmx-sidebar-labeled-block svelte-gt11xl",C.className="gmx-sidebar-label-small svelte-gt11xl",m(D,"change",ee),D.name="organizationName",D.value=L=e.params.organizationName.value,g(D,"type","text"),D.className="gmx-sidebar-input-large svelte-gt11xl",j.className="gmx-sidebar-labeled-block svelte-gt11xl",q.className="gmx-sidebar-label-small svelte-gt11xl",m(M,"change",ae),M.name="inn",M.value=V=e.params.inn.value,g(M,"type","text"),M.className="gmx-sidebar-input-large svelte-gt11xl",S.className="gmx-sidebar-labeled-block svelte-gt11xl",at.className="gmx-sidebar-label svelte-gt11xl",ot.__value="5000",ot.value=ot.__value,ot.className="svelte-gt11xl",lt.__value="10000",lt.value=lt.__value,lt.className="svelte-gt11xl",it.__value="15000",it.value=it.__value,it.className="svelte-gt11xl",ct.__value="20000",ct.value=ct.__value,ct.className="svelte-gt11xl",ut.__value="25000",ut.value=ut.__value,ut.className="svelte-gt11xl",dt.__value="30000",dt.value=dt.__value,dt.className="svelte-gt11xl",ht.__value="35000",ht.value=ht.__value,ht.className="svelte-gt11xl",mt.__value="40000",mt.value=mt.__value,mt.className="svelte-gt11xl",vt.__value="45000",vt.value=vt.__value,vt.className="svelte-gt11xl",gt.__value="50000",gt.value=gt.__value,gt.className="svelte-gt11xl",m(rt,"change",ye),rt.name="scale",rt.className="gmx-sidebar-select-large svelte-gt11xl",et.className="gmx-sidebar-labeled-block svelte-gt11xl",_t.className="gmx-sidebar-label svelte-gt11xl",bt.__value="",bt.value=bt.__value,bt.className="svelte-gt11xl",m(kt,"change",ke),kt.name="quadrantLayerId",kt.className="gmx-sidebar-select-large svelte-gt11xl",pt.className="gmx-sidebar-labeled-block svelte-gt11xl",It.className="gmx-sidebar-label-medium svelte-gt11xl",m(Ft,"click",be),Ft.className="gmx-sidebar-button svelte-gt11xl",wt.className="gmx-geometry-select-container svelte-gt11xl",zt.className="gmx-sidebar-label-medium svelte-gt11xl",Ct.className="forest-features-block svelte-gt11xl",Vt.className="gmx-button-container svelte-gt11xl",a.className="leftContent forest-plugin-content svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n),o(a,r),o(a,h),o(h,p),o(p,_),o(_,y),o(y,x),o(_,k),o(_,b);for(var s=0;s<Yt.length;s+=1)Yt[s].m(b,null);o(p,N),te&&te.m(p,null),o(p,I),o(p,j),o(j,C),o(C,T),o(j,F),o(j,D),o(p,z),o(p,S),o(S,q),o(q,O),o(S,P),o(S,M),o(p,E),se._mount(p,null),o(p,G),oe._mount(p,null),o(p,K),ie._mount(p,null),o(p,H),ue._mount(p,null),o(p,J),he._mount(p,null),o(p,Y),ve._mount(p,null),o(p,Z),fe._mount(p,null),o(p,$),_e._mount(p,null),o(p,tt),o(p,et),o(et,at),o(at,nt),o(et,st),o(et,rt),o(rt,ot),o(rt,lt),o(rt,it),o(rt,ct),o(rt,ut),o(rt,dt),o(rt,ht),o(rt,mt),o(rt,vt),o(rt,gt),o(p,ft),o(p,pt),o(pt,_t),o(_t,yt),o(pt,xt),o(pt,kt),o(kt,bt),xe&&xe.m(kt,null),o(a,Nt),o(a,It),o(a,jt),o(a,Ct),o(Ct,Tt),o(Tt,wt),o(wt,Ft),o(Ft,Dt),o(Tt,Lt),o(Tt,zt),o(zt,St),o(zt,qt),o(zt,Rt),o(zt,Ot),o(Tt,Pt),Ie._mount(Tt,null),o(a,Mt),o(a,Vt),Te.m(Vt,null),At=!0},p:function(a,n){if(e=n,At&&!a.params||Et===(Et=e.params.reportType.title)||f(x,Et),a.params){Xt=e.params.reportType.options;for(var s=0;s<Xt.length;s+=1){var r=A(e,Xt,s);Yt[s]?Yt[s].p(a,r):(Yt[s]=W(t,r),Yt[s].c(),Yt[s].m(b,null))}for(;s<Yt.length;s+=1)Yt[s].d(1);Yt.length=Xt.length}"о восстановлении лесов"!==e.reportType?(te?te.p(a,e):(te=B(t,e))&&te.c(),te.i(p,I)):te&&te.o(function(){te.d(1),te=null}),At&&!a.params||Gt===(Gt=e.params.organizationName.title||e.params.organizationName.value)||f(T,Gt),At&&!a.params||L===(L=e.params.organizationName.value)||(D.value=L),At&&!a.params||Kt===(Kt=e.params.inn.title||e.params.inn.value)||f(O,Kt),At&&!a.params||V===(V=e.params.inn.value)||(M.value=V);var o={};a.cols&&(o.cols=e.cols),se._set(o);var l={};a.cols&&(l.cols=e.cols),oe._set(l);var i={};a.cols&&(i.cols=e.cols),ie._set(i);var c={};a.cols&&(c.cols=e.cols),ue._set(c);var u={};a.cols&&(u.cols=e.cols),he._set(u);var d={};a.cols&&(d.cols=e.cols),ve._set(d);var h={};a.cols&&(h.cols=e.cols),fe._set(h);var m={};a.cols&&(m.cols=e.cols),_e._set(m),At&&!a.params||Ht===(Ht=e.params.reportType.title)||f(nt,Ht),At&&!a.params||Wt===(Wt=e.params.quadrantLayerId.title||e.params.quadrantLayerId.value)||f(yt,Wt),e.quadrantIds?xe?xe.p(a,e):((xe=U(t,e)).c(),xe.m(kt,null)):xe&&(xe.d(1),xe=null),At&&!a.drawstart||Bt===(Bt=e.drawstart?"Полигон рисуется":"Выделите участки полигоном")||f(Dt,Bt),At&&!a.Object&&!a.checked||Ut===(Ut=e.Object.keys(e.checked).length)||f(qt,Ut),At&&!a.layerItems||Jt===(Jt=e.layerItems.length)||f(Ot,Jt);var v={};a.layerItems&&(v.items=e.layerItems),a.hashCols&&(v.hashCols=e.hashCols),!Qt.checked&&a.checked&&(v.checked=e.checked,Qt.checked=void 0!==e.checked),Ie._set(v),Qt={},Ce===(Ce=je(e))&&Te?Te.p(a,e):(Te.d(1),(Te=Ce(t,e)).c(),Te.m(Vt,null))},i:function(t,e){At||this.m(t,e)},o:function(t){At&&(t=s(t,10),te?te.o(t):t(),se&&se._fragment.o(t),oe&&oe._fragment.o(t),ie&&ie._fragment.o(t),ue&&ue._fragment.o(t),he&&he._fragment.o(t),ve&&ve._fragment.o(t),fe&&fe._fragment.o(t),_e&&_e._fragment.o(t),Ie&&Ie._fragment.o(t),At=!1)},d:function(t){t&&i(a),c(Yt,t),v(b,"change",$t),te&&te.d(),v(D,"change",ee),v(M,"change",ae),se.destroy(),oe.destroy(),ie.destroy(),ue.destroy(),he.destroy(),ve.destroy(),fe.destroy(),_e.destroy(),v(rt,"change",ye),xe&&xe.d(),v(kt,"change",ke),v(Ft,"click",be),Ie.destroy(),Te.d()}}}function W(t,e){var a,n,s,r=e.it;return{c:function(){a=u("option"),n=d(r),a.__value=s=e.it,a.value=a.__value,a.className="svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n)},p:function(t,e){t.params&&r!==(r=e.it)&&f(n,r),t.params&&s!==(s=e.it)&&(a.__value=s),a.value=a.__value},d:function(t){t&&i(a)}}}function B(t,e){var a,n,r,c={key:"fellingForm",cols:e.cols},h=new R({root:t.root,store:t.store,data:c}),m={key:"fellingType",cols:e.cols},v=new R({root:t.root,store:t.store,data:m});return{c:function(){a=u("div"),h._fragment.c(),n=d("\r\n\t\t\t\t\t\t"),v._fragment.c()},m:function(t,e){l(t,a,e),h._mount(a,null),o(a,n),v._mount(a,null),r=!0},p:function(t,e){var a={};t.cols&&(a.cols=e.cols),h._set(a);var n={};t.cols&&(n.cols=e.cols),v._set(n)},i:function(t,e){r||this.m(t,e)},o:function(t){r&&(t=s(t,2),h&&h._fragment.o(t),v&&v._fragment.o(t),r=!1)},d:function(t){t&&i(a),h.destroy(),v.destroy()}}}function U(t,e){for(var a,n=e.quadrantIds,s=[],r=0;r<n.length;r+=1)s[r]=J(t,V(e,n,r));return{c:function(){for(var t=0;t<s.length;t+=1)s[t].c();a=h()},m:function(t,e){for(var n=0;n<s.length;n+=1)s[n].m(t,e);l(t,a,e)},p:function(e,r){if(e.quadrantIds||e.quadrantLayerId){n=r.quadrantIds;for(var o=0;o<n.length;o+=1){var l=V(r,n,o);s[o]?s[o].p(e,l):(s[o]=J(t,l),s[o].c(),s[o].m(a.parentNode,a))}for(;o<s.length;o+=1)s[o].d(1);s.length=n.length}},d:function(t){c(s,t),t&&i(a)}}}function J(t,e){var a,n,s,r,c=e.it.title;return{c:function(){a=u("option"),n=d(c),a.__value=s=e.it.id,a.value=a.__value,a.selected=r=e.quadrantLayerId===e.it.id,a.className="svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n)},p:function(t,e){t.quadrantIds&&c!==(c=e.it.title)&&f(n,c),t.quadrantIds&&s!==(s=e.it.id)&&(a.__value=s),a.value=a.__value,(t.quadrantLayerId||t.quadrantIds)&&r!==(r=e.quadrantLayerId===e.it.id)&&(a.selected=r)},d:function(t){t&&i(a)}}}function Q(t,e){var a,n,s;function r(e){t.sendReport()}return{c:function(){a=u("button"),n=d("Создать отчеты"),m(a,"click",r),a.className=s="gmx-sidebar-button"+(e.Object.keys(e.checked).length?"":"-disabled")+" svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n)},p:function(t,e){(t.Object||t.checked)&&s!==(s="gmx-sidebar-button"+(e.Object.keys(e.checked).length?"":"-disabled")+" svelte-gt11xl")&&(a.className=s)},d:function(t){t&&i(a),v(a,"click",r)}}}function X(t,a){var n;return{c:function(){(n=u("button")).innerHTML='<div class="lds-ellipsis svelte-gt11xl"><div class="svelte-gt11xl"></div><div class="svelte-gt11xl"></div><div class="svelte-gt11xl"></div><div class="svelte-gt11xl"></div></div>',n.className="gmx-sidebar-button-disabled svelte-gt11xl"},m:function(t,e){l(t,n,e)},p:e,d:function(t){t&&i(n)}}}function Y(t){var e=this;y(this,t),this._state=a(a({Object:Object},{params:{layerID:{value:"",title:"Выбор слоя"},quadrantLayerId:{value:"",title:"Слой квартальной сети"},reportType:{value:"об использовании лесов",options:["об использовании лесов","о восстановлении лесов"],title:"Тип отчета"},organizationName:{value:"Наименование организации"},inn:{value:"1234567890",title:"ИНН"},region:{value:"Субъект",title:"Субъект Российской Федерации"},forestry:{value:"Лесничество"},sectionForestry:{value:"Участковое лесничество"},quadrant:{value:"Квартал"},stratum:{value:"Выдел"},fellingForm:{value:"",title:"Форма рубки"},fellingType:{value:"",title:"Тип рубки"},recoveryEventType:{value:"",title:"Тип мероприятия"},siteArea:{value:"Площадь"},scale:{value:"Масштаб"},site:{value:"Делянка"}},layerItems:[],format:2,limit:0,report:!1,drawstart:!1,layerID:"",quadrantLayerId:"",reportType:"",checked:{},layerIds:[],quadrantIds:[],hashCols:{},cols:[]}),t.data),this._intro=!!t.intro,this._handlers.state=[M],M.call(this,{changed:n({},this._state),current:this._state}),this._fragment=function(t,e){var a,n,s,r,c,h,g,p,_,y,x,k,b=e.layerIds&&G(t,e);function N(e){t.setNodeField(this,!0)}var I=e.layerID&&H(t,e);return{c:function(){a=u("div"),n=u("div"),s=d("Лимит отчетов: "),r=d(e.limit),c=d("\r\n\t"),h=u("div"),(g=u("span")).textContent="Выбор слоя",p=d("\r\n\t\t"),_=u("select"),y=u("option"),b&&b.c(),x=d("\r\n"),I&&I.c(),n.className="forest-plugin-header svelte-gt11xl",g.className="gmx-select-layer-container__label svelte-gt11xl",y.__value="",y.value=y.__value,y.className="svelte-gt11xl",m(_,"change",N),_.name="layerID",_.className="gmx-sidebar-select-medium svelte-gt11xl",h.className="gmx-select-layer-container svelte-gt11xl",a.className="forest-plugin-container svelte-gt11xl"},m:function(t,e){l(t,a,e),o(a,n),o(n,s),o(n,r),o(a,c),o(a,h),o(h,g),o(h,p),o(h,_),o(_,y),b&&b.m(_,null),o(a,x),I&&I.m(a,null),k=!0},p:function(e,n){k&&!e.limit||f(r,n.limit),n.layerIds?b?b.p(e,n):((b=G(t,n)).c(),b.m(_,null)):b&&(b.d(1),b=null),n.layerID?(I?I.p(e,n):(I=H(t,n))&&I.c(),I.i(a,null)):I&&I.o(function(){I.d(1),I=null})},i:function(t,e){k||this.m(t,e)},o:function(t){k&&(I?I.o(t):t(),k=!1)},d:function(t){t&&i(a),b&&b.d(),v(_,"change",N),I&&I.d()}}}(this,this._state),this.root._oncreate.push(function(){(function(){this.changedParams={};var t=this.get(),e=t.meta,a=t.gmxMap;this.getReportsCount();var n=[],s=[];a.layers.forEach(function(t){if(t.getGmxProperties){var a=t.getGmxProperties(),r=a.MetaProperties||{};if("vector"===a.type.toLowerCase()&&"polygon"===a.GeometryType.toLowerCase()&&!a.IsRasterCatalog&&!a.Quicklook){var o={id:a.name,title:a.title};e?(r.forest&&"true"===r.forest.Value&&n.push(o),r.quadrant&&"true"===r.quadrant.Value&&s.push(o)):(n.push(o),s.push(o))}}}),this.set({layerIds:n,quadrantIds:s,cols:[]})}).call(e),e.fire("update",{changed:n({},e._state),current:e._state})}),t.target&&(this._fragment.c(),this._mount(t.target,t.anchor),_(this)),this._intro=!0}return a(Y.prototype,k),a(Y.prototype,P),t.App=Y,t}({});
+var gmxForest = (function (exports) {
+	'use strict';
+
+	function noop() {}
+
+	function assign(tar, src) {
+		for (var k in src) { tar[k] = src[k]; }
+		return tar;
+	}
+
+	function assignTrue(tar, src) {
+		for (var k in src) { tar[k] = 1; }
+		return tar;
+	}
+
+	function callAfter(fn, i) {
+		if (i === 0) { fn(); }
+		return function () {
+			if (!--i) { fn(); }
+		};
+	}
+
+	function run(fn) {
+		fn();
+	}
+
+	function append(target, node) {
+		target.appendChild(node);
+	}
+
+	function insert(target, node, anchor) {
+		target.insertBefore(node, anchor);
+	}
+
+	function detachNode(node) {
+		node.parentNode.removeChild(node);
+	}
+
+	function destroyEach(iterations, detach) {
+		for (var i = 0; i < iterations.length; i += 1) {
+			if (iterations[i]) { iterations[i].d(detach); }
+		}
+	}
+
+	function createElement(name) {
+		return document.createElement(name);
+	}
+
+	function createText(data) {
+		return document.createTextNode(data);
+	}
+
+	function createComment() {
+		return document.createComment('');
+	}
+
+	function addListener(node, event, handler, options) {
+		node.addEventListener(event, handler, options);
+	}
+
+	function removeListener(node, event, handler, options) {
+		node.removeEventListener(event, handler, options);
+	}
+
+	function setAttribute(node, attribute, value) {
+		if (value == null) { node.removeAttribute(attribute); }
+		else { node.setAttribute(attribute, value); }
+	}
+
+	function setData(text, data) {
+		text.data = '' + data;
+	}
+
+	function blankObject() {
+		return Object.create(null);
+	}
+
+	function destroy(detach) {
+		this.destroy = noop;
+		this.fire('destroy');
+		this.set = noop;
+
+		this._fragment.d(detach !== false);
+		this._fragment = null;
+		this._state = {};
+	}
+
+	function _differs(a, b) {
+		return a != a ? b == b : a !== b || ((a && typeof a === 'object') || typeof a === 'function');
+	}
+
+	function fire(eventName, data) {
+		var handlers =
+			eventName in this._handlers && this._handlers[eventName].slice();
+		if (!handlers) { return; }
+
+		for (var i = 0; i < handlers.length; i += 1) {
+			var handler = handlers[i];
+
+			if (!handler.__calling) {
+				try {
+					handler.__calling = true;
+					handler.call(this, data);
+				} finally {
+					handler.__calling = false;
+				}
+			}
+		}
+	}
+
+	function flush(component) {
+		component._lock = true;
+		callAll(component._beforecreate);
+		callAll(component._oncreate);
+		callAll(component._aftercreate);
+		component._lock = false;
+	}
+
+	function get() {
+		return this._state;
+	}
+
+	function init(component, options) {
+		component._handlers = blankObject();
+		component._slots = blankObject();
+		component._bind = options._bind;
+		component._staged = {};
+
+		component.options = options;
+		component.root = options.root || component;
+		component.store = options.store || component.root.store;
+
+		if (!options.root) {
+			component._beforecreate = [];
+			component._oncreate = [];
+			component._aftercreate = [];
+		}
+	}
+
+	function on(eventName, handler) {
+		var handlers = this._handlers[eventName] || (this._handlers[eventName] = []);
+		handlers.push(handler);
+
+		return {
+			cancel: function() {
+				var index = handlers.indexOf(handler);
+				if (~index) { handlers.splice(index, 1); }
+			}
+		};
+	}
+
+	function set(newState) {
+		this._set(assign({}, newState));
+		if (this.root._lock) { return; }
+		flush(this.root);
+	}
+
+	function _set(newState) {
+		var oldState = this._state,
+			changed = {},
+			dirty = false;
+
+		newState = assign(this._staged, newState);
+		this._staged = {};
+
+		for (var key in newState) {
+			if (this._differs(newState[key], oldState[key])) { changed[key] = dirty = true; }
+		}
+		if (!dirty) { return; }
+
+		this._state = assign(assign({}, oldState), newState);
+		this._recompute(changed, this._state);
+		if (this._bind) { this._bind(changed, this._state); }
+
+		if (this._fragment) {
+			this.fire("state", { changed: changed, current: this._state, previous: oldState });
+			this._fragment.p(changed, this._state);
+			this.fire("update", { changed: changed, current: this._state, previous: oldState });
+		}
+	}
+
+	function _stage(newState) {
+		assign(this._staged, newState);
+	}
+
+	function callAll(fns) {
+		while (fns && fns.length) { fns.shift()(); }
+	}
+
+	function _mount(target, anchor) {
+		this._fragment[this._fragment.i ? 'i' : 'm'](target, anchor || null);
+	}
+
+	var proto = {
+		destroy: destroy,
+		get: get,
+		fire: fire,
+		on: on,
+		set: set,
+		_recompute: noop,
+		_set: _set,
+		_stage: _stage,
+		_mount: _mount,
+		_differs: _differs
+	};
+
+	/* src\Table.html generated by Svelte v2.15.3 */
+
+	function data() {
+		return {
+			sortType: 'desc',	// 'asc'
+			sortKey: 'gmx_id',	// 'FRSTAT'
+			reverse: false,
+			pageCurr: 1,
+			pagesize: 15,
+			pageFrom: 0,
+			tableItems: [],
+			items: [],
+			// checked: {},
+			hashCols: []
+		};
+	}
+	var methods = {
+		sort: function sort(key) {
+			var ref = this.get();
+			var sortType = ref.sortType;
+			// console.log('sort', sortType);
+			this.set({sortType: sortType === 'desc' ? 'asc' : 'desc', sortKey: key});
+			this.setCurrPage(1);
+		},
+		checkReverse: function checkReverse(ev) {
+			// console.log('checkReverse', ev.ctrlKey);
+
+			var nChecked = {};
+			var ctrlKey = ev.ctrlKey;
+			var isChecked = ev.target.checked;
+			
+			if (ctrlKey || isChecked) {
+				var ref = this.get();
+				var items = ref.items;
+				var hashCols = ref.hashCols;
+				var checked = ref.checked;
+				var nm = hashCols.gmx_id;
+				items.forEach(function (it) {
+					var id = it[nm];
+					if (!ctrlKey || !checked[id]) {
+						nChecked[id] = true;
+					}
+				});
+			}
+			this.set({checked: nChecked});
+			// this.root.set({checked: nChecked});
+		},
+		checkMe: function checkMe(id) {
+			// console.log('checkMe', id);
+			var ref = this.get();
+			var checked = ref.checked;
+			if (checked[id]) {
+				delete checked[id];
+			} else {
+				checked[id] = true;
+			}
+			this.set({checked: checked});
+			// this.root.set({checked: checked});
+		},
+		sortMe: function sortMe(arr, sortKey, hashCols, sortType) {
+			var nm = hashCols[sortKey];
+			return arr.sort(function (a, b) {
+				var x = b[nm];
+				var y = a[nm];
+	                return (x < y ? -1 : (x > y ? 1 : 0)) * (sortType === 'desc' ? -1 : 1);
+			});
+		},
+		pageTo: function pageTo(nm) {
+			var ref = this.get();
+			var pageFrom = ref.pageFrom;
+			this.set({pageCurr: nm});
+			nm = nm < 1 ? 1 : (nm > pageFrom ? pageFrom : nm);
+			this.setCurrPage(nm);
+			return nm;
+		},
+		viewItem: function viewItem(id) {
+			this.root.viewItem(id);
+		},
+		setCurrPage: function setCurrPage(nm) {
+			// console.log('setCurrPage', nm);
+			var ref = this.get();
+			var items = ref.items;
+			var hashCols = ref.hashCols;
+			var pageCurr = ref.pageCurr;
+			var pagesize = ref.pagesize;
+			var sortKey = ref.sortKey;
+			var sortType = ref.sortType;
+			nm = nm || pageCurr;
+			var beg = pagesize * (nm - 1);
+
+			var arr = (sortKey ? this.sortMe(items, sortKey, hashCols, sortType) : items)
+				.slice(beg, beg + pagesize);
+
+			var cnt = items.length / pagesize;
+			var pf = Math.floor(cnt);
+			// console.log('setCurrPage1', nm, arr, cnt);
+			this.set({tableItems: arr, pageCurr: nm, pageFrom: pf + (cnt > pf ? 1 : 0)});
+		}
+	};
+
+	function onstate(ref) {
+		var changed = ref.changed;
+		var current = ref.current;
+		var previous = ref.previous;
+
+		// console.log('Table in onstate', changed, current);
+		if (changed.items && current.items.length) {
+			this.setCurrPage();
+		}
+	// },
+
+	// onupdate({ changed, current, previous }) {
+		// console.log('Table  in onupdate', changed);
+	}
+	function click_handler(event) {
+		var ref = this._svelte;
+		var component = ref.component;
+		var ctx = ref.ctx;
+
+		component.viewItem(ctx.it[ctx.hashCols.gmx_id]);
+	}
+
+	function change_handler(event) {
+		var ref = this._svelte;
+		var component = ref.component;
+		var ctx = ref.ctx;
+
+		component.checkMe(ctx.it[ctx.hashCols.gmx_id]);
+	}
+
+	function get_each_context(ctx, list, i) {
+		var child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		return child_ctx;
+	}
+
+	function create_main_fragment(component, ctx) {
+		var div2, table, tr0, th0, input0, text0, th1, span0, th1_class_value, text2, th2, span1, th2_class_value, text4, text5, tr1, td, button0, text6, button0_disabled_value, text7, span2, text8, input1, text9, text10, text11, button1, text12, button1_disabled_value, text13, div1, current;
+
+		function click_handler(event) {
+			component.checkReverse(event);
+		}
+
+		function click_handler_1(event) {
+			component.sort('gmx_id');
+		}
+
+		function click_handler_2(event) {
+			component.sort('FRSTAT');
+		}
+
+		var each_value = ctx.tableItems;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block(component, get_each_context(ctx, each_value, i));
+		}
+
+		function click_handler_3(event) {
+			component.pageTo(ctx.pageCurr - 1);
+		}
+
+		function change_handler_1(event) {
+			component.pageTo(this.value);
+		}
+
+		function click_handler_4(event) {
+			component.pageTo(ctx.pageCurr + 1);
+		}
+
+		return {
+			c: function c() {
+				div2 = createElement("div");
+				table = createElement("table");
+				tr0 = createElement("tr");
+				th0 = createElement("th");
+				input0 = createElement("input");
+				text0 = createText("\r\n\t\t\t");
+				th1 = createElement("th");
+				span0 = createElement("span");
+				span0.textContent = "Id";
+				text2 = createText("\r\n\t\t\t");
+				th2 = createElement("th");
+				span1 = createElement("span");
+				span1.textContent = "Статус";
+				text4 = createText("\r\n");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				text5 = createText("\r\n\t\t");
+				tr1 = createElement("tr");
+				td = createElement("td");
+				button0 = createElement("button");
+				text6 = createText("назад");
+				text7 = createText("\r\n\t\t\t\t");
+				span2 = createElement("span");
+				text8 = createText("Стр. ");
+				input1 = createElement("input");
+				text9 = createText(" из ");
+				text10 = createText(ctx.pageFrom);
+				text11 = createText("\r\n\t\t\t\t");
+				button1 = createElement("button");
+				text12 = createText("вперед");
+				text13 = createText("\r\n\t\t\t\t");
+				div1 = createElement("div");
+				div1.innerHTML = "<div class=\"-loading-inner\"></div>";
+				addListener(input0, "click", click_handler);
+				input0.checked = ctx.reverse;
+				setAttribute(input0, "type", "checkbox");
+				input0.value = "on";
+				input0.className = "svelte-1jj6zh";
+				th0.className = "c1 svelte-1jj6zh";
+				addListener(th1, "click", click_handler_1);
+				th1.className = th1_class_value = "c2 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh";
+				addListener(th2, "click", click_handler_2);
+				th2.className = th2_class_value = "c3 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh";
+				tr0.className = "head svelte-1jj6zh";
+				addListener(button0, "click", click_handler_3);
+				button0.disabled = button0_disabled_value = ctx.pageCurr === 1;
+				addListener(input1, "change", change_handler_1);
+				setAttribute(input1, "type", "number");
+				input1.value = ctx.pageCurr;
+				input1.className = "svelte-1jj6zh";
+				span2.className = "pageInfo svelte-1jj6zh";
+				addListener(button1, "click", click_handler_4);
+				button1.disabled = button1_disabled_value = ctx.pageFrom === ctx.pageCurr;
+				div1.className = "-loading";
+				td.colSpan = "3";
+				td.className = "svelte-1jj6zh";
+				tr1.className = "pagination svelte-1jj6zh";
+				table.className = "table svelte-1jj6zh";
+				div2.className = "tableContect svelte-1jj6zh";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, div2, anchor);
+				append(div2, table);
+				append(table, tr0);
+				append(tr0, th0);
+				append(th0, input0);
+				append(tr0, text0);
+				append(tr0, th1);
+				append(th1, span0);
+				append(tr0, text2);
+				append(tr0, th2);
+				append(th2, span1);
+				append(table, text4);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(table, null);
+				}
+
+				append(table, text5);
+				append(table, tr1);
+				append(tr1, td);
+				append(td, button0);
+				append(button0, text6);
+				append(td, text7);
+				append(td, span2);
+				append(span2, text8);
+				append(span2, input1);
+				append(span2, text9);
+				append(span2, text10);
+				append(td, text11);
+				append(td, button1);
+				append(button1, text12);
+				append(td, text13);
+				append(td, div1);
+				current = true;
+			},
+
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
+				if (changed.reverse) {
+					input0.checked = ctx.reverse;
+				}
+
+				if ((changed.sortKey || changed.sortType) && th1_class_value !== (th1_class_value = "c2 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh")) {
+					th1.className = th1_class_value;
+				}
+
+				if ((changed.sortKey || changed.sortType) && th2_class_value !== (th2_class_value = "c3 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
+							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh")) {
+					th2.className = th2_class_value;
+				}
+
+				if (changed.tableItems || changed.hashCols || changed.checked) {
+					each_value = ctx.tableItems;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						var child_ctx = get_each_context(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(table, text5);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+
+				if ((changed.pageCurr) && button0_disabled_value !== (button0_disabled_value = ctx.pageCurr === 1)) {
+					button0.disabled = button0_disabled_value;
+				}
+
+				if (changed.pageCurr) {
+					input1.value = ctx.pageCurr;
+				}
+
+				if (changed.pageFrom) {
+					setData(text10, ctx.pageFrom);
+				}
+
+				if ((changed.pageFrom || changed.pageCurr) && button1_disabled_value !== (button1_disabled_value = ctx.pageFrom === ctx.pageCurr)) {
+					button1.disabled = button1_disabled_value;
+				}
+			},
+
+			i: function i(target, anchor) {
+				if (current) { return; }
+
+				this.m(target, anchor);
+			},
+
+			o: run,
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(div2);
+				}
+
+				removeListener(input0, "click", click_handler);
+				removeListener(th1, "click", click_handler_1);
+				removeListener(th2, "click", click_handler_2);
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(button0, "click", click_handler_3);
+				removeListener(input1, "change", change_handler_1);
+				removeListener(button1, "click", click_handler_4);
+			}
+		};
+	}
+
+	// (123:0) {#each tableItems as it}
+	function create_each_block(component, ctx) {
+		var tr, td0, input, input_checked_value, text0, td1, span0, text1_value = ctx.it[ctx.hashCols.gmx_id], text1, text2, td2, span1, span1_class_value, span2;
+
+		return {
+			c: function c() {
+				tr = createElement("tr");
+				td0 = createElement("td");
+				input = createElement("input");
+				text0 = createText("\r\n\t\t\t");
+				td1 = createElement("td");
+				span0 = createElement("span");
+				text1 = createText(text1_value);
+				text2 = createText("\r\n\t\t\t");
+				td2 = createElement("td");
+				span1 = createElement("span");
+				span2 = createElement("span");
+				span2.innerHTML = "<svg class=\"svgIcon svelte-1jj6zh\"><use xlink:href=\"#zoom-to-feature\"></use></svg>";
+				input._svelte = { component: component, ctx: ctx };
+
+				addListener(input, "change", change_handler);
+				input.checked = input_checked_value = ctx.checked[ctx.it[ctx.hashCols.gmx_id]];
+				setAttribute(input, "type", "checkbox");
+				input.className = "svelte-1jj6zh";
+				td0.className = "c1 svelte-1jj6zh";
+				td1.className = "c2 svelte-1jj6zh";
+				span1.className = span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jj6zh";
+
+				span2._svelte = { component: component, ctx: ctx };
+
+				addListener(span2, "click", click_handler);
+				span2.className = "leaflet-gmx-iconSvg svgIcon svelte-1jj6zh";
+				td2.className = "c3";
+				tr.className = "item svelte-1jj6zh";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, tr, anchor);
+				append(tr, td0);
+				append(td0, input);
+				append(tr, text0);
+				append(tr, td1);
+				append(td1, span0);
+				append(span0, text1);
+				append(tr, text2);
+				append(tr, td2);
+				append(td2, span1);
+				append(td2, span2);
+			},
+
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
+				input._svelte.ctx = ctx;
+				if ((changed.checked || changed.tableItems || changed.hashCols) && input_checked_value !== (input_checked_value = ctx.checked[ctx.it[ctx.hashCols.gmx_id]])) {
+					input.checked = input_checked_value;
+				}
+
+				if ((changed.tableItems || changed.hashCols) && text1_value !== (text1_value = ctx.it[ctx.hashCols.gmx_id])) {
+					setData(text1, text1_value);
+				}
+
+				if ((changed.tableItems || changed.hashCols) && span1_class_value !== (span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jj6zh")) {
+					span1.className = span1_class_value;
+				}
+
+				span2._svelte.ctx = ctx;
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(tr);
+				}
+
+				removeListener(input, "change", change_handler);
+				removeListener(span2, "click", click_handler);
+			}
+		};
+	}
+
+	function Table(options) {
+		var this$1 = this;
+
+		init(this, options);
+		this._state = assign(data(), options.data);
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate];
+
+		onstate.call(this, { changed: assignTrue({}, this._state), current: this._state });
+
+		this._fragment = create_main_fragment(this, this._state);
+
+		this.root._oncreate.push(function () {
+			this$1.fire("update", { changed: assignTrue({}, this$1._state), current: this$1._state });
+		});
+
+		if (options.target) {
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			flush(this);
+		}
+
+		this._intro = true;
+	}
+
+	assign(Table.prototype, proto);
+	assign(Table.prototype, methods);
+
+	/* src\SelectInput.html generated by Svelte v2.15.3 */
+
+	function data$1() {
+		return {
+			title: '',
+			value: '',
+			colName: '',
+			clicked: false,
+			cols: []
+		};
+	}
+	var methods$1 = {
+		setSelection: function setSelection(val) {
+			var ref = this.get();
+			var key = ref.key;
+			this.root.setField(key, {value: '', field: val});
+		},
+		setValue: function setValue(val) {
+			var ref = this.get();
+			var key = ref.key;
+			this.root.setField(key, {value: val, field: ''});
+		}
+	};
+
+	function oncreate() {
+		var ref = this.get();
+		var key = ref.key;
+		var ref$1 = this.root.get();
+		var params = ref$1.params;
+		var attr = params[key];
+		if (attr.title === undefined) { attr.title = attr.value; }
+		this.set(attr);
+	}
+	function onstate$1(ref) {
+		var changed = ref.changed;
+		var current = ref.current;
+		var previous = ref.previous;
+
+		if(changed.clicked) {
+			if(current.clicked) {
+				var ref$1 = this.get();
+				var cols = ref$1.cols;
+				this.setSelection(cols[0]);
+			} else {
+				var ref$2 = this.get();
+				var value = ref$2.value;
+				this.setValue(value);
+			}
+		}
+	}
+	function get_each_context$1(ctx, list, i) {
+		var child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		return child_ctx;
+	}
+
+	function create_main_fragment$1(component, ctx) {
+		var div3, div0, text0, text1, div2, div1, text2, button, current;
+
+		function select_block_type(ctx) {
+			if (ctx.clicked) { return create_if_block; }
+			return create_else_block;
+		}
+
+		var current_block_type = select_block_type(ctx);
+		var if_block = current_block_type(component, ctx);
+
+		function click_handler(event) {
+			component.set({clicked: !ctx.clicked});
+		}
+
+		return {
+			c: function c() {
+				div3 = createElement("div");
+				div0 = createElement("div");
+				text0 = createText(ctx.title);
+				text1 = createText("\r\n\t");
+				div2 = createElement("div");
+				div1 = createElement("div");
+				if_block.c();
+				text2 = createText("\r\n\t\t\t");
+				button = createElement("button");
+				div0.className = "gmx-sidebar-label svelte-1amu9hw";
+				addListener(button, "click", click_handler);
+				button.className = "gmx-addon-button svelte-1amu9hw";
+				button.title = "выбрать из таблицы атрибутов";
+				div3.className = "gmx-sidebar-labeled-block svelte-1amu9hw";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, div3, anchor);
+				append(div3, div0);
+				append(div0, text0);
+				append(div3, text1);
+				append(div3, div2);
+				append(div2, div1);
+				if_block.m(div1, null);
+				append(div1, text2);
+				append(div1, button);
+				current = true;
+			},
+
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
+				if (changed.title) {
+					setData(text0, ctx.title);
+				}
+
+				if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+					if_block.p(changed, ctx);
+				} else {
+					if_block.d(1);
+					if_block = current_block_type(component, ctx);
+					if_block.c();
+					if_block.m(div1, text2);
+				}
+			},
+
+			i: function i(target, anchor) {
+				if (current) { return; }
+
+				this.m(target, anchor);
+			},
+
+			o: run,
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(div3);
+				}
+
+				if_block.d();
+				removeListener(button, "click", click_handler);
+			}
+		};
+	}
+
+	// (54:3) {:else}
+	function create_else_block(component, ctx) {
+		var input;
+
+		function change_handler(event) {
+			component.setValue(event.target.value);
+		}
+
+		return {
+			c: function c() {
+				input = createElement("input");
+				addListener(input, "change", change_handler);
+				setAttribute(input, "type", "text");
+				input.className = "gmx-sidebar-input-with-addon svelte-1amu9hw";
+				input.name = ctx.key;
+				input.value = ctx.value;
+			},
+
+			m: function m(target, anchor) {
+				insert(target, input, anchor);
+			},
+
+			p: function p(changed, ctx) {
+				if (changed.key) {
+					input.name = ctx.key;
+				}
+
+				if (changed.value) {
+					input.value = ctx.value;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(input);
+				}
+
+				removeListener(input, "change", change_handler);
+			}
+		};
+	}
+
+	// (48:3) {#if clicked}
+	function create_if_block(component, ctx) {
+		var select;
+
+		var each_value = ctx.cols;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block$1(component, get_each_context$1(ctx, each_value, i));
+		}
+
+		function change_handler(event) {
+			component.setSelection(this.options[this.selectedIndex].value);
+		}
+
+		return {
+			c: function c() {
+				select = createElement("select");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+				addListener(select, "change", change_handler);
+				select.name = ctx.key;
+				select.className = "gmx-sidebar-select-with-addon svelte-1amu9hw";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, select, anchor);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(select, null);
+				}
+			},
+
+			p: function p(changed, ctx) {
+				if (changed.cols || changed.colName) {
+					each_value = ctx.cols;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						var child_ctx = get_each_context$1(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block$1(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(select, null);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+
+				if (changed.key) {
+					select.name = ctx.key;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(select);
+				}
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(select, "change", change_handler);
+			}
+		};
+	}
+
+	// (50:5) {#each cols as it}
+	function create_each_block$1(component, ctx) {
+		var option, text_value = ctx.it, text, option_value_value, option_selected_value;
+
+		return {
+			c: function c() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.colName === ctx.it;
+			},
+
+			m: function m(target, anchor) {
+				insert(target, option, anchor);
+				append(option, text);
+			},
+
+			p: function p(changed, ctx) {
+				if ((changed.cols) && text_value !== (text_value = ctx.it)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.cols) && option_value_value !== (option_value_value = ctx.it)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.colName || changed.cols) && option_selected_value !== (option_selected_value = ctx.colName === ctx.it)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	function SelectInput(options) {
+		var this$1 = this;
+
+		init(this, options);
+		this._state = assign(data$1(), options.data);
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate$1];
+
+		onstate$1.call(this, { changed: assignTrue({}, this._state), current: this._state });
+
+		this._fragment = create_main_fragment$1(this, this._state);
+
+		this.root._oncreate.push(function () {
+			oncreate.call(this$1);
+			this$1.fire("update", { changed: assignTrue({}, this$1._state), current: this$1._state });
+		});
+
+		if (options.target) {
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			flush(this);
+		}
+
+		this._intro = true;
+	}
+
+	assign(SelectInput.prototype, proto);
+	assign(SelectInput.prototype, methods$1);
+
+	/* src\App.html generated by Svelte v2.15.3 */
+
+	var serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
+
+	function data$2() {
+		return {
+			params: {
+				layerID: {value: '', title: 'Выбор слоя'},
+				quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
+				reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+				organizationName: {value: 'Наименование организации'},
+				inn: {value: '1234567890', title: 'ИНН'},
+				region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
+				forestry: {value: 'Лесничество'},
+				sectionForestry: {value: 'Участковое лесничество'},
+				quadrant: {value: 'Квартал'},
+				stratum: {value: 'Выдел'},
+				fellingForm: {value: '', title: 'Форма рубки'},
+				fellingType: {value: '', title: 'Тип рубки'},
+				recoveryEventType: {value: '', title: 'Тип мероприятия'},
+				siteArea: {value: 'Площадь'},
+				scale: {value: 'Масштаб'},
+				site: {value: 'Делянка'}
+			},
+			layerItems: [],
+			format: 2,
+			limit: 0,
+			report: false,
+			drawstart: false,
+			layerID: '',
+			quadrantLayerId: '',
+			reportType: '',
+			checked: {},
+			layerIds: [], quadrantIds: [],
+			hashCols: {},
+			cols: []
+		}
+	}
+	var methods$2 = {
+		viewItem: function viewItem(id) {
+			var ref = this.get();
+			var map = ref.map;
+			var layerItems = ref.layerItems;
+			var hashCols = ref.hashCols;
+			
+			for (var i = 0, len = layerItems.length; i < len; i++) {
+				var it = layerItems[i];
+				if (id === it[hashCols.gmx_id]) {
+					var geo = it[hashCols.geomixergeojson],
+						bbox = L.gmxUtil.getGeometryBounds(geo),
+						latlngBbox = L.latLngBounds([[bbox.min.y, bbox.min.x], [bbox.max.y, bbox.max.x]]);
+					map.fitBounds(latlngBbox);
+					// console.log('viewItem ____ ', geo, latlngBbox, L.latLngBounds(bbox.coordinates));
+					break;
+				}
+			}
+		},
+		sendReport: function sendReport() {
+			var this$1 = this;
+
+			var ref = this.get();
+			var checked = ref.checked;
+			var layerItems = ref.layerItems;
+			var hashCols = ref.hashCols;
+			var params = ref.params;
+			var format = ref.format;
+			var layerID = ref.layerID;
+			var gmxMap = ref.gmxMap;
+			var groupRequest = [],
+				features = [],
+				satLayers = [];
+
+			gmxMap.layers.forEach(function (it) {
+				if (it.getGmxProperties && it._map) {
+					var props = it.getGmxProperties(),
+						metaProps = props.MetaProperties || {},
+						out = {layerId: props.name, type: 'оптическая'};
+					if (props.Temporal) {
+						var dt = it.getDateInterval();
+						if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
+						if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
+					}
+					if (metaProps.type) {
+						out.type = metaProps.type.Value;
+					}
+					if (metaProps.system) {
+						out.system = metaProps.system.Value;
+					}
+					if (metaProps.resolution) {
+						out.resolution = metaProps.resolution.Value;
+					}
+					satLayers.push(out);
+				}
+			});
+
+			layerItems.forEach(function (it) {
+				var id = it[hashCols.gmx_id];
+				if (checked[id]) {
+					var data = {featureID: id};
+					// Object.entries(params).forEach(([key, val]) => {
+					for (var key in params) {
+						var val = params[key];
+						var par = this$1.changedParams[key] || {};
+						data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+					}
+					data.satLayers = satLayers;
+					groupRequest.push(data);
+					features.push({action:'update', id:id, properties:{FRSTAT:2}});
+				}
+			});
+			this.set({report: true});
+			return fetch((serverBase + "Plugins/ForestReport/ForestReportImage"), {
+					method: 'post',
+					headers: {'Content-type': 'application/x-www-form-urlencoded'},
+					body: L.gmxUtil.getFormData({WrapStyle: 'None', format: format, groupRequest: groupRequest}),
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(function (res) { return res.json(); })
+				.then(function (json) {
+					if (json.Status === 'ok') {
+						this$1.chkTask(json.Result.TaskID)
+							.then(function (json) {
+								if (json.Status === 'ok') {
+									var downloadFile = json.Result.Result.downloadFile,
+										name = downloadFile.split('name=')[1];
+
+									window.open(serverBase + downloadFile, '_self');
+									// fetch(serverBase + downloadFile, {
+										// headers:{
+											// 'Access-Control-Allow-Origin':'*'
+										// },
+										// mode: 'cors',
+										// credentials: 'include'
+									// })
+										// .then(async res => ({
+											// filename: name,
+											// blob: await res.blob()
+										// }))
+										// .catch(this.handleError)
+									this$1.modifyVectorObjects(layerID, features);
+									this$1.set({report: false});
+								}
+							})
+							.catch(function (err) { return console.log(err); });
+					}
+				})
+				.catch(function (err) { return console.log(err); });
+		},
+		chkTask: function chkTask(id) {
+			var UPDATE_INTERVAL = 2000;
+			return new Promise(function (resolve, reject) {
+				var interval = setInterval(function () {
+					fetch((serverBase + "AsyncTask.ashx?WrapStyle=None&TaskID=" + id),
+					{
+						mode: 'cors',
+						credentials: 'include'
+					})
+						.then(function (res) { return res.json(); })
+						.then(function (json) {
+							var ref = json.Result;
+							var Completed = ref.Completed;
+							var ErrorInfo = ref.ErrorInfo;
+							if (ErrorInfo) {
+								clearInterval(interval);
+								reject(json);
+							} else if (Completed) {
+								clearInterval(interval);
+								resolve(json);
+							}
+						});
+				}, UPDATE_INTERVAL);
+			});
+		},
+		modifyVectorObjects: function modifyVectorObjects(layerId, features) {
+			// console.log('modifyVectorObjects ____ ', layerId, features);
+			var params = {
+				WrapStyle: 'None',
+				LayerName : layerId,
+				Objects: JSON.stringify(features)
+			};
+
+			return fetch((serverBase + "VectorLayer/ModifyVectorObjects.ashx?" + (L.gmxUtil.getFormData(params))), {
+				mode: 'cors',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json'
+				}
+			})
+				.then(function (res) { return res.json(); })
+				.catch(function (err) { return console.log(err); });
+		},
+		selectFeaturesWithDrawing: function selectFeaturesWithDrawing(id, geometry) {
+			var params = {
+				WrapStyle: 'None',
+				layer: id,
+				columns: '[{"Value":"[gmx_id]"}]',
+				page: 0,
+				// pagesize: null,
+				query: ("STIntersects([gmx_geometry], GeometryFromGeoJson('" + (JSON.stringify(geometry)) + "', 4326))")
+			};
+	    
+			return fetch((serverBase + "VectorLayer/Search.ashx?" + (L.gmxUtil.getFormData(params))), {
+				mode: 'cors',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json'
+				}
+			})
+			.then(function (res) { return res.json(); })
+			.catch(function (err) { return console.log(err); })
+		},
+		startDrawing: function startDrawing(ev) {
+			var this$1 = this;
+
+			var ref = this.get();
+			var map = ref.map;
+			var drawstart = ref.drawstart;
+			var layerID = ref.layerID;
+			var checked = ref.checked;
+			this.set({drawstart: !drawstart});
+			if(!drawstart) {
+				map.gmxDrawing.clear();
+				map.gmxDrawing.create('Polygon');
+				map.gmxDrawing.on('drawstop', function (e) {
+					this$1.set({drawstart: false});
+					this$1.selectFeaturesWithDrawing(layerID, e.object.toGeoJSON().geometry)
+						.then(function (json) {
+							if (json.Status === 'ok' && json.Result) {
+								var newChecked = json.Result.values.reduce(function (a, v) {
+									a[v] = true;
+									return a;
+								}, {});
+								this$1.root.set({checked: L.extend(newChecked, checked)});
+								// console.log('checked ____ ', checked);
+							}
+						});
+				}, this);
+				map._gmxEventsManager._drawstart = true;
+			}
+
+		},
+		setField: function setField(key, data) {
+			this.changedParams[key] = data;
+		},
+		setNodeField: function setNodeField(node, setFlag) {
+			var obj;
+
+			var val = node.options ? node.options[node.selectedIndex].value : node.value;
+			this.setField(node.name, val);
+			if (setFlag) {
+				this.set(( obj = {}, obj[node.name] = val, obj ));
+			}
+			// console.log('setField ____ ', data);
+		},
+		colsToHash: function colsToHash(arr) {
+			return arr.reduce(function (a, v, i) { a[v] = i; return a; }, {});
+		},
+	 			loadFeatures: function loadFeatures(id) {
+			var this$1 = this;
+
+			return fetch((serverBase + "VectorLayer/Search.ashx?layer=" + id + "&geometry=true&out_cs=EPSG:4326&WrapStyle=None"), {
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(function (res) { return res.json(); })
+				.then(function (json) {
+					if (json.Status === 'ok') {
+						var cols = json.Result.fields;
+						this$1.set({cols: cols, hashCols: this$1.colsToHash(cols),layerItems: json.Result.values});
+					}
+				})
+				.catch(function (err) { return console.log(err); });
+		},
+		getReportsCount: function getReportsCount() {
+			var this$1 = this;
+
+			return fetch((serverBase + "plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None"), {
+					mode: 'cors',
+					credentials: 'include'
+				})
+				.then(function (res) { return res.json(); })
+				.then(function (json) {
+					if (json.Status === 'ok') {
+						var count = json.Result.limit - json.Result.used;
+						this$1.set({limit: count > 0 ? count : 0});
+					}
+				})
+				.catch(function (err) { return console.log(err); });
+		},
+		styleHook: function styleHook(it) {
+			var ref = this.get();
+			var checked = ref.checked;
+			return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
+		}
+	};
+
+	function oncreate$1() {
+		this.changedParams = {};
+		var ref = this.get();
+		var meta = ref.meta;
+		var gmxMap = ref.gmxMap;
+		this.getReportsCount();
+		var layerIds = [], quadrantIds = [];
+		gmxMap.layers.forEach(function (it) {
+			if (it.getGmxProperties) {
+				var props = it.getGmxProperties(),
+					metaProps = props.MetaProperties || {};
+				if (
+					props.type.toLowerCase() === 'vector' &&
+					props.GeometryType.toLowerCase() === 'polygon' &&
+					!props.IsRasterCatalog &&
+					!props.Quicklook
+					) {
+					var hash$$1 = {id: props.name, title: props.title};
+					if (meta) {
+						if (metaProps.forest && metaProps.forest.Value === 'true') {
+							layerIds.push(hash$$1);
+						}
+						if (metaProps.quadrant && metaProps.quadrant.Value === 'true') {
+							quadrantIds.push(hash$$1);
+						}
+					} else {
+						layerIds.push(hash$$1);
+						quadrantIds.push(hash$$1);
+					}
+				}
+			}
+		});
+		this.set({layerIds: layerIds, quadrantIds: quadrantIds, cols: []});
+	}
+	function onstate$2(ref) {
+		var changed = ref.changed;
+		var current = ref.current;
+		var previous = ref.previous;
+
+		// console.log('in onstate', changed);
+		if (changed.layerID && current.layerID) {
+			var ref$1 = this.get();
+			var gmxMap = ref$1.gmxMap;
+			var checked = ref$1.checked;
+			this.currentLayer = gmxMap.layersByID[current.layerID];
+			if (this.currentLayer) {
+				this.currentLayer.setStyleHook(this.styleHook.bind(this));
+			}
+			this.loadFeatures(current.layerID);
+		}
+		if (changed.checked && this.currentLayer) {
+			this.currentLayer.repaint();
+		}
+	}
+	function get_each_context_2(ctx, list, i) {
+		var child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		return child_ctx;
+	}
+
+	function get_each_context_1(ctx, list, i) {
+		var child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		return child_ctx;
+	}
+
+	function get_each_context$2(ctx, list, i) {
+		var child_ctx = Object.create(ctx);
+		child_ctx.it = list[i];
+		return child_ctx;
+	}
+
+	function create_main_fragment$2(component, ctx) {
+		var div2, div0, text0, text1, text2, div1, span, text4, select, option, text5, current;
+
+		var if_block0 = (ctx.layerIds) && create_if_block_4(component, ctx);
+
+		function change_handler(event) {
+			component.setNodeField(this, true);
+		}
+
+		var if_block1 = (ctx.layerID) && create_if_block$1(component, ctx);
+
+		return {
+			c: function c() {
+				div2 = createElement("div");
+				div0 = createElement("div");
+				text0 = createText("Лимит отчетов: ");
+				text1 = createText(ctx.limit);
+				text2 = createText("\r\n\t");
+				div1 = createElement("div");
+				span = createElement("span");
+				span.textContent = "Выбор слоя";
+				text4 = createText("\r\n\t\t");
+				select = createElement("select");
+				option = createElement("option");
+				if (if_block0) { if_block0.c(); }
+				text5 = createText("\r\n");
+				if (if_block1) { if_block1.c(); }
+				div0.className = "forest-plugin-header svelte-gt11xl";
+				span.className = "gmx-select-layer-container__label svelte-gt11xl";
+				option.__value = "";
+				option.value = option.__value;
+				option.className = "svelte-gt11xl";
+				addListener(select, "change", change_handler);
+				select.name = "layerID";
+				select.className = "gmx-sidebar-select-medium svelte-gt11xl";
+				div1.className = "gmx-select-layer-container svelte-gt11xl";
+				div2.className = "forest-plugin-container svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, div2, anchor);
+				append(div2, div0);
+				append(div0, text0);
+				append(div0, text1);
+				append(div2, text2);
+				append(div2, div1);
+				append(div1, span);
+				append(div1, text4);
+				append(div1, select);
+				append(select, option);
+				if (if_block0) { if_block0.m(select, null); }
+				append(div2, text5);
+				if (if_block1) { if_block1.m(div2, null); }
+				current = true;
+			},
+
+			p: function p(changed, ctx) {
+				if (!current || changed.limit) {
+					setData(text1, ctx.limit);
+				}
+
+				if (ctx.layerIds) {
+					if (if_block0) {
+						if_block0.p(changed, ctx);
+					} else {
+						if_block0 = create_if_block_4(component, ctx);
+						if_block0.c();
+						if_block0.m(select, null);
+					}
+				} else if (if_block0) {
+					if_block0.d(1);
+					if_block0 = null;
+				}
+
+				if (ctx.layerID) {
+					if (if_block1) {
+						if_block1.p(changed, ctx);
+					} else {
+						if_block1 = create_if_block$1(component, ctx);
+						if (if_block1) { if_block1.c(); }
+					}
+
+					if_block1.i(div2, null);
+				} else if (if_block1) {
+					if_block1.o(function() {
+						if_block1.d(1);
+						if_block1 = null;
+					});
+				}
+			},
+
+			i: function i(target, anchor) {
+				if (current) { return; }
+
+				this.m(target, anchor);
+			},
+
+			o: function o(outrocallback) {
+				if (!current) { return; }
+
+				if (if_block1) { if_block1.o(outrocallback); }
+				else { outrocallback(); }
+
+				current = false;
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(div2);
+				}
+
+				if (if_block0) { if_block0.d(); }
+				removeListener(select, "change", change_handler);
+				if (if_block1) { if_block1.d(); }
+			}
+		};
+	}
+
+	// (369:3) {#if layerIds}
+	function create_if_block_4(component, ctx) {
+		var each_anchor;
+
+		var each_value = ctx.layerIds;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value.length; i += 1) {
+			each_blocks[i] = create_each_block_2(component, get_each_context$2(ctx, each_value, i));
+		}
+
+		return {
+			c: function c() {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				each_anchor = createComment();
+			},
+
+			m: function m(target, anchor) {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(target, anchor);
+				}
+
+				insert(target, each_anchor, anchor);
+			},
+
+			p: function p(changed, ctx) {
+				if (changed.layerIds || changed.layerID) {
+					each_value = ctx.layerIds;
+
+					for (var i = 0; i < each_value.length; i += 1) {
+						var child_ctx = get_each_context$2(ctx, each_value, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block_2(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(each_anchor.parentNode, each_anchor);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value.length;
+				}
+			},
+
+			d: function d(detach) {
+				destroyEach(each_blocks, detach);
+
+				if (detach) {
+					detachNode(each_anchor);
+				}
+			}
+		};
+	}
+
+	// (370:4) {#each layerIds as it}
+	function create_each_block_2(component, ctx) {
+		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
+
+		return {
+			c: function c() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it.id;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.layerID === ctx.it.id;
+				option.className = "svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, option, anchor);
+				append(option, text);
+			},
+
+			p: function p(changed, ctx) {
+				if ((changed.layerIds) && text_value !== (text_value = ctx.it.title)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.layerIds) && option_value_value !== (option_value_value = ctx.it.id)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.layerID || changed.layerIds) && option_selected_value !== (option_selected_value = ctx.layerID === ctx.it.id)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (376:0) {#if layerID}
+	function create_if_block$1(component, ctx) {
+		var div19, div0, text1, div12, div11, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, div4, div3, text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text6, text7, input0, input0_value_value, text8, div6, div5, text9_value = ctx.params.inn.title || ctx.params.inn.value, text9, text10, input1, input1_value_value, text11, text12, text13, text14, text15, text16, text17, text18, text19, div8, div7, text20_value = ctx.params.reportType.title, text20, text21, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text32, div10, div9, text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text33, text34, select2, option10, text35, div13, text37, div17, div16, div14, button, text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text38, text39, div15, text40, text41_value = ctx.Object.keys(ctx.checked).length, text41, text42, text43_value = ctx.layerItems.length, text43, text44, table_updating = {}, text45, div18, current;
+
+		var each_value_1 = ctx.params.reportType.options;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value_1.length; i += 1) {
+			each_blocks[i] = create_each_block_1(component, get_each_context_1(ctx, each_value_1, i));
+		}
+
+		function change_handler(event) {
+			component.setNodeField(this, true);
+		}
+
+		var if_block0 = (ctx.reportType !== 'о восстановлении лесов') && create_if_block_3(component, ctx);
+
+		function change_handler_1(event) {
+			component.setNodeField(this);
+		}
+
+		function change_handler_2(event) {
+			component.setNodeField(this);
+		}
+
+		var selectinput0_initial_data = { key: "region", cols: ctx.cols };
+		var selectinput0 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput0_initial_data
+		});
+
+		var selectinput1_initial_data = { key: "forestry", cols: ctx.cols };
+		var selectinput1 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput1_initial_data
+		});
+
+		var selectinput2_initial_data = {
+		 	key: "sectionForestry",
+		 	cols: ctx.cols
+		 };
+		var selectinput2 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput2_initial_data
+		});
+
+		var selectinput3_initial_data = { key: "quadrant", cols: ctx.cols };
+		var selectinput3 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput3_initial_data
+		});
+
+		var selectinput4_initial_data = { key: "stratum", cols: ctx.cols };
+		var selectinput4 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput4_initial_data
+		});
+
+		var selectinput5_initial_data = { key: "site", cols: ctx.cols };
+		var selectinput5 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput5_initial_data
+		});
+
+		var selectinput6_initial_data = {
+		 	key: "recoveryEventType",
+		 	cols: ctx.cols
+		 };
+		var selectinput6 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput6_initial_data
+		});
+
+		var selectinput7_initial_data = { key: "siteArea", cols: ctx.cols };
+		var selectinput7 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput7_initial_data
+		});
+
+		function change_handler_3(event) {
+			component.setNodeField(this, true);
+		}
+
+		var if_block1 = (ctx.quadrantIds) && create_if_block_2(component, ctx);
+
+		function change_handler_4(event) {
+			component.setNodeField(this, true);
+		}
+
+		function click_handler(event) {
+			component.startDrawing(event);
+		}
+
+		var table_initial_data = {
+		 	items: ctx.layerItems,
+		 	hashCols: ctx.hashCols
+		 };
+		if (ctx.checked  !== void 0) {
+			table_initial_data.checked = ctx.checked ;
+			table_updating.checked = true;
+		}
+		var table = new Table({
+			root: component.root,
+			store: component.store,
+			data: table_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!table_updating.checked && changed.checked) {
+					newState.checked = childState.checked;
+				}
+				component._set(newState);
+				table_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			table._bind({ checked: 1 }, table.get());
+		});
+
+		function select_block_type(ctx) {
+			if (ctx.report) { return create_if_block_1; }
+			return create_else_block$1;
+		}
+
+		var current_block_type = select_block_type(ctx);
+		var if_block2 = current_block_type(component, ctx);
+
+		return {
+			c: function c() {
+				div19 = createElement("div");
+				div0 = createElement("div");
+				div0.textContent = "Ввод информации";
+				text1 = createText("\r\n\t\t\t");
+				div12 = createElement("div");
+				div11 = createElement("div");
+				div2 = createElement("div");
+				div1 = createElement("div");
+				text2 = createText(text2_value);
+				text3 = createText("\r\n\t\t\t\t\t\t");
+				select0 = createElement("select");
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				text4 = createText("\r\n");
+				if (if_block0) { if_block0.c(); }
+				text5 = createText("\r\n\t\t\t\t\t");
+				div4 = createElement("div");
+				div3 = createElement("div");
+				text6 = createText(text6_value);
+				text7 = createText("\r\n\t\t\t\t\t\t");
+				input0 = createElement("input");
+				text8 = createText("\r\n\t\t\t\t\t");
+				div6 = createElement("div");
+				div5 = createElement("div");
+				text9 = createText(text9_value);
+				text10 = createText("\r\n\t\t\t\t\t\t");
+				input1 = createElement("input");
+				text11 = createText("\r\n\r\n\t\t\t\t\t");
+				selectinput0._fragment.c();
+				text12 = createText("\r\n\t\t\t\t\t");
+				selectinput1._fragment.c();
+				text13 = createText("\r\n\t\t\t\t\t");
+				selectinput2._fragment.c();
+				text14 = createText("\r\n\t\t\t\t\t");
+				selectinput3._fragment.c();
+				text15 = createText("\r\n\t\t\t\t\t");
+				selectinput4._fragment.c();
+				text16 = createText("\r\n\t\t\t\t\t");
+				selectinput5._fragment.c();
+				text17 = createText("\r\n\t\t\t\t\t");
+				selectinput6._fragment.c();
+				text18 = createText("\r\n\t\t\t\t\t");
+				selectinput7._fragment.c();
+				text19 = createText("\r\n\r\n\t\t\t\t\t\r\n\t\t\t\t\t");
+				div8 = createElement("div");
+				div7 = createElement("div");
+				text20 = createText(text20_value);
+				text21 = createText("\r\n\t\t\t\t\t\t");
+				select1 = createElement("select");
+				option0 = createElement("option");
+				option0.textContent = "1:5000";
+				option1 = createElement("option");
+				option1.textContent = "1:10000";
+				option2 = createElement("option");
+				option2.textContent = "1:15000";
+				option3 = createElement("option");
+				option3.textContent = "1:20000";
+				option4 = createElement("option");
+				option4.textContent = "1:25000";
+				option5 = createElement("option");
+				option5.textContent = "1:30000";
+				option6 = createElement("option");
+				option6.textContent = "1:35000";
+				option7 = createElement("option");
+				option7.textContent = "1:40000";
+				option8 = createElement("option");
+				option8.textContent = "1:45000";
+				option9 = createElement("option");
+				option9.textContent = "1:50000";
+				text32 = createText("\r\n\t\t\t\t\t");
+				div10 = createElement("div");
+				div9 = createElement("div");
+				text33 = createText(text33_value);
+				text34 = createText("\r\n\t\t\t\t\t\t");
+				select2 = createElement("select");
+				option10 = createElement("option");
+				if (if_block1) { if_block1.c(); }
+				text35 = createText("\r\n\t\t\t");
+				div13 = createElement("div");
+				div13.textContent = "Список объектов";
+				text37 = createText("\r\n\t\t\t");
+				div17 = createElement("div");
+				div16 = createElement("div");
+				div14 = createElement("div");
+				button = createElement("button");
+				text38 = createText(text38_value);
+				text39 = createText("\r\n\t\t\t\t\t");
+				div15 = createElement("div");
+				text40 = createText("Выделено: ");
+				text41 = createText(text41_value);
+				text42 = createText(" / ");
+				text43 = createText(text43_value);
+				text44 = createText("\r\n\t\t\t\t\t");
+				table._fragment.c();
+				text45 = createText("\r\n\t\t\t");
+				div18 = createElement("div");
+				if_block2.c();
+				div0.className = "gmx-sidebar-label-medium svelte-gt11xl";
+				div1.className = "gmx-sidebar-label svelte-gt11xl";
+				addListener(select0, "change", change_handler);
+				select0.name = "reportType";
+				select0.className = "gmx-sidebar-select-large svelte-gt11xl";
+				div2.className = "gmx-sidebar-labeled-block svelte-gt11xl";
+				div3.className = "gmx-sidebar-label-small svelte-gt11xl";
+				addListener(input0, "change", change_handler_1);
+				input0.name = "organizationName";
+				input0.value = input0_value_value = ctx.params.organizationName.value;
+				setAttribute(input0, "type", "text");
+				input0.className = "gmx-sidebar-input-large svelte-gt11xl";
+				div4.className = "gmx-sidebar-labeled-block svelte-gt11xl";
+				div5.className = "gmx-sidebar-label-small svelte-gt11xl";
+				addListener(input1, "change", change_handler_2);
+				input1.name = "inn";
+				input1.value = input1_value_value = ctx.params.inn.value;
+				setAttribute(input1, "type", "text");
+				input1.className = "gmx-sidebar-input-large svelte-gt11xl";
+				div6.className = "gmx-sidebar-labeled-block svelte-gt11xl";
+				div7.className = "gmx-sidebar-label svelte-gt11xl";
+				option0.__value = "5000";
+				option0.value = option0.__value;
+				option0.className = "svelte-gt11xl";
+				option1.__value = "10000";
+				option1.value = option1.__value;
+				option1.className = "svelte-gt11xl";
+				option2.__value = "15000";
+				option2.value = option2.__value;
+				option2.className = "svelte-gt11xl";
+				option3.__value = "20000";
+				option3.value = option3.__value;
+				option3.className = "svelte-gt11xl";
+				option4.__value = "25000";
+				option4.value = option4.__value;
+				option4.className = "svelte-gt11xl";
+				option5.__value = "30000";
+				option5.value = option5.__value;
+				option5.className = "svelte-gt11xl";
+				option6.__value = "35000";
+				option6.value = option6.__value;
+				option6.className = "svelte-gt11xl";
+				option7.__value = "40000";
+				option7.value = option7.__value;
+				option7.className = "svelte-gt11xl";
+				option8.__value = "45000";
+				option8.value = option8.__value;
+				option8.className = "svelte-gt11xl";
+				option9.__value = "50000";
+				option9.value = option9.__value;
+				option9.className = "svelte-gt11xl";
+				addListener(select1, "change", change_handler_3);
+				select1.name = "scale";
+				select1.className = "gmx-sidebar-select-large svelte-gt11xl";
+				div8.className = "gmx-sidebar-labeled-block svelte-gt11xl";
+				div9.className = "gmx-sidebar-label svelte-gt11xl";
+				option10.__value = "";
+				option10.value = option10.__value;
+				option10.className = "svelte-gt11xl";
+				addListener(select2, "change", change_handler_4);
+				select2.name = "quadrantLayerId";
+				select2.className = "gmx-sidebar-select-large svelte-gt11xl";
+				div10.className = "gmx-sidebar-labeled-block svelte-gt11xl";
+				div13.className = "gmx-sidebar-label-medium svelte-gt11xl";
+				addListener(button, "click", click_handler);
+				button.className = "gmx-sidebar-button svelte-gt11xl";
+				div14.className = "gmx-geometry-select-container svelte-gt11xl";
+				div15.className = "gmx-sidebar-label-medium svelte-gt11xl";
+				div17.className = "forest-features-block svelte-gt11xl";
+				div18.className = "gmx-button-container svelte-gt11xl";
+				div19.className = "leftContent forest-plugin-content svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, div19, anchor);
+				append(div19, div0);
+				append(div19, text1);
+				append(div19, div12);
+				append(div12, div11);
+				append(div11, div2);
+				append(div2, div1);
+				append(div1, text2);
+				append(div2, text3);
+				append(div2, select0);
+
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(select0, null);
+				}
+
+				append(div11, text4);
+				if (if_block0) { if_block0.m(div11, null); }
+				append(div11, text5);
+				append(div11, div4);
+				append(div4, div3);
+				append(div3, text6);
+				append(div4, text7);
+				append(div4, input0);
+				append(div11, text8);
+				append(div11, div6);
+				append(div6, div5);
+				append(div5, text9);
+				append(div6, text10);
+				append(div6, input1);
+				append(div11, text11);
+				selectinput0._mount(div11, null);
+				append(div11, text12);
+				selectinput1._mount(div11, null);
+				append(div11, text13);
+				selectinput2._mount(div11, null);
+				append(div11, text14);
+				selectinput3._mount(div11, null);
+				append(div11, text15);
+				selectinput4._mount(div11, null);
+				append(div11, text16);
+				selectinput5._mount(div11, null);
+				append(div11, text17);
+				selectinput6._mount(div11, null);
+				append(div11, text18);
+				selectinput7._mount(div11, null);
+				append(div11, text19);
+				append(div11, div8);
+				append(div8, div7);
+				append(div7, text20);
+				append(div8, text21);
+				append(div8, select1);
+				append(select1, option0);
+				append(select1, option1);
+				append(select1, option2);
+				append(select1, option3);
+				append(select1, option4);
+				append(select1, option5);
+				append(select1, option6);
+				append(select1, option7);
+				append(select1, option8);
+				append(select1, option9);
+				append(div11, text32);
+				append(div11, div10);
+				append(div10, div9);
+				append(div9, text33);
+				append(div10, text34);
+				append(div10, select2);
+				append(select2, option10);
+				if (if_block1) { if_block1.m(select2, null); }
+				append(div19, text35);
+				append(div19, div13);
+				append(div19, text37);
+				append(div19, div17);
+				append(div17, div16);
+				append(div16, div14);
+				append(div14, button);
+				append(button, text38);
+				append(div16, text39);
+				append(div16, div15);
+				append(div15, text40);
+				append(div15, text41);
+				append(div15, text42);
+				append(div15, text43);
+				append(div16, text44);
+				table._mount(div16, null);
+				append(div19, text45);
+				append(div19, div18);
+				if_block2.m(div18, null);
+				current = true;
+			},
+
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
+				if ((!current || changed.params) && text2_value !== (text2_value = ctx.params.reportType.title)) {
+					setData(text2, text2_value);
+				}
+
+				if (changed.params) {
+					each_value_1 = ctx.params.reportType.options;
+
+					for (var i = 0; i < each_value_1.length; i += 1) {
+						var child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block_1(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(select0, null);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value_1.length;
+				}
+
+				if (ctx.reportType !== 'о восстановлении лесов') {
+					if (if_block0) {
+						if_block0.p(changed, ctx);
+					} else {
+						if_block0 = create_if_block_3(component, ctx);
+						if (if_block0) { if_block0.c(); }
+					}
+
+					if_block0.i(div11, text5);
+				} else if (if_block0) {
+					if_block0.o(function() {
+						if_block0.d(1);
+						if_block0 = null;
+					});
+				}
+
+				if ((!current || changed.params) && text6_value !== (text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value)) {
+					setData(text6, text6_value);
+				}
+
+				if ((!current || changed.params) && input0_value_value !== (input0_value_value = ctx.params.organizationName.value)) {
+					input0.value = input0_value_value;
+				}
+
+				if ((!current || changed.params) && text9_value !== (text9_value = ctx.params.inn.title || ctx.params.inn.value)) {
+					setData(text9, text9_value);
+				}
+
+				if ((!current || changed.params) && input1_value_value !== (input1_value_value = ctx.params.inn.value)) {
+					input1.value = input1_value_value;
+				}
+
+				var selectinput0_changes = {};
+				if (changed.cols) { selectinput0_changes.cols = ctx.cols; }
+				selectinput0._set(selectinput0_changes);
+
+				var selectinput1_changes = {};
+				if (changed.cols) { selectinput1_changes.cols = ctx.cols; }
+				selectinput1._set(selectinput1_changes);
+
+				var selectinput2_changes = {};
+				if (changed.cols) { selectinput2_changes.cols = ctx.cols; }
+				selectinput2._set(selectinput2_changes);
+
+				var selectinput3_changes = {};
+				if (changed.cols) { selectinput3_changes.cols = ctx.cols; }
+				selectinput3._set(selectinput3_changes);
+
+				var selectinput4_changes = {};
+				if (changed.cols) { selectinput4_changes.cols = ctx.cols; }
+				selectinput4._set(selectinput4_changes);
+
+				var selectinput5_changes = {};
+				if (changed.cols) { selectinput5_changes.cols = ctx.cols; }
+				selectinput5._set(selectinput5_changes);
+
+				var selectinput6_changes = {};
+				if (changed.cols) { selectinput6_changes.cols = ctx.cols; }
+				selectinput6._set(selectinput6_changes);
+
+				var selectinput7_changes = {};
+				if (changed.cols) { selectinput7_changes.cols = ctx.cols; }
+				selectinput7._set(selectinput7_changes);
+
+				if ((!current || changed.params) && text20_value !== (text20_value = ctx.params.reportType.title)) {
+					setData(text20, text20_value);
+				}
+
+				if ((!current || changed.params) && text33_value !== (text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value)) {
+					setData(text33, text33_value);
+				}
+
+				if (ctx.quadrantIds) {
+					if (if_block1) {
+						if_block1.p(changed, ctx);
+					} else {
+						if_block1 = create_if_block_2(component, ctx);
+						if_block1.c();
+						if_block1.m(select2, null);
+					}
+				} else if (if_block1) {
+					if_block1.d(1);
+					if_block1 = null;
+				}
+
+				if ((!current || changed.drawstart) && text38_value !== (text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном')) {
+					setData(text38, text38_value);
+				}
+
+				if ((!current || changed.Object || changed.checked) && text41_value !== (text41_value = ctx.Object.keys(ctx.checked).length)) {
+					setData(text41, text41_value);
+				}
+
+				if ((!current || changed.layerItems) && text43_value !== (text43_value = ctx.layerItems.length)) {
+					setData(text43, text43_value);
+				}
+
+				var table_changes = {};
+				if (changed.layerItems) { table_changes.items = ctx.layerItems; }
+				if (changed.hashCols) { table_changes.hashCols = ctx.hashCols; }
+				if (!table_updating.checked && changed.checked) {
+					table_changes.checked = ctx.checked ;
+					table_updating.checked = ctx.checked  !== void 0;
+				}
+				table._set(table_changes);
+				table_updating = {};
+
+				if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block2) {
+					if_block2.p(changed, ctx);
+				} else {
+					if_block2.d(1);
+					if_block2 = current_block_type(component, ctx);
+					if_block2.c();
+					if_block2.m(div18, null);
+				}
+			},
+
+			i: function i(target, anchor) {
+				if (current) { return; }
+
+				this.m(target, anchor);
+			},
+
+			o: function o(outrocallback) {
+				if (!current) { return; }
+
+				outrocallback = callAfter(outrocallback, 10);
+
+				if (if_block0) { if_block0.o(outrocallback); }
+				else { outrocallback(); }
+
+				if (selectinput0) { selectinput0._fragment.o(outrocallback); }
+				if (selectinput1) { selectinput1._fragment.o(outrocallback); }
+				if (selectinput2) { selectinput2._fragment.o(outrocallback); }
+				if (selectinput3) { selectinput3._fragment.o(outrocallback); }
+				if (selectinput4) { selectinput4._fragment.o(outrocallback); }
+				if (selectinput5) { selectinput5._fragment.o(outrocallback); }
+				if (selectinput6) { selectinput6._fragment.o(outrocallback); }
+				if (selectinput7) { selectinput7._fragment.o(outrocallback); }
+				if (table) { table._fragment.o(outrocallback); }
+				current = false;
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(div19);
+				}
+
+				destroyEach(each_blocks, detach);
+
+				removeListener(select0, "change", change_handler);
+				if (if_block0) { if_block0.d(); }
+				removeListener(input0, "change", change_handler_1);
+				removeListener(input1, "change", change_handler_2);
+				selectinput0.destroy();
+				selectinput1.destroy();
+				selectinput2.destroy();
+				selectinput3.destroy();
+				selectinput4.destroy();
+				selectinput5.destroy();
+				selectinput6.destroy();
+				selectinput7.destroy();
+				removeListener(select1, "change", change_handler_3);
+				if (if_block1) { if_block1.d(); }
+				removeListener(select2, "change", change_handler_4);
+				removeListener(button, "click", click_handler);
+				table.destroy();
+				if_block2.d();
+			}
+		};
+	}
+
+	// (384:0) {#each params.reportType.options as it}
+	function create_each_block_1(component, ctx) {
+		var option, text_value = ctx.it, text, option_value_value;
+
+		return {
+			c: function c() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it;
+				option.value = option.__value;
+				option.className = "svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, option, anchor);
+				append(option, text);
+			},
+
+			p: function p(changed, ctx) {
+				if ((changed.params) && text_value !== (text_value = ctx.it)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.params) && option_value_value !== (option_value_value = ctx.it)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (390:0) {#if reportType !== 'о восстановлении лесов'}
+	function create_if_block_3(component, ctx) {
+		var div, text, current;
+
+		var selectinput0_initial_data = {
+		 	key: "fellingForm",
+		 	cols: ctx.cols
+		 };
+		var selectinput0 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput0_initial_data
+		});
+
+		var selectinput1_initial_data = {
+		 	key: "fellingType",
+		 	cols: ctx.cols
+		 };
+		var selectinput1 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput1_initial_data
+		});
+
+		return {
+			c: function c() {
+				div = createElement("div");
+				selectinput0._fragment.c();
+				text = createText("\r\n\t\t\t\t\t\t");
+				selectinput1._fragment.c();
+			},
+
+			m: function m(target, anchor) {
+				insert(target, div, anchor);
+				selectinput0._mount(div, null);
+				append(div, text);
+				selectinput1._mount(div, null);
+				current = true;
+			},
+
+			p: function p(changed, ctx) {
+				var selectinput0_changes = {};
+				if (changed.cols) { selectinput0_changes.cols = ctx.cols; }
+				selectinput0._set(selectinput0_changes);
+
+				var selectinput1_changes = {};
+				if (changed.cols) { selectinput1_changes.cols = ctx.cols; }
+				selectinput1._set(selectinput1_changes);
+			},
+
+			i: function i(target, anchor) {
+				if (current) { return; }
+
+				this.m(target, anchor);
+			},
+
+			o: function o(outrocallback) {
+				if (!current) { return; }
+
+				outrocallback = callAfter(outrocallback, 2);
+
+				if (selectinput0) { selectinput0._fragment.o(outrocallback); }
+				if (selectinput1) { selectinput1._fragment.o(outrocallback); }
+				current = false;
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(div);
+				}
+
+				selectinput0.destroy();
+				selectinput1.destroy();
+			}
+		};
+	}
+
+	// (434:0) {#if quadrantIds}
+	function create_if_block_2(component, ctx) {
+		var each_anchor;
+
+		var each_value_2 = ctx.quadrantIds;
+
+		var each_blocks = [];
+
+		for (var i = 0; i < each_value_2.length; i += 1) {
+			each_blocks[i] = create_each_block$2(component, get_each_context_2(ctx, each_value_2, i));
+		}
+
+		return {
+			c: function c() {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].c();
+				}
+
+				each_anchor = createComment();
+			},
+
+			m: function m(target, anchor) {
+				for (var i = 0; i < each_blocks.length; i += 1) {
+					each_blocks[i].m(target, anchor);
+				}
+
+				insert(target, each_anchor, anchor);
+			},
+
+			p: function p(changed, ctx) {
+				if (changed.quadrantIds || changed.quadrantLayerId) {
+					each_value_2 = ctx.quadrantIds;
+
+					for (var i = 0; i < each_value_2.length; i += 1) {
+						var child_ctx = get_each_context_2(ctx, each_value_2, i);
+
+						if (each_blocks[i]) {
+							each_blocks[i].p(changed, child_ctx);
+						} else {
+							each_blocks[i] = create_each_block$2(component, child_ctx);
+							each_blocks[i].c();
+							each_blocks[i].m(each_anchor.parentNode, each_anchor);
+						}
+					}
+
+					for (; i < each_blocks.length; i += 1) {
+						each_blocks[i].d(1);
+					}
+					each_blocks.length = each_value_2.length;
+				}
+			},
+
+			d: function d(detach) {
+				destroyEach(each_blocks, detach);
+
+				if (detach) {
+					detachNode(each_anchor);
+				}
+			}
+		};
+	}
+
+	// (435:1) {#each quadrantIds as it}
+	function create_each_block$2(component, ctx) {
+		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
+
+		return {
+			c: function c() {
+				option = createElement("option");
+				text = createText(text_value);
+				option.__value = option_value_value = ctx.it.id;
+				option.value = option.__value;
+				option.selected = option_selected_value = ctx.quadrantLayerId === ctx.it.id;
+				option.className = "svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, option, anchor);
+				append(option, text);
+			},
+
+			p: function p(changed, ctx) {
+				if ((changed.quadrantIds) && text_value !== (text_value = ctx.it.title)) {
+					setData(text, text_value);
+				}
+
+				if ((changed.quadrantIds) && option_value_value !== (option_value_value = ctx.it.id)) {
+					option.__value = option_value_value;
+				}
+
+				option.value = option.__value;
+				if ((changed.quadrantLayerId || changed.quadrantIds) && option_selected_value !== (option_selected_value = ctx.quadrantLayerId === ctx.it.id)) {
+					option.selected = option_selected_value;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(option);
+				}
+			}
+		};
+	}
+
+	// (459:0) {:else}
+	function create_else_block$1(component, ctx) {
+		var button, text, button_class_value;
+
+		function click_handler(event) {
+			component.sendReport();
+		}
+
+		return {
+			c: function c() {
+				button = createElement("button");
+				text = createText("Создать отчеты");
+				addListener(button, "click", click_handler);
+				button.className = button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, button, anchor);
+				append(button, text);
+			},
+
+			p: function p(changed, ctx) {
+				if ((changed.Object || changed.checked) && button_class_value !== (button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-gt11xl")) {
+					button.className = button_class_value;
+				}
+			},
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(button);
+				}
+
+				removeListener(button, "click", click_handler);
+			}
+		};
+	}
+
+	// (457:0) {#if report}
+	function create_if_block_1(component, ctx) {
+		var button;
+
+		return {
+			c: function c() {
+				button = createElement("button");
+				button.innerHTML = "<div class=\"lds-ellipsis svelte-gt11xl\"><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div></div>";
+				button.className = "gmx-sidebar-button-disabled svelte-gt11xl";
+			},
+
+			m: function m(target, anchor) {
+				insert(target, button, anchor);
+			},
+
+			p: noop,
+
+			d: function d(detach) {
+				if (detach) {
+					detachNode(button);
+				}
+			}
+		};
+	}
+
+	function App(options) {
+		var this$1 = this;
+
+		init(this, options);
+		this._state = assign(assign({ Object : Object }, data$2()), options.data);
+		this._intro = !!options.intro;
+
+		this._handlers.state = [onstate$2];
+
+		onstate$2.call(this, { changed: assignTrue({}, this._state), current: this._state });
+
+		this._fragment = create_main_fragment$2(this, this._state);
+
+		this.root._oncreate.push(function () {
+			oncreate$1.call(this$1);
+			this$1.fire("update", { changed: assignTrue({}, this$1._state), current: this$1._state });
+		});
+
+		if (options.target) {
+			this._fragment.c();
+			this._mount(options.target, options.anchor);
+
+			flush(this);
+		}
+
+		this._intro = true;
+	}
+
+	assign(App.prototype, proto);
+	assign(App.prototype, methods$2);
+
+	exports.App = App;
+
+	return exports;
+
+}({}));
 //# sourceMappingURL=gmxForest.js.map

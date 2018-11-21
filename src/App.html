@@ -90,7 +90,7 @@
 				layerItems.forEach((it) => {
 					let id = it[hashCols.gmx_id];
 					if (checked[id]) {
-						let data = {featureID: id, format: format};
+						let data = {featureID: id};
 						// Object.entries(params).forEach(([key, val]) => {
 						for (let key in params) {
 							let val = params[key];
@@ -106,7 +106,7 @@
 				return fetch(`${serverBase}Plugins/ForestReport/ForestReportImage`, {
 						method: 'post',
 						headers: {'Content-type': 'application/x-www-form-urlencoded'},
-						body: L.gmxUtil.getFormData({WrapStyle: 'None', groupRequest: groupRequest}),
+						body: L.gmxUtil.getFormData({WrapStyle: 'None', format: format, groupRequest: groupRequest}),
 						mode: 'cors',
 						credentials: 'include'
 					})
