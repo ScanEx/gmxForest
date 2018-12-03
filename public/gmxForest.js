@@ -1008,7 +1008,7 @@ var gmxForest = (function (exports) {
 			params: {
 				layerID: {value: '', title: 'Выбор слоя'},
 				quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-				reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+				reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
 				organizationName: {value: 'Наименование организации'},
 				inn: {value: '1234567890', title: 'ИНН'},
 				region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
@@ -1606,7 +1606,7 @@ var gmxForest = (function (exports) {
 			component.setNodeField(this, true);
 		}
 
-		var if_block0 = (ctx.reportType !== 'о восстановлении лесов') && create_if_block_3(component, ctx);
+		var if_block0 = (ctx.reportType !== 'о воспроизводстве лесов') && create_if_block_3(component, ctx);
 
 		function change_handler_1(event) {
 			component.setNodeField(this);
@@ -2020,7 +2020,7 @@ var gmxForest = (function (exports) {
 					each_blocks.length = each_value_1.length;
 				}
 
-				if (ctx.reportType !== 'о восстановлении лесов') {
+				if (ctx.reportType !== 'о воспроизводстве лесов') {
 					if (if_block0) {
 						if_block0.p(changed, ctx);
 					} else {
@@ -2230,7 +2230,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (390:0) {#if reportType !== 'о восстановлении лесов'}
+	// (390:0) {#if reportType !== 'о воспроизводстве лесов'}
 	function create_if_block_3(component, ctx) {
 		var div, text, current;
 

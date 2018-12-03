@@ -8,7 +8,7 @@
 				params: {
 					layerID: {value: '', title: 'Выбор слоя'},
 					quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-					reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о восстановлении лесов'], title: 'Тип отчета'},
+					reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
 					organizationName: {value: 'Наименование организации'},
 					inn: {value: '1234567890', title: 'ИНН'},
 					region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
@@ -387,7 +387,7 @@
 
 						</select>
 					</div>
-{#if reportType !== 'о восстановлении лесов'}
+{#if reportType !== 'о воспроизводстве лесов'}
 					<div>
 						<SelectInput key="fellingForm" cols="{cols}" />
 						<SelectInput key="fellingType" cols="{cols}" />
