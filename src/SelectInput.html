@@ -37,6 +37,7 @@ export default {
 		let attr = params[key];
 		if (attr.title === undefined) { attr.title = attr.value; }
 		this.set(attr);
+		if (attr.clicked) { this.set({clicked: true}); }
 	}
 };
 </script>

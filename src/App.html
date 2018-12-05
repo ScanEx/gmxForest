@@ -1,28 +1,43 @@
 
 <script>
 	const serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
+	const stateStorage = JSON.parse(window.localStorage.getItem('gmxForest_')) || {};
+	let params = {
+		layerID: {value: '', title: 'Выбор слоя'},
+		quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
+		reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
+		organizationName: {value: 'Наименование организации'},
+		inn: {value: '1234567890', title: 'ИНН'},
+		region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
+		forestry: {value: '', title: 'Лесничество'},
+		sectionForestry: {value: 'Участковое лесничество'},
+		quadrant: {value: 'Квартал'},
+		stratum: {value: 'Выдел'},
+		fellingForm: {value: '', title: 'Форма рубки'},
+		fellingType: {value: '', title: 'Тип рубки'},
+		recoveryEventType: {value: '', title: 'Тип мероприятия'},
+		siteArea: {value: 'Площадь'},
+		scale: {value: 'Масштаб'},
+		site: {value: 'Делянка'}
+	};
+	for (let key in params) {
+		let it = stateStorage[key];
+		if (it) {
+			if (it.value) {
+				params[key].title = params[key].title || params[key].value;
+				params[key].value = it.value;
+			} else if (it.field) {
+				params[key].colName = it.field;
+				params[key].clicked = true;
+			}
+		}
+	}
 
 	export default {
 		data() {
 			return {
-				params: {
-					layerID: {value: '', title: 'Выбор слоя'},
-					quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-					reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
-					organizationName: {value: 'Наименование организации'},
-					inn: {value: '1234567890', title: 'ИНН'},
-					region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
-					forestry: {value: 'Лесничество'},
-					sectionForestry: {value: 'Участковое лесничество'},
-					quadrant: {value: 'Квартал'},
-					stratum: {value: 'Выдел'},
-					fellingForm: {value: '', title: 'Форма рубки'},
-					fellingType: {value: '', title: 'Тип рубки'},
-					recoveryEventType: {value: '', title: 'Тип мероприятия'},
-					siteArea: {value: 'Площадь'},
-					scale: {value: 'Масштаб'},
-					site: {value: 'Делянка'}
-				},
+				stateStorage: {},
+				params: params,
 				layerItems: [],
 				format: 2,
 				limit: 0,
@@ -91,7 +106,6 @@
 					let id = it[hashCols.gmx_id];
 					if (checked[id]) {
 						let data = {featureID: id};
-						// Object.entries(params).forEach(([key, val]) => {
 						for (let key in params) {
 							let val = params[key];
 							let par = this.changedParams[key] || {};
@@ -137,6 +151,7 @@
 									}
 								})
 								.catch(err => console.log(err));
+							this.saveState(this.changedParams);
 						}
 					})
 					.catch(err => console.log(err));
@@ -235,7 +250,6 @@
 				if (setFlag) {
 					this.set({[node.name]: val});
 				}
-				// console.log('setField ____ ', data);
 			},
 			colsToHash(arr) {
 				return arr.reduce((a, v, i) => { a[v] = i; return a; }, {});
@@ -271,14 +285,39 @@
 			styleHook(it) {
 				const { checked } = this.get();
 				return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
+			},
+			checkState() {
+				this.set({stateStorage: stateStorage});
+				let target = this.options.target;
+				for(let key in stateStorage) {
+					let it = stateStorage[key],
+						node = target.getElementsByClassName(key)[0];
+
+					if (node) {
+						if (typeof(it) !== 'object') {
+							node.value = it;
+						// } else if (it.field) {
+							// node.selectedIndex = 1;
+						}
+					}
+					if (key === 'reportType') {
+						this.set({reportType: it});
+					}
+				}
+				
+			},
+			saveState(data) {
+				window.localStorage.setItem('gmxForest_', JSON.stringify(data));
 			}
 		},
 		
 		oncreate() {
-			this.changedParams = {};
+			this.changedParams = stateStorage || {};
 			const { meta, gmxMap } = this.get();
+			
 			this.getReportsCount();
 			let layerIds = [], quadrantIds = [];
+
 			gmxMap.layers.forEach((it) => {
 				if (it.getGmxProperties) {
 					let props = it.getGmxProperties(),
@@ -316,47 +355,12 @@
 					this.currentLayer.setStyleHook(this.styleHook.bind(this));
 				}
 				this.loadFeatures(current.layerID);
+				this.checkState();
 			}
 			if (changed.checked && this.currentLayer) {
 				this.currentLayer.repaint();
 			}
 		}
-/*
-		// preload({ params, query }) {
-			// const { slug } = params;
-
-			// return this.fetch(`${serverBase}plugins/forestreport/rest/GetCurrentUserInfo`)
-				// .then(r => r.json()).then(post => {
-					// return { post };
-				// });
-		// },
-        helpers: {
-           // collect
-		},
-		,
-
-		onupdate({ changed, current, previous }) {
-			console.log('in onupdate', this);
-			var tt = 1;
-			const { currentPerPage, searchInput, selectedPage, rows } = current;
-			// if (changed.currentPerPage) {
-				// this.getPaged({size: currentPerPage});
-			// }	        
-			// if (changed.searchInput) {
-				// debounce((x) => {
-					// console.log('searchInput changed', x);
-					// this.getPaged({ searchText: x });
-				// }, 250)();
-			// }	        
-			// if (changed.selectedPage) {
-				// const newPage = selectedPage + 1;
-				// this.getPaged({ page: newPage }, x => x.page != newPage);
-			// }   	        
-		},
-		ondestroy() {
-			console.log('in ondestroy', this);
-		}
-*/
 	}
 </script>
 
@@ -380,7 +384,7 @@
 				<div>
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label">{params.reportType.title}</div>
-						<select on:change="setNodeField(this, true)" name="reportType" class="gmx-sidebar-select-large">
+						<select on:change="setNodeField(this, true)" name="reportType" class="reportType gmx-sidebar-select-large">
 {#each params.reportType.options as it}
 								<option value="{it}">{it}</option>
 {/each}
@@ -395,11 +399,11 @@
 {/if}
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label-small">{params.organizationName.title || params.organizationName.value}</div>
-						<input on:change="setNodeField(this)" name="organizationName" value="{params.organizationName.value}" type="text" class="gmx-sidebar-input-large">
+						<input on:change="setNodeField(this)" name="organizationName" value="{params.organizationName.value}" type="text" class="organizationName gmx-sidebar-input-large">
 					</div>
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label-small">{params.inn.title || params.inn.value}</div>
-						<input on:change="setNodeField(this)" name="inn" value="{params.inn.value}" type="text" class="gmx-sidebar-input-large">
+						<input on:change="setNodeField(this)" name="inn" value="{params.inn.value}" type="text" class="inn gmx-sidebar-input-large">
 					</div>
 
 					<SelectInput key="region" cols="{cols}" />
@@ -411,10 +415,9 @@
 					<SelectInput key="recoveryEventType" cols="{cols}" />
 					<SelectInput key="siteArea" cols="{cols}" />
 
-					<!-- SelectInput key="scale" cols="{cols}" /> -->
 					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label">{params.reportType.title}</div>
-						<select on:change="setNodeField(this, true)" name="scale" class="gmx-sidebar-select-large">
+						<div class="gmx-sidebar-label">{params.scale.title || params.scale.value}</div>
+						<select on:change="setNodeField(this, true)" name="scale" class="scale gmx-sidebar-select-large">
 								<option value="5000">1:5000</option>
 								<option value="10000">1:10000</option>
 								<option value="15000">1:15000</option>
@@ -429,7 +432,7 @@
 					</div>
 					<div class="gmx-sidebar-labeled-block">
 						<div class="gmx-sidebar-label">{params.quadrantLayerId.title || params.quadrantLayerId.value}</div>
-						<select on:change="setNodeField(this, true)" name="quadrantLayerId" class="gmx-sidebar-select-large">
+						<select on:change="setNodeField(this, true)" name="quadrantLayerId" class="quadrantLayerId gmx-sidebar-select-large">
 							<option value=""></option>
 {#if quadrantIds}
 	{#each quadrantIds as it}
