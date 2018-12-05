@@ -59,7 +59,7 @@
 									});
 								}
 								treePane.appendChild(node);
-							} else if (node.parentNode) {
+							} else if (node && node.parentNode) {
 								node.parentNode.removeChild(node);
 							}
 						};
