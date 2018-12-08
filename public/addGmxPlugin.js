@@ -48,6 +48,7 @@
 										target: node,
 										data: {
 											// meta: true,		// фильтровать списки слоев по Meta
+											stateSave: Number(publicInterface.params.stateSave) || 0,
 											format: Number(publicInterface.params.format || 2),
 											map: publicInterface.map,
 											gmxMap: nsGmx.gmxMap

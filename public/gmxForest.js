@@ -204,6 +204,222 @@ var gmxForest = (function (exports) {
 		_differs: _differs
 	};
 
+	var serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
+
+	var chkTask = function (id) {
+		var UPDATE_INTERVAL = 2000;
+		return new Promise(function (resolve, reject) {
+			var interval = setInterval(function () {
+				fetch((serverBase + "AsyncTask.ashx?WrapStyle=None&TaskID=" + id),
+				{
+					mode: 'cors',
+					credentials: 'include'
+				})
+					.then(function (res) { return res.json(); })
+					.then(function (json) {
+						var ref = json.Result;
+						var Completed = ref.Completed;
+						var ErrorInfo = ref.ErrorInfo;
+						if (ErrorInfo) {
+							clearInterval(interval);
+							reject(json);
+						} else if (Completed) {
+							clearInterval(interval);
+							resolve(json);
+						}
+					})
+					.catch(function (err) { return console.warn(err); });
+			}, UPDATE_INTERVAL);
+		});
+	};
+
+	var modifyVectorObjects = function (layerId, features) {
+		console.log('modifyVectorObjects ____ ', layerId, features);
+		var params = {
+			WrapStyle: 'None',
+			LayerName : layerId,
+			Objects: JSON.stringify(features)
+		};
+
+		return fetch((serverBase + "VectorLayer/ModifyVectorObjects.ashx?" + (L.gmxUtil.getFormData(params))), {
+			mode: 'cors',
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json'
+			}
+		})
+			.then(function (res) { return res.json(); })
+			.catch(function (err) { return console.warn(err); });
+	};
+
+	var getReportsCount = function () {
+		return fetch((serverBase + "plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None"), {
+				mode: 'cors',
+				credentials: 'include'
+			})
+			.then(function (res) { return res.json(); })
+			.catch(function (err) { return console.warn(err); });
+	};
+
+	var loadFeatures = function (id) {
+		return fetch((serverBase + "VectorLayer/Search.ashx?layer=" + id + "&geometry=true&out_cs=EPSG:4326&WrapStyle=None"), {
+				mode: 'cors',
+				credentials: 'include'
+			})
+			.then(function (res) { return res.json(); })
+			.catch(function (err) { return console.warn(err); });
+	};
+
+	var selectFeaturesWithDrawing = function (id, geometry) {
+		var params = {
+			WrapStyle: 'None',
+			layer: id,
+			columns: '[{"Value":"[gmx_id]"}]',
+			page: 0,
+			// pagesize: null,
+			query: ("STIntersects([gmx_geometry], GeometryFromGeoJson('" + (JSON.stringify(geometry)) + "', 4326))")
+		};
+
+		return fetch((serverBase + "VectorLayer/Search.ashx?" + (L.gmxUtil.getFormData(params))), {
+			mode: 'cors',
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json'
+			}
+		})
+		.then(function (res) { return res.json(); })
+		.then(function (json) {
+			if (json.Status === 'ok' && json.Result) {
+				return json.Result.values.reduce(function (a, v) {
+					a[v] = true;
+					return a;
+				}, {});
+			}
+		})
+		.catch(function (err) { return console.warn(err); })
+	};
+
+	var getLayersParams = function (gmxMap) {
+		var satLayers = [];
+
+		gmxMap.layers.forEach(function (it) {
+			if (it.getGmxProperties && it._map) {
+				var props = it.getGmxProperties(),
+					metaProps = props.MetaProperties || {},
+					out = {layerId: props.name, type: 'оптическая'};
+				if (props.Temporal) {
+					var dt = it.getDateInterval();
+					if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
+					if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
+				}
+				if (metaProps.type) {
+					out.type = metaProps.type.Value;
+				}
+				if (metaProps.system) {
+					out.system = metaProps.system.Value;
+				}
+				if (metaProps.resolution) {
+					out.resolution = metaProps.resolution.Value;
+				}
+				satLayers.push(out);
+			}
+		});
+		return satLayers;
+	};
+
+	var getLayersIds = function (meta, gmxMap) {
+		var layerIds = [], quadrantIds = [], limit = 0;
+
+		gmxMap.layers.forEach(function (it) {
+			if (it.getGmxProperties) {
+				var props = it.getGmxProperties(),
+					metaProps = props.MetaProperties || {};
+				if (
+					props.type.toLowerCase() === 'vector' &&
+					props.GeometryType.toLowerCase() === 'polygon' &&
+					!props.IsRasterCatalog &&
+					!props.Quicklook
+					) {
+					var hash = {id: props.name, title: props.title};
+					if (meta) {
+						if (metaProps.forest && metaProps.forest.Value === 'true') {
+							layerIds.push(hash);
+						}
+						if (metaProps.quadrant && metaProps.quadrant.Value === 'true') {
+							quadrantIds.push(hash);
+						}
+					} else {
+						layerIds.push(hash);
+						quadrantIds.push(hash);
+					}
+				}
+			}
+		});
+
+		return getReportsCount().then(function (json) {
+			if (json.Status === 'ok') {
+				var count = json.Result.limit - json.Result.used;
+				limit = count > 0 ? count : 0;
+			}
+			return {layerIds: layerIds, quadrantIds: quadrantIds, limit: limit, cols: []};
+		});
+	};
+
+	var saveState = function (data) {
+		window.localStorage.setItem('gmxForest_', JSON.stringify(data));
+	};
+
+	var getState = function () {
+		return JSON.parse(window.localStorage.getItem('gmxForest_')) || {};
+	};
+
+	var sendReport = function (checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams) {
+		var groupRequest = [],
+			features = [],
+			satLayers = getLayersParams(gmxMap);
+
+		layerItems.forEach(function (it) {
+			var id = it[hashCols.gmx_id];
+			if (checked[id]) {
+				var data = {featureID: id};
+				for (var key in params) {
+					var val = params[key];
+					var par = changedParams[key] || {};
+					data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+				}
+				data.satLayers = satLayers;
+				groupRequest.push(data);
+				features.push({action:'update', id:id, properties:{FRSTAT:2}});
+			}
+		});
+		return fetch((serverBase + "Plugins/ForestReport/ForestReportImage"), {
+				method: 'post',
+				headers: {'Content-type': 'application/x-www-form-urlencoded'},
+				body: L.gmxUtil.getFormData({WrapStyle: 'None', format: format, groupRequest: groupRequest}),
+				mode: 'cors',
+				credentials: 'include'
+			})
+			.then(function (res) { return res.json(); })
+			.then(function (json) {
+				if (json.Status === 'ok') {
+					saveState(changedParams);
+					return chkTask(json.Result.TaskID)
+						.then(function (json) {
+							if (json.Status === 'ok') {
+								var downloadFile = json.Result.Result.downloadFile;
+
+								window.open(serverBase + downloadFile, '_self');
+
+								modifyVectorObjects(layerID, features);
+								return {report: false};
+							}
+						})
+						.catch(function (err) { return console.warn(err); });
+				}
+			})
+			.catch(function (err) { return console.warn(err); });
+	};
+
 	/* src\Table.html generated by Svelte v2.15.3 */
 
 	function data() {
@@ -412,37 +628,41 @@ var gmxForest = (function (exports) {
 				text12 = createText("вперед");
 				text13 = createText("\r\n\t\t\t\t");
 				div1 = createElement("div");
-				div1.innerHTML = "<div class=\"-loading-inner\"></div>";
+				div1.innerHTML = "<div class=\"-loading-inner svelte-1jklu78\"></div>";
 				addListener(input0, "click", click_handler);
 				input0.checked = ctx.reverse;
 				setAttribute(input0, "type", "checkbox");
 				input0.value = "on";
-				input0.className = "svelte-1jj6zh";
-				th0.className = "c1 svelte-1jj6zh";
+				input0.className = "svelte-1jklu78";
+				th0.className = "c1 svelte-1jklu78";
+				span0.className = "svelte-1jklu78";
 				addListener(th1, "click", click_handler_1);
 				th1.className = th1_class_value = "c2 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
 							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
-							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh";
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jklu78";
+				span1.className = "svelte-1jklu78";
 				addListener(th2, "click", click_handler_2);
 				th2.className = th2_class_value = "c3 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
 							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
-							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh";
-				tr0.className = "head svelte-1jj6zh";
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jklu78";
+				tr0.className = "head";
 				addListener(button0, "click", click_handler_3);
 				button0.disabled = button0_disabled_value = ctx.pageCurr === 1;
+				button0.className = "svelte-1jklu78";
 				addListener(input1, "change", change_handler_1);
 				setAttribute(input1, "type", "number");
 				input1.value = ctx.pageCurr;
-				input1.className = "svelte-1jj6zh";
-				span2.className = "pageInfo svelte-1jj6zh";
+				input1.className = "svelte-1jklu78";
+				span2.className = "pageInfo svelte-1jklu78";
 				addListener(button1, "click", click_handler_4);
 				button1.disabled = button1_disabled_value = ctx.pageFrom === ctx.pageCurr;
-				div1.className = "-loading";
+				button1.className = "svelte-1jklu78";
+				div1.className = "-loading svelte-1jklu78";
 				td.colSpan = "3";
-				td.className = "svelte-1jj6zh";
-				tr1.className = "pagination svelte-1jj6zh";
-				table.className = "table svelte-1jj6zh";
-				div2.className = "tableContect svelte-1jj6zh";
+				td.className = "svelte-1jklu78";
+				tr1.className = "pagination svelte-1jklu78";
+				table.className = "table svelte-1jklu78";
+				div2.className = "tableContect svelte-1jklu78";
 			},
 
 			m: function m(target, anchor) {
@@ -490,13 +710,13 @@ var gmxForest = (function (exports) {
 
 				if ((changed.sortKey || changed.sortType) && th1_class_value !== (th1_class_value = "c2 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'gmx_id' ?
 							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
-							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh")) {
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jklu78")) {
 					th1.className = th1_class_value;
 				}
 
 				if ((changed.sortKey || changed.sortType) && th2_class_value !== (th2_class_value = "c3 sorting \r\n\t\t\t\t\t" + (ctx.sortKey === 'FRSTAT' ?
 							(ctx.sortType === 'desc' ? 'sorting-desc' : 'sorting-asc')
-							: '') + "\r\n\t\t\t\t\t" + " svelte-1jj6zh")) {
+							: '') + "\r\n\t\t\t\t\t" + " svelte-1jklu78")) {
 					th2.className = th2_class_value;
 				}
 
@@ -581,23 +801,24 @@ var gmxForest = (function (exports) {
 				td2 = createElement("td");
 				span1 = createElement("span");
 				span2 = createElement("span");
-				span2.innerHTML = "<svg class=\"svgIcon svelte-1jj6zh\"><use xlink:href=\"#zoom-to-feature\"></use></svg>";
+				span2.innerHTML = "<svg class=\"svgIcon svelte-1jklu78\"><use xlink:href=\"#zoom-to-feature\" class=\"svelte-1jklu78\"></use></svg>";
 				input._svelte = { component: component, ctx: ctx };
 
 				addListener(input, "change", change_handler);
 				input.checked = input_checked_value = ctx.checked[ctx.it[ctx.hashCols.gmx_id]];
 				setAttribute(input, "type", "checkbox");
-				input.className = "svelte-1jj6zh";
-				td0.className = "c1 svelte-1jj6zh";
-				td1.className = "c2 svelte-1jj6zh";
-				span1.className = span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jj6zh";
+				input.className = "svelte-1jklu78";
+				td0.className = "c1 svelte-1jklu78";
+				span0.className = "svelte-1jklu78";
+				td1.className = "c2 svelte-1jklu78";
+				span1.className = span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jklu78";
 
 				span2._svelte = { component: component, ctx: ctx };
 
 				addListener(span2, "click", click_handler);
-				span2.className = "leaflet-gmx-iconSvg svgIcon svelte-1jj6zh";
-				td2.className = "c3";
-				tr.className = "item svelte-1jj6zh";
+				span2.className = "leaflet-gmx-iconSvg svgIcon svelte-1jklu78";
+				td2.className = "c3 svelte-1jklu78";
+				tr.className = "item";
 			},
 
 			m: function m(target, anchor) {
@@ -625,7 +846,7 @@ var gmxForest = (function (exports) {
 					setData(text1, text1_value);
 				}
 
-				if ((changed.tableItems || changed.hashCols) && span1_class_value !== (span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jj6zh")) {
+				if ((changed.tableItems || changed.hashCols) && span1_class_value !== (span1_class_value = "status " + (ctx.it[ctx.hashCols.FRSTAT] > 0 ? 'checked' : '') + " svelte-1jklu78")) {
 					span1.className = span1_class_value;
 				}
 
@@ -675,12 +896,38 @@ var gmxForest = (function (exports) {
 
 	/* src\SelectInput.html generated by Svelte v2.15.3 */
 
+	function value(ref) {
+		var key = ref.key;
+		var changedParams = ref.changedParams;
+
+		var it = changedParams ? changedParams[key] : {};
+		return it && it.value || '';
+	}
+
+	function colName(ref) {
+		var key = ref.key;
+		var changedParams = ref.changedParams;
+
+		var it = changedParams ? changedParams[key] : {};
+		return it && it.field || '';
+	}
+
+	function isClicked(ref) {
+		var key = ref.key;
+		var changedParams = ref.changedParams;
+
+		var it = changedParams ? changedParams[key] : {};
+		return it && it.field || false;
+	}
+
+	function title(ref) {
+	var key = ref.key;
+	var params = ref.params;
+	 var it = params[key]; return it.title || it.value; }
+
 	function data$1() {
 		return {
-			title: '',
-			value: '',
-			colName: '',
-			clicked: false,
+			key: '',
 			cols: []
 		};
 	}
@@ -688,42 +935,20 @@ var gmxForest = (function (exports) {
 		setSelection: function setSelection(val) {
 			var ref = this.get();
 			var key = ref.key;
-			this.root.setField(key, {value: '', field: val});
+			var changedParams = ref.changedParams;
+	// console.log(colName, `___ setSelection ______`, key, val, changedParams);
+			changedParams[key] = {value: '', field: val};
+			this.set({changedParams: changedParams});
 		},
-		setValue: function setValue(val) {
+		setValue: function setValue(val, fieldFlag) {
 			var ref = this.get();
 			var key = ref.key;
-			this.root.setField(key, {value: val, field: ''});
+			var changedParams = ref.changedParams;
+			changedParams[key] = {value: !fieldFlag ? val : '', field: fieldFlag ? val : ''};
+			this.set({changedParams: changedParams});
 		}
 	};
 
-	function oncreate() {
-		var ref = this.get();
-		var key = ref.key;
-		var ref$1 = this.root.get();
-		var params = ref$1.params;
-		var attr = params[key];
-		if (attr.title === undefined) { attr.title = attr.value; }
-		this.set(attr);
-		if (attr.clicked) { this.set({clicked: true}); }
-	}
-	function onstate$1(ref) {
-		var changed = ref.changed;
-		var current = ref.current;
-		var previous = ref.previous;
-
-		if(changed.clicked) {
-			if(current.clicked) {
-				var ref$1 = this.get();
-				var cols = ref$1.cols;
-				this.setSelection(cols[0]);
-			} else {
-				var ref$2 = this.get();
-				var value = ref$2.value;
-				this.setValue(value);
-			}
-		}
-	}
 	function get_each_context$1(ctx, list, i) {
 		var child_ctx = Object.create(ctx);
 		child_ctx.it = list[i];
@@ -731,19 +956,15 @@ var gmxForest = (function (exports) {
 	}
 
 	function create_main_fragment$1(component, ctx) {
-		var div3, div0, text0, text1, div2, div1, text2, button, current;
+		var div3, div0, text0, text1, div2, div1, current;
 
 		function select_block_type(ctx) {
-			if (ctx.clicked) { return create_if_block; }
+			if (ctx.isClicked) { return create_if_block; }
 			return create_else_block;
 		}
 
 		var current_block_type = select_block_type(ctx);
 		var if_block = current_block_type(component, ctx);
-
-		function click_handler(event) {
-			component.set({clicked: !ctx.clicked});
-		}
 
 		return {
 			c: function c() {
@@ -754,13 +975,8 @@ var gmxForest = (function (exports) {
 				div2 = createElement("div");
 				div1 = createElement("div");
 				if_block.c();
-				text2 = createText("\r\n\t\t\t");
-				button = createElement("button");
-				div0.className = "gmx-sidebar-label svelte-1amu9hw";
-				addListener(button, "click", click_handler);
-				button.className = "gmx-addon-button svelte-1amu9hw";
-				button.title = "выбрать из таблицы атрибутов";
-				div3.className = "gmx-sidebar-labeled-block svelte-1amu9hw";
+				div0.className = "gmx-sidebar-label svelte-tubnte";
+				div3.className = "gmx-sidebar-labeled-block svelte-tubnte";
 			},
 
 			m: function m(target, anchor) {
@@ -771,13 +987,10 @@ var gmxForest = (function (exports) {
 				append(div3, div2);
 				append(div2, div1);
 				if_block.m(div1, null);
-				append(div1, text2);
-				append(div1, button);
 				current = true;
 			},
 
-			p: function p(changed, _ctx) {
-				ctx = _ctx;
+			p: function p(changed, ctx) {
 				if (changed.title) {
 					setData(text0, ctx.title);
 				}
@@ -788,7 +1001,7 @@ var gmxForest = (function (exports) {
 					if_block.d(1);
 					if_block = current_block_type(component, ctx);
 					if_block.c();
-					if_block.m(div1, text2);
+					if_block.m(div1, null);
 				}
 			},
 
@@ -806,38 +1019,45 @@ var gmxForest = (function (exports) {
 				}
 
 				if_block.d();
-				removeListener(button, "click", click_handler);
 			}
 		};
 	}
 
-	// (55:3) {:else}
+	// (52:3) {:else}
 	function create_else_block(component, ctx) {
-		var input;
+		var input, text, button;
 
 		function change_handler(event) {
 			component.setValue(event.target.value);
 		}
 
+		function click_handler(event) {
+			component.setValue(ctx.cols[0], true);
+		}
+
 		return {
 			c: function c() {
 				input = createElement("input");
+				text = createText("\r\n\t\t\t\t");
+				button = createElement("button");
 				addListener(input, "change", change_handler);
 				setAttribute(input, "type", "text");
-				input.className = "gmx-sidebar-input-with-addon svelte-1amu9hw";
-				input.name = ctx.key;
+				input.className = "gmx-sidebar-input-with-addon svelte-tubnte";
 				input.value = ctx.value;
+				addListener(button, "click", click_handler);
+				button.className = "gmx-addon-button svelte-tubnte";
+				button.title = "выбрать из таблицы атрибутов";
 			},
 
 			m: function m(target, anchor) {
 				insert(target, input, anchor);
+				component.refs.inp = input;
+				insert(target, text, anchor);
+				insert(target, button, anchor);
 			},
 
-			p: function p(changed, ctx) {
-				if (changed.key) {
-					input.name = ctx.key;
-				}
-
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
 				if (changed.value) {
 					input.value = ctx.value;
 				}
@@ -849,13 +1069,20 @@ var gmxForest = (function (exports) {
 				}
 
 				removeListener(input, "change", change_handler);
+				if (component.refs.inp === input) { component.refs.inp = null; }
+				if (detach) {
+					detachNode(text);
+					detachNode(button);
+				}
+
+				removeListener(button, "click", click_handler);
 			}
 		};
 	}
 
-	// (49:3) {#if clicked}
+	// (45:3) {#if isClicked}
 	function create_if_block(component, ctx) {
-		var select;
+		var select, text, button;
 
 		var each_value = ctx.cols;
 
@@ -866,7 +1093,11 @@ var gmxForest = (function (exports) {
 		}
 
 		function change_handler(event) {
-			component.setSelection(this.options[this.selectedIndex].value);
+			component.setSelection(event.target.options[event.target.selectedIndex].value);
+		}
+
+		function click_handler(event) {
+			component.setValue('');
 		}
 
 		return {
@@ -876,9 +1107,14 @@ var gmxForest = (function (exports) {
 				for (var i = 0; i < each_blocks.length; i += 1) {
 					each_blocks[i].c();
 				}
+
+				text = createText("\r\n\t\t\t\t");
+				button = createElement("button");
 				addListener(select, "change", change_handler);
-				select.name = ctx.key;
-				select.className = "gmx-sidebar-select-with-addon svelte-1amu9hw";
+				select.className = "gmx-sidebar-select-with-addon svelte-tubnte";
+				addListener(button, "click", click_handler);
+				button.className = "gmx-addon-button svelte-tubnte";
+				button.title = "выбрать из таблицы атрибутов";
 			},
 
 			m: function m(target, anchor) {
@@ -887,6 +1123,10 @@ var gmxForest = (function (exports) {
 				for (var i = 0; i < each_blocks.length; i += 1) {
 					each_blocks[i].m(select, null);
 				}
+
+				component.refs.sel = select;
+				insert(target, text, anchor);
+				insert(target, button, anchor);
 			},
 
 			p: function p(changed, ctx) {
@@ -910,10 +1150,6 @@ var gmxForest = (function (exports) {
 					}
 					each_blocks.length = each_value.length;
 				}
-
-				if (changed.key) {
-					select.name = ctx.key;
-				}
 			},
 
 			d: function d(detach) {
@@ -924,11 +1160,18 @@ var gmxForest = (function (exports) {
 				destroyEach(each_blocks, detach);
 
 				removeListener(select, "change", change_handler);
+				if (component.refs.sel === select) { component.refs.sel = null; }
+				if (detach) {
+					detachNode(text);
+					detachNode(button);
+				}
+
+				removeListener(button, "click", click_handler);
 			}
 		};
 	}
 
-	// (51:5) {#each cols as it}
+	// (47:5) {#each cols as it}
 	function create_each_block$1(component, ctx) {
 		var option, text_value = ctx.it, text, option_value_value, option_selected_value;
 
@@ -970,28 +1213,18 @@ var gmxForest = (function (exports) {
 	}
 
 	function SelectInput(options) {
-		var this$1 = this;
-
 		init(this, options);
+		this.refs = {};
 		this._state = assign(data$1(), options.data);
+
+		this._recompute({ key: 1, changedParams: 1, params: 1 }, this._state);
 		this._intro = !!options.intro;
 
-		this._handlers.state = [onstate$1];
-
-		onstate$1.call(this, { changed: assignTrue({}, this._state), current: this._state });
-
 		this._fragment = create_main_fragment$1(this, this._state);
-
-		this.root._oncreate.push(function () {
-			oncreate.call(this$1);
-			this$1.fire("update", { changed: assignTrue({}, this$1._state), current: this$1._state });
-		});
 
 		if (options.target) {
 			this._fragment.c();
 			this._mount(options.target, options.anchor);
-
-			flush(this);
 		}
 
 		this._intro = true;
@@ -1000,45 +1233,44 @@ var gmxForest = (function (exports) {
 	assign(SelectInput.prototype, proto);
 	assign(SelectInput.prototype, methods$1);
 
+	SelectInput.prototype._recompute = function _recompute(changed, state) {
+		if (changed.key || changed.changedParams) {
+			if (this._differs(state.value, (state.value = value(state)))) { changed.value = true; }
+			if (this._differs(state.colName, (state.colName = colName(state)))) { changed.colName = true; }
+			if (this._differs(state.isClicked, (state.isClicked = isClicked(state)))) { changed.isClicked = true; }
+		}
+
+		if (changed.key || changed.params) {
+			if (this._differs(state.title, (state.title = title(state)))) { changed.title = true; }
+		}
+	};
+
 	/* src\App.html generated by Svelte v2.15.3 */
 
-	var serverBase = window.serverBase || '//maps.kosmosnimki.ru/';
-	var stateStorage = JSON.parse(window.localStorage.getItem('gmxForest_')) || {};
-	var params = {
-		layerID: {value: '', title: 'Выбор слоя'},
-		quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
-		reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
-		organizationName: {value: 'Наименование организации'},
-		inn: {value: '1234567890', title: 'ИНН'},
-		region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
-		forestry: {value: '', title: 'Лесничество'},
-		sectionForestry: {value: 'Участковое лесничество'},
-		quadrant: {value: 'Квартал'},
-		stratum: {value: 'Выдел'},
-		fellingForm: {value: '', title: 'Форма рубки'},
-		fellingType: {value: '', title: 'Тип рубки'},
-		recoveryEventType: {value: '', title: 'Тип мероприятия'},
-		siteArea: {value: 'Площадь'},
-		scale: {value: 'Масштаб'},
-		site: {value: 'Делянка'}
-	};
-	for (var key in params) {
-		var it = stateStorage[key];
-		if (it) {
-			if (it.value) {
-				params[key].title = params[key].title || params[key].value;
-				params[key].value = it.value;
-			} else if (it.field) {
-				params[key].colName = it.field;
-				params[key].clicked = true;
-			}
-		}
-	}
+	var stateStorage = getState();
 
 	function data$2() {
 		return {
-			stateStorage: {},
-			params: params,
+			stateSave: 0,
+			changedParams: {},
+			params: {
+				layerID: {value: '', title: 'Выбор слоя'},
+				quadrantLayerId: {value: '', title: 'Слой квартальной сети'},
+				reportType: {value: 'об использовании лесов', options: ['об использовании лесов', 'о воспроизводстве лесов'], title: 'Тип отчета'},
+				organizationName: {value: 'Наименование организации'},
+				inn: {value: '1234567890', title: 'ИНН'},
+				region: {value: 'Субъект', title: 'Субъект Российской Федерации'},
+				forestry: {value: '', title: 'Лесничество'},
+				sectionForestry: {value: 'Участковое лесничество'},
+				quadrant: {value: 'Квартал'},
+				stratum: {value: 'Выдел'},
+				fellingForm: {value: '', title: 'Форма рубки'},
+				fellingType: {value: '', title: 'Тип рубки'},
+				recoveryEventType: {value: '', title: 'Тип мероприятия'},
+				siteArea: {value: 'Площадь'},
+				scale: {value: 'Масштаб'},
+				site: {value: 'Делянка'}
+			},
 			layerItems: [],
 			format: 2,
 			limit: 0,
@@ -1059,7 +1291,7 @@ var gmxForest = (function (exports) {
 			var map = ref.map;
 			var layerItems = ref.layerItems;
 			var hashCols = ref.hashCols;
-			
+
 			for (var i = 0, len = layerItems.length; i < len; i++) {
 				var it = layerItems[i];
 				if (id === it[hashCols.gmx_id]) {
@@ -1067,12 +1299,11 @@ var gmxForest = (function (exports) {
 						bbox = L.gmxUtil.getGeometryBounds(geo),
 						latlngBbox = L.latLngBounds([[bbox.min.y, bbox.min.x], [bbox.max.y, bbox.max.x]]);
 					map.fitBounds(latlngBbox);
-					// console.log('viewItem ____ ', geo, latlngBbox, L.latLngBounds(bbox.coordinates));
 					break;
 				}
 			}
 		},
-		sendReport: function sendReport() {
+		sendReport: function sendReport$$1() {
 			var this$1 = this;
 
 			var ref = this.get();
@@ -1083,149 +1314,10 @@ var gmxForest = (function (exports) {
 			var format = ref.format;
 			var layerID = ref.layerID;
 			var gmxMap = ref.gmxMap;
-			var groupRequest = [],
-				features = [],
-				satLayers = [];
-
-			gmxMap.layers.forEach(function (it) {
-				if (it.getGmxProperties && it._map) {
-					var props = it.getGmxProperties(),
-						metaProps = props.MetaProperties || {},
-						out = {layerId: props.name, type: 'оптическая'};
-					if (props.Temporal) {
-						var dt = it.getDateInterval();
-						if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
-						if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
-					}
-					if (metaProps.type) {
-						out.type = metaProps.type.Value;
-					}
-					if (metaProps.system) {
-						out.system = metaProps.system.Value;
-					}
-					if (metaProps.resolution) {
-						out.resolution = metaProps.resolution.Value;
-					}
-					satLayers.push(out);
-				}
-			});
-
-			layerItems.forEach(function (it) {
-				var id = it[hashCols.gmx_id];
-				if (checked[id]) {
-					var data = {featureID: id};
-					for (var key in params) {
-						var val = params[key];
-						var par = this$1.changedParams[key] || {};
-						data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
-					}
-					data.satLayers = satLayers;
-					groupRequest.push(data);
-					features.push({action:'update', id:id, properties:{FRSTAT:2}});
-				}
-			});
+			var changedParams = ref.changedParams;
 			this.set({report: true});
-			return fetch((serverBase + "Plugins/ForestReport/ForestReportImage"), {
-					method: 'post',
-					headers: {'Content-type': 'application/x-www-form-urlencoded'},
-					body: L.gmxUtil.getFormData({WrapStyle: 'None', format: format, groupRequest: groupRequest}),
-					mode: 'cors',
-					credentials: 'include'
-				})
-				.then(function (res) { return res.json(); })
-				.then(function (json) {
-					if (json.Status === 'ok') {
-						this$1.chkTask(json.Result.TaskID)
-							.then(function (json) {
-								if (json.Status === 'ok') {
-									var downloadFile = json.Result.Result.downloadFile,
-										name = downloadFile.split('name=')[1];
-
-									window.open(serverBase + downloadFile, '_self');
-									// fetch(serverBase + downloadFile, {
-										// headers:{
-											// 'Access-Control-Allow-Origin':'*'
-										// },
-										// mode: 'cors',
-										// credentials: 'include'
-									// })
-										// .then(async res => ({
-											// filename: name,
-											// blob: await res.blob()
-										// }))
-										// .catch(this.handleError)
-									this$1.modifyVectorObjects(layerID, features);
-									this$1.set({report: false});
-								}
-							})
-							.catch(function (err) { return console.log(err); });
-						this$1.saveState(this$1.changedParams);
-					}
-				})
-				.catch(function (err) { return console.log(err); });
-		},
-		chkTask: function chkTask(id) {
-			var UPDATE_INTERVAL = 2000;
-			return new Promise(function (resolve, reject) {
-				var interval = setInterval(function () {
-					fetch((serverBase + "AsyncTask.ashx?WrapStyle=None&TaskID=" + id),
-					{
-						mode: 'cors',
-						credentials: 'include'
-					})
-						.then(function (res) { return res.json(); })
-						.then(function (json) {
-							var ref = json.Result;
-							var Completed = ref.Completed;
-							var ErrorInfo = ref.ErrorInfo;
-							if (ErrorInfo) {
-								clearInterval(interval);
-								reject(json);
-							} else if (Completed) {
-								clearInterval(interval);
-								resolve(json);
-							}
-						});
-				}, UPDATE_INTERVAL);
-			});
-		},
-		modifyVectorObjects: function modifyVectorObjects(layerId, features) {
-			// console.log('modifyVectorObjects ____ ', layerId, features);
-			var params = {
-				WrapStyle: 'None',
-				LayerName : layerId,
-				Objects: JSON.stringify(features)
-			};
-
-			return fetch((serverBase + "VectorLayer/ModifyVectorObjects.ashx?" + (L.gmxUtil.getFormData(params))), {
-				mode: 'cors',
-				credentials: 'include',
-				headers: {
-					'Accept': 'application/json'
-				}
-			})
-				.then(function (res) { return res.json(); })
-				.catch(function (err) { return console.log(err); });
-		},
-		selectFeaturesWithDrawing: function selectFeaturesWithDrawing(id, geometry) {
-			var params = {
-				WrapStyle: 'None',
-				layer: id,
-				columns: '[{"Value":"[gmx_id]"}]',
-				page: 0,
-				// pagesize: null,
-				query: ("STIntersects([gmx_geometry], GeometryFromGeoJson('" + (JSON.stringify(geometry)) + "', 4326))")
-			};
-	    
-			return fetch((serverBase + "VectorLayer/Search.ashx?" + (L.gmxUtil.getFormData(params))), {
-				mode: 'cors',
-				credentials: 'include',
-				headers: {
-					'Accept': 'application/json'
-				}
-			})
-			.then(function (res) { return res.json(); })
-			.catch(function (err) { return console.log(err); })
+			sendReport(checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams)
+			.then(function (json) { this$1.set(json); });
 		},
 		startDrawing: function startDrawing(ev) {
 			var this$1 = this;
@@ -1241,141 +1333,76 @@ var gmxForest = (function (exports) {
 				map.gmxDrawing.create('Polygon');
 				map.gmxDrawing.on('drawstop', function (e) {
 					this$1.set({drawstart: false});
-					this$1.selectFeaturesWithDrawing(layerID, e.object.toGeoJSON().geometry)
+					selectFeaturesWithDrawing(layerID, e.object.toGeoJSON().geometry)
 						.then(function (json) {
-							if (json.Status === 'ok' && json.Result) {
-								var newChecked = json.Result.values.reduce(function (a, v) {
-									a[v] = true;
-									return a;
-								}, {});
-								this$1.root.set({checked: L.extend(newChecked, checked)});
-								// console.log('checked ____ ', checked);
-							}
+							this$1.set({checked: L.extend(json, checked)});
 						});
 				}, this);
 				map._gmxEventsManager._drawstart = true;
 			}
 
 		},
+		getKeyState: function getKeyState(key) {
+			var ref = this.get();
+			var changedParams = ref.changedParams;
+			return changedParams[key];
+		},
 		setField: function setField(key, data) {
-			this.changedParams[key] = data;
+			var ref = this.get();
+			var changedParams = ref.changedParams;
+			changedParams[key] = data;
+			this.set({changedParams: changedParams});
 		},
 		setNodeField: function setNodeField(node, setFlag) {
-			var obj;
-
-			var val = node.options ? node.options[node.selectedIndex].value : node.value;
-			this.setField(node.name, val);
+			var val = node.options ? node.options[node.selectedIndex].value : node.value,
+				name = node.name;
+			this.setField(name, val);
 			if (setFlag) {
-				this.set(( obj = {}, obj[node.name] = val, obj ));
+				var attr = {};
+				attr[name] = val;
+				this.set(attr);
 			}
 		},
 		colsToHash: function colsToHash(arr) {
 			return arr.reduce(function (a, v, i) { a[v] = i; return a; }, {});
 		},
-	 			loadFeatures: function loadFeatures(id) {
-			var this$1 = this;
 
-			return fetch((serverBase + "VectorLayer/Search.ashx?layer=" + id + "&geometry=true&out_cs=EPSG:4326&WrapStyle=None"), {
-					mode: 'cors',
-					credentials: 'include'
-				})
-				.then(function (res) { return res.json(); })
-				.then(function (json) {
-					if (json.Status === 'ok') {
-						var cols = json.Result.fields;
-						this$1.set({cols: cols, hashCols: this$1.colsToHash(cols),layerItems: json.Result.values});
-					}
-				})
-				.catch(function (err) { return console.log(err); });
-		},
-		getReportsCount: function getReportsCount() {
-			var this$1 = this;
-
-			return fetch((serverBase + "plugins/forestreport/rest/GetCurrentUserInfo?WrapStyle=None"), {
-					mode: 'cors',
-					credentials: 'include'
-				})
-				.then(function (res) { return res.json(); })
-				.then(function (json) {
-					if (json.Status === 'ok') {
-						var count = json.Result.limit - json.Result.used;
-						this$1.set({limit: count > 0 ? count : 0});
-					}
-				})
-				.catch(function (err) { return console.log(err); });
-		},
 		styleHook: function styleHook(it) {
 			var ref = this.get();
 			var checked = ref.checked;
 			return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
 		},
 		checkState: function checkState() {
-			this.set({stateStorage: stateStorage});
+			var ref = this.get();
+			var changedParams = ref.changedParams;
 			var target = this.options.target;
-			for(var key in stateStorage) {
-				var it = stateStorage[key],
-					node = target.getElementsByClassName(key)[0];
+			for(var key in changedParams) {
+				var it = changedParams[key],
+					node = this.refs[key];
 
 				if (node) {
 					if (typeof(it) !== 'object') {
 						node.value = it;
-					// } else if (it.field) {
-						// node.selectedIndex = 1;
 					}
 				}
 				if (key === 'reportType') {
 					this.set({reportType: it});
 				}
 			}
-			
-		},
-		saveState: function saveState(data) {
-			window.localStorage.setItem('gmxForest_', JSON.stringify(data));
 		}
 	};
 
-	function oncreate$1() {
-		this.changedParams = stateStorage || {};
-		var ref = this.get();
-		var meta = ref.meta;
-		var gmxMap = ref.gmxMap;
-		
-		this.getReportsCount();
-		var layerIds = [], quadrantIds = [];
-
-		gmxMap.layers.forEach(function (it) {
-			if (it.getGmxProperties) {
-				var props = it.getGmxProperties(),
-					metaProps = props.MetaProperties || {};
-				if (
-					props.type.toLowerCase() === 'vector' &&
-					props.GeometryType.toLowerCase() === 'polygon' &&
-					!props.IsRasterCatalog &&
-					!props.Quicklook
-					) {
-					var hash$$1 = {id: props.name, title: props.title};
-					if (meta) {
-						if (metaProps.forest && metaProps.forest.Value === 'true') {
-							layerIds.push(hash$$1);
-						}
-						if (metaProps.quadrant && metaProps.quadrant.Value === 'true') {
-							quadrantIds.push(hash$$1);
-						}
-					} else {
-						layerIds.push(hash$$1);
-						quadrantIds.push(hash$$1);
-					}
-				}
-			}
-		});
-		this.set({layerIds: layerIds, quadrantIds: quadrantIds, cols: []});
-	}
-	function onstate$2(ref) {
+	function onstate$1(ref) {
+		var this$1 = this;
 		var changed = ref.changed;
 		var current = ref.current;
 		var previous = ref.previous;
 
-		// console.log('in onstate', changed);
+		// console.log('in onstate', changed, current);
+		if (changed.gmxMap) {
+			if (current.stateSave === 1) { this.set({changedParams: stateStorage}); }
+			getLayersIds(current.meta, current.gmxMap).then(function (json) { this$1.set(json); });
+		}
 		if (changed.layerID && current.layerID) {
 			var ref$1 = this.get();
 			var gmxMap = ref$1.gmxMap;
@@ -1384,11 +1411,25 @@ var gmxForest = (function (exports) {
 			if (this.currentLayer) {
 				this.currentLayer.setStyleHook(this.styleHook.bind(this));
 			}
-			this.loadFeatures(current.layerID);
-			this.checkState();
+			loadFeatures(current.layerID)
+			.then(function (json) {
+				if (json.Status === 'ok') {
+					var cols = json.Result.fields;
+					this$1.set({cols: cols, hashCols: this$1.colsToHash(cols),layerItems: json.Result.values});
+				}
+			});
 		}
 		if (changed.checked && this.currentLayer) {
 			this.currentLayer.repaint();
+		}
+	}
+	function onupdate(ref) {
+		var changed = ref.changed;
+		var current = ref.current;
+		var previous = ref.previous;
+
+		if (changed.cols) {
+			this.checkState();
 		}
 	}
 	function get_each_context_2(ctx, list, i) {
@@ -1436,16 +1477,16 @@ var gmxForest = (function (exports) {
 				if (if_block0) { if_block0.c(); }
 				text5 = createText("\r\n");
 				if (if_block1) { if_block1.c(); }
-				div0.className = "forest-plugin-header svelte-gt11xl";
-				span.className = "gmx-select-layer-container__label svelte-gt11xl";
+				div0.className = "forest-plugin-header svelte-qidupr";
+				span.className = "gmx-select-layer-container__label svelte-qidupr";
 				option.__value = "";
 				option.value = option.__value;
-				option.className = "svelte-gt11xl";
+				option.className = "svelte-qidupr";
 				addListener(select, "change", change_handler);
 				select.name = "layerID";
-				select.className = "gmx-sidebar-select-medium svelte-gt11xl";
-				div1.className = "gmx-select-layer-container svelte-gt11xl";
-				div2.className = "forest-plugin-container svelte-gt11xl";
+				select.className = "gmx-sidebar-select-medium svelte-qidupr";
+				div1.className = "gmx-select-layer-container svelte-qidupr";
+				div2.className = "forest-plugin-container svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -1527,7 +1568,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (373:3) {#if layerIds}
+	// (169:3) {#if layerIds}
 	function create_if_block_4(component, ctx) {
 		var each_anchor;
 
@@ -1589,7 +1630,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (374:4) {#each layerIds as it}
+	// (170:4) {#each layerIds as it}
 	function create_each_block_2(component, ctx) {
 		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
 
@@ -1600,7 +1641,7 @@ var gmxForest = (function (exports) {
 				option.__value = option_value_value = ctx.it.id;
 				option.value = option.__value;
 				option.selected = option_selected_value = ctx.layerID === ctx.it.id;
-				option.className = "svelte-gt11xl";
+				option.className = "svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -1631,9 +1672,9 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (380:0) {#if layerID}
+	// (176:0) {#if layerID}
 	function create_if_block$1(component, ctx) {
-		var div19, div0, text1, div12, div11, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, div4, div3, text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text6, text7, input0, input0_value_value, text8, div6, div5, text9_value = ctx.params.inn.title || ctx.params.inn.value, text9, text10, input1, input1_value_value, text11, text12, text13, text14, text15, text16, text17, text18, text19, div8, div7, text20_value = ctx.params.scale.title || ctx.params.scale.value, text20, text21, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text32, div10, div9, text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text33, text34, select2, option10, text35, div13, text37, div17, div16, div14, button, text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text38, text39, div15, text40, text41_value = ctx.Object.keys(ctx.checked).length, text41, text42, text43_value = ctx.layerItems.length, text43, text44, table_updating = {}, text45, div18, current;
+		var div19, div0, text1, div12, div11, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, div4, div3, text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text6, text7, input0, input0_value_value, text8, div6, div5, text9_value = ctx.params.inn.title || ctx.params.inn.value, text9, text10, input1, input1_value_value, text11, selectinput0_updating = {}, text12, selectinput1_updating = {}, text13, selectinput2_updating = {}, text14, selectinput3_updating = {}, text15, selectinput4_updating = {}, text16, selectinput5_updating = {}, text17, selectinput6_updating = {}, text18, selectinput7_updating = {}, text19, div8, div7, text20_value = ctx.params.scale.title || ctx.params.scale.value, text20, text21, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text32, div10, div9, text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text33, text34, select2, option10, text35, div13, text37, div17, div16, div14, button, text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text38, text39, div15, text40, text41_value = ctx.Object.keys(ctx.checked).length, text41, text42, text43_value = ctx.layerItems.length, text43, text44, table_updating = {}, text45, div18, current;
 
 		var each_value_1 = ctx.params.reportType.options;
 
@@ -1657,66 +1698,316 @@ var gmxForest = (function (exports) {
 			component.setNodeField(this);
 		}
 
-		var selectinput0_initial_data = { key: "region", cols: ctx.cols };
+		var selectinput0_initial_data = { key: "region" };
+		if (ctx.params  !== void 0) {
+			selectinput0_initial_data.params = ctx.params ;
+			selectinput0_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput0_initial_data.cols = ctx.cols ;
+			selectinput0_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput0_initial_data.changedParams = ctx.changedParams ;
+			selectinput0_updating.changedParams = true;
+		}
 		var selectinput0 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput0_initial_data
+			data: selectinput0_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput0_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput0_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput0_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput0_updating = {};
+			}
 		});
 
-		var selectinput1_initial_data = { key: "forestry", cols: ctx.cols };
+		component.root._beforecreate.push(function () {
+			selectinput0._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput0.get());
+		});
+
+		var selectinput1_initial_data = { key: "forestry" };
+		if (ctx.params  !== void 0) {
+			selectinput1_initial_data.params = ctx.params ;
+			selectinput1_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput1_initial_data.cols = ctx.cols ;
+			selectinput1_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput1_initial_data.changedParams = ctx.changedParams ;
+			selectinput1_updating.changedParams = true;
+		}
 		var selectinput1 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput1_initial_data
+			data: selectinput1_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput1_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput1_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput1_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput1_updating = {};
+			}
 		});
 
-		var selectinput2_initial_data = {
-		 	key: "sectionForestry",
-		 	cols: ctx.cols
-		 };
+		component.root._beforecreate.push(function () {
+			selectinput1._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput1.get());
+		});
+
+		var selectinput2_initial_data = { key: "sectionForestry" };
+		if (ctx.params  !== void 0) {
+			selectinput2_initial_data.params = ctx.params ;
+			selectinput2_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput2_initial_data.cols = ctx.cols ;
+			selectinput2_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput2_initial_data.changedParams = ctx.changedParams ;
+			selectinput2_updating.changedParams = true;
+		}
 		var selectinput2 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput2_initial_data
+			data: selectinput2_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput2_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput2_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput2_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput2_updating = {};
+			}
 		});
 
-		var selectinput3_initial_data = { key: "quadrant", cols: ctx.cols };
+		component.root._beforecreate.push(function () {
+			selectinput2._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput2.get());
+		});
+
+		var selectinput3_initial_data = { key: "quadrant" };
+		if (ctx.params  !== void 0) {
+			selectinput3_initial_data.params = ctx.params ;
+			selectinput3_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput3_initial_data.cols = ctx.cols ;
+			selectinput3_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput3_initial_data.changedParams = ctx.changedParams ;
+			selectinput3_updating.changedParams = true;
+		}
 		var selectinput3 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput3_initial_data
+			data: selectinput3_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput3_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput3_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput3_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput3_updating = {};
+			}
 		});
 
-		var selectinput4_initial_data = { key: "stratum", cols: ctx.cols };
+		component.root._beforecreate.push(function () {
+			selectinput3._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput3.get());
+		});
+
+		var selectinput4_initial_data = { key: "stratum" };
+		if (ctx.params  !== void 0) {
+			selectinput4_initial_data.params = ctx.params ;
+			selectinput4_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput4_initial_data.cols = ctx.cols ;
+			selectinput4_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput4_initial_data.changedParams = ctx.changedParams ;
+			selectinput4_updating.changedParams = true;
+		}
 		var selectinput4 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput4_initial_data
+			data: selectinput4_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput4_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput4_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput4_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput4_updating = {};
+			}
 		});
 
-		var selectinput5_initial_data = { key: "site", cols: ctx.cols };
+		component.root._beforecreate.push(function () {
+			selectinput4._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput4.get());
+		});
+
+		var selectinput5_initial_data = { key: "site" };
+		if (ctx.params  !== void 0) {
+			selectinput5_initial_data.params = ctx.params ;
+			selectinput5_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput5_initial_data.cols = ctx.cols ;
+			selectinput5_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput5_initial_data.changedParams = ctx.changedParams ;
+			selectinput5_updating.changedParams = true;
+		}
 		var selectinput5 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput5_initial_data
+			data: selectinput5_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput5_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput5_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput5_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput5_updating = {};
+			}
 		});
 
-		var selectinput6_initial_data = {
-		 	key: "recoveryEventType",
-		 	cols: ctx.cols
-		 };
+		component.root._beforecreate.push(function () {
+			selectinput5._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput5.get());
+		});
+
+		var selectinput6_initial_data = { key: "recoveryEventType" };
+		if (ctx.params  !== void 0) {
+			selectinput6_initial_data.params = ctx.params ;
+			selectinput6_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput6_initial_data.cols = ctx.cols ;
+			selectinput6_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput6_initial_data.changedParams = ctx.changedParams ;
+			selectinput6_updating.changedParams = true;
+		}
 		var selectinput6 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput6_initial_data
+			data: selectinput6_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput6_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput6_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput6_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput6_updating = {};
+			}
 		});
 
-		var selectinput7_initial_data = { key: "siteArea", cols: ctx.cols };
+		component.root._beforecreate.push(function () {
+			selectinput6._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput6.get());
+		});
+
+		var selectinput7_initial_data = { key: "siteArea" };
+		if (ctx.params  !== void 0) {
+			selectinput7_initial_data.params = ctx.params ;
+			selectinput7_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput7_initial_data.cols = ctx.cols ;
+			selectinput7_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput7_initial_data.changedParams = ctx.changedParams ;
+			selectinput7_updating.changedParams = true;
+		}
 		var selectinput7 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput7_initial_data
+			data: selectinput7_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput7_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput7_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput7_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput7_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			selectinput7._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput7.get());
 		});
 
 		function change_handler_3(event) {
@@ -1869,77 +2160,77 @@ var gmxForest = (function (exports) {
 				text45 = createText("\r\n\t\t\t");
 				div18 = createElement("div");
 				if_block2.c();
-				div0.className = "gmx-sidebar-label-medium svelte-gt11xl";
-				div1.className = "gmx-sidebar-label svelte-gt11xl";
+				div0.className = "gmx-sidebar-label-medium svelte-qidupr";
+				div1.className = "gmx-sidebar-label svelte-qidupr";
 				addListener(select0, "change", change_handler);
 				select0.name = "reportType";
-				select0.className = "reportType gmx-sidebar-select-large svelte-gt11xl";
-				div2.className = "gmx-sidebar-labeled-block svelte-gt11xl";
-				div3.className = "gmx-sidebar-label-small svelte-gt11xl";
+				select0.className = "reportType gmx-sidebar-select-large svelte-qidupr";
+				div2.className = "gmx-sidebar-labeled-block svelte-qidupr";
+				div3.className = "gmx-sidebar-label-small svelte-qidupr";
 				addListener(input0, "change", change_handler_1);
 				input0.name = "organizationName";
 				input0.value = input0_value_value = ctx.params.organizationName.value;
 				setAttribute(input0, "type", "text");
-				input0.className = "organizationName gmx-sidebar-input-large svelte-gt11xl";
-				div4.className = "gmx-sidebar-labeled-block svelte-gt11xl";
-				div5.className = "gmx-sidebar-label-small svelte-gt11xl";
+				input0.className = "organizationName gmx-sidebar-input-large svelte-qidupr";
+				div4.className = "gmx-sidebar-labeled-block svelte-qidupr";
+				div5.className = "gmx-sidebar-label-small svelte-qidupr";
 				addListener(input1, "change", change_handler_2);
 				input1.name = "inn";
 				input1.value = input1_value_value = ctx.params.inn.value;
 				setAttribute(input1, "type", "text");
-				input1.className = "inn gmx-sidebar-input-large svelte-gt11xl";
-				div6.className = "gmx-sidebar-labeled-block svelte-gt11xl";
-				div7.className = "gmx-sidebar-label svelte-gt11xl";
+				input1.className = "inn gmx-sidebar-input-large svelte-qidupr";
+				div6.className = "gmx-sidebar-labeled-block svelte-qidupr";
+				div7.className = "gmx-sidebar-label svelte-qidupr";
 				option0.__value = "5000";
 				option0.value = option0.__value;
-				option0.className = "svelte-gt11xl";
+				option0.className = "svelte-qidupr";
 				option1.__value = "10000";
 				option1.value = option1.__value;
-				option1.className = "svelte-gt11xl";
+				option1.className = "svelte-qidupr";
 				option2.__value = "15000";
 				option2.value = option2.__value;
-				option2.className = "svelte-gt11xl";
+				option2.className = "svelte-qidupr";
 				option3.__value = "20000";
 				option3.value = option3.__value;
-				option3.className = "svelte-gt11xl";
+				option3.className = "svelte-qidupr";
 				option4.__value = "25000";
 				option4.value = option4.__value;
-				option4.className = "svelte-gt11xl";
+				option4.className = "svelte-qidupr";
 				option5.__value = "30000";
 				option5.value = option5.__value;
-				option5.className = "svelte-gt11xl";
+				option5.className = "svelte-qidupr";
 				option6.__value = "35000";
 				option6.value = option6.__value;
-				option6.className = "svelte-gt11xl";
+				option6.className = "svelte-qidupr";
 				option7.__value = "40000";
 				option7.value = option7.__value;
-				option7.className = "svelte-gt11xl";
+				option7.className = "svelte-qidupr";
 				option8.__value = "45000";
 				option8.value = option8.__value;
-				option8.className = "svelte-gt11xl";
+				option8.className = "svelte-qidupr";
 				option9.__value = "50000";
 				option9.value = option9.__value;
-				option9.className = "svelte-gt11xl";
+				option9.className = "svelte-qidupr";
 				addListener(select1, "change", change_handler_3);
 				select1.name = "scale";
-				select1.className = "scale gmx-sidebar-select-large svelte-gt11xl";
-				div8.className = "gmx-sidebar-labeled-block svelte-gt11xl";
-				div9.className = "gmx-sidebar-label svelte-gt11xl";
+				select1.className = "scale gmx-sidebar-select-large svelte-qidupr";
+				div8.className = "gmx-sidebar-labeled-block svelte-qidupr";
+				div9.className = "gmx-sidebar-label svelte-qidupr";
 				option10.__value = "";
 				option10.value = option10.__value;
-				option10.className = "svelte-gt11xl";
+				option10.className = "svelte-qidupr";
 				addListener(select2, "change", change_handler_4);
 				select2.name = "quadrantLayerId";
-				select2.className = "quadrantLayerId gmx-sidebar-select-large svelte-gt11xl";
-				div10.className = "gmx-sidebar-labeled-block svelte-gt11xl";
-				div13.className = "gmx-sidebar-label-medium svelte-gt11xl";
+				select2.className = "quadrantLayerId gmx-sidebar-select-large svelte-qidupr";
+				div10.className = "gmx-sidebar-labeled-block svelte-qidupr";
+				div13.className = "gmx-sidebar-label-medium svelte-qidupr";
 				addListener(button, "click", click_handler);
-				button.className = "gmx-sidebar-button svelte-gt11xl";
-				div14.className = "gmx-geometry-select-container svelte-gt11xl";
-				div15.className = "gmx-sidebar-label-medium svelte-gt11xl";
-				div17.className = "forest-features-block svelte-gt11xl";
-				div18.className = "gmx-button-container svelte-gt11xl";
-				div19.className = "leftContent forest-plugin-content svelte-gt11xl";
+				button.className = "gmx-sidebar-button svelte-qidupr";
+				div14.className = "gmx-geometry-select-container svelte-qidupr";
+				div15.className = "gmx-sidebar-label-medium svelte-qidupr";
+				div17.className = "forest-features-block svelte-qidupr";
+				div18.className = "gmx-button-container svelte-qidupr";
+				div19.className = "leftContent forest-plugin-content svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -1958,6 +2249,7 @@ var gmxForest = (function (exports) {
 					each_blocks[i].m(select0, null);
 				}
 
+				component.refs.reportType = select0;
 				append(div11, text4);
 				if (if_block0) { if_block0.m(div11, null); }
 				append(div11, text5);
@@ -1966,12 +2258,14 @@ var gmxForest = (function (exports) {
 				append(div3, text6);
 				append(div4, text7);
 				append(div4, input0);
+				component.refs.organizationName = input0;
 				append(div11, text8);
 				append(div11, div6);
 				append(div6, div5);
 				append(div5, text9);
 				append(div6, text10);
 				append(div6, input1);
+				component.refs.inn = input1;
 				append(div11, text11);
 				selectinput0._mount(div11, null);
 				append(div11, text12);
@@ -2004,6 +2298,7 @@ var gmxForest = (function (exports) {
 				append(select1, option7);
 				append(select1, option8);
 				append(select1, option9);
+				component.refs.scale = select1;
 				append(div11, text32);
 				append(div11, div10);
 				append(div10, div9);
@@ -2012,6 +2307,7 @@ var gmxForest = (function (exports) {
 				append(div10, select2);
 				append(select2, option10);
 				if (if_block1) { if_block1.m(select2, null); }
+				component.refs.quadrantLayerId = select2;
 				append(div19, text35);
 				append(div19, div13);
 				append(div19, text37);
@@ -2094,36 +2390,132 @@ var gmxForest = (function (exports) {
 				}
 
 				var selectinput0_changes = {};
-				if (changed.cols) { selectinput0_changes.cols = ctx.cols; }
+				if (!selectinput0_updating.params && changed.params) {
+					selectinput0_changes.params = ctx.params ;
+					selectinput0_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput0_updating.cols && changed.cols) {
+					selectinput0_changes.cols = ctx.cols ;
+					selectinput0_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput0_updating.changedParams && changed.changedParams) {
+					selectinput0_changes.changedParams = ctx.changedParams ;
+					selectinput0_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput0._set(selectinput0_changes);
+				selectinput0_updating = {};
 
 				var selectinput1_changes = {};
-				if (changed.cols) { selectinput1_changes.cols = ctx.cols; }
+				if (!selectinput1_updating.params && changed.params) {
+					selectinput1_changes.params = ctx.params ;
+					selectinput1_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput1_updating.cols && changed.cols) {
+					selectinput1_changes.cols = ctx.cols ;
+					selectinput1_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput1_updating.changedParams && changed.changedParams) {
+					selectinput1_changes.changedParams = ctx.changedParams ;
+					selectinput1_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput1._set(selectinput1_changes);
+				selectinput1_updating = {};
 
 				var selectinput2_changes = {};
-				if (changed.cols) { selectinput2_changes.cols = ctx.cols; }
+				if (!selectinput2_updating.params && changed.params) {
+					selectinput2_changes.params = ctx.params ;
+					selectinput2_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput2_updating.cols && changed.cols) {
+					selectinput2_changes.cols = ctx.cols ;
+					selectinput2_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput2_updating.changedParams && changed.changedParams) {
+					selectinput2_changes.changedParams = ctx.changedParams ;
+					selectinput2_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput2._set(selectinput2_changes);
+				selectinput2_updating = {};
 
 				var selectinput3_changes = {};
-				if (changed.cols) { selectinput3_changes.cols = ctx.cols; }
+				if (!selectinput3_updating.params && changed.params) {
+					selectinput3_changes.params = ctx.params ;
+					selectinput3_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput3_updating.cols && changed.cols) {
+					selectinput3_changes.cols = ctx.cols ;
+					selectinput3_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput3_updating.changedParams && changed.changedParams) {
+					selectinput3_changes.changedParams = ctx.changedParams ;
+					selectinput3_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput3._set(selectinput3_changes);
+				selectinput3_updating = {};
 
 				var selectinput4_changes = {};
-				if (changed.cols) { selectinput4_changes.cols = ctx.cols; }
+				if (!selectinput4_updating.params && changed.params) {
+					selectinput4_changes.params = ctx.params ;
+					selectinput4_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput4_updating.cols && changed.cols) {
+					selectinput4_changes.cols = ctx.cols ;
+					selectinput4_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput4_updating.changedParams && changed.changedParams) {
+					selectinput4_changes.changedParams = ctx.changedParams ;
+					selectinput4_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput4._set(selectinput4_changes);
+				selectinput4_updating = {};
 
 				var selectinput5_changes = {};
-				if (changed.cols) { selectinput5_changes.cols = ctx.cols; }
+				if (!selectinput5_updating.params && changed.params) {
+					selectinput5_changes.params = ctx.params ;
+					selectinput5_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput5_updating.cols && changed.cols) {
+					selectinput5_changes.cols = ctx.cols ;
+					selectinput5_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput5_updating.changedParams && changed.changedParams) {
+					selectinput5_changes.changedParams = ctx.changedParams ;
+					selectinput5_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput5._set(selectinput5_changes);
+				selectinput5_updating = {};
 
 				var selectinput6_changes = {};
-				if (changed.cols) { selectinput6_changes.cols = ctx.cols; }
+				if (!selectinput6_updating.params && changed.params) {
+					selectinput6_changes.params = ctx.params ;
+					selectinput6_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput6_updating.cols && changed.cols) {
+					selectinput6_changes.cols = ctx.cols ;
+					selectinput6_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput6_updating.changedParams && changed.changedParams) {
+					selectinput6_changes.changedParams = ctx.changedParams ;
+					selectinput6_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput6._set(selectinput6_changes);
+				selectinput6_updating = {};
 
 				var selectinput7_changes = {};
-				if (changed.cols) { selectinput7_changes.cols = ctx.cols; }
+				if (!selectinput7_updating.params && changed.params) {
+					selectinput7_changes.params = ctx.params ;
+					selectinput7_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput7_updating.cols && changed.cols) {
+					selectinput7_changes.cols = ctx.cols ;
+					selectinput7_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput7_updating.changedParams && changed.changedParams) {
+					selectinput7_changes.changedParams = ctx.changedParams ;
+					selectinput7_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput7._set(selectinput7_changes);
+				selectinput7_updating = {};
 
 				if ((!current || changed.params) && text20_value !== (text20_value = ctx.params.scale.title || ctx.params.scale.value)) {
 					setData(text20, text20_value);
@@ -2212,9 +2604,12 @@ var gmxForest = (function (exports) {
 				destroyEach(each_blocks, detach);
 
 				removeListener(select0, "change", change_handler);
+				if (component.refs.reportType === select0) { component.refs.reportType = null; }
 				if (if_block0) { if_block0.d(); }
 				removeListener(input0, "change", change_handler_1);
+				if (component.refs.organizationName === input0) { component.refs.organizationName = null; }
 				removeListener(input1, "change", change_handler_2);
+				if (component.refs.inn === input1) { component.refs.inn = null; }
 				selectinput0.destroy();
 				selectinput1.destroy();
 				selectinput2.destroy();
@@ -2224,8 +2619,10 @@ var gmxForest = (function (exports) {
 				selectinput6.destroy();
 				selectinput7.destroy();
 				removeListener(select1, "change", change_handler_3);
+				if (component.refs.scale === select1) { component.refs.scale = null; }
 				if (if_block1) { if_block1.d(); }
 				removeListener(select2, "change", change_handler_4);
+				if (component.refs.quadrantLayerId === select2) { component.refs.quadrantLayerId = null; }
 				removeListener(button, "click", click_handler);
 				table.destroy();
 				if_block2.d();
@@ -2233,7 +2630,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (388:0) {#each params.reportType.options as it}
+	// (184:0) {#each params.reportType.options as it}
 	function create_each_block_1(component, ctx) {
 		var option, text_value = ctx.it, text, option_value_value;
 
@@ -2243,7 +2640,7 @@ var gmxForest = (function (exports) {
 				text = createText(text_value);
 				option.__value = option_value_value = ctx.it;
 				option.value = option.__value;
-				option.className = "svelte-gt11xl";
+				option.className = "svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -2271,28 +2668,86 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (394:0) {#if reportType !== 'о воспроизводстве лесов'}
+	// (190:0) {#if reportType !== 'о воспроизводстве лесов'}
 	function create_if_block_3(component, ctx) {
-		var div, text, current;
+		var div, selectinput0_updating = {}, text, selectinput1_updating = {}, current;
 
-		var selectinput0_initial_data = {
-		 	key: "fellingForm",
-		 	cols: ctx.cols
-		 };
+		var selectinput0_initial_data = { key: "fellingForm" };
+		if (ctx.params  !== void 0) {
+			selectinput0_initial_data.params = ctx.params ;
+			selectinput0_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput0_initial_data.cols = ctx.cols ;
+			selectinput0_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput0_initial_data.changedParams = ctx.changedParams ;
+			selectinput0_updating.changedParams = true;
+		}
 		var selectinput0 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput0_initial_data
+			data: selectinput0_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput0_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput0_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput0_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput0_updating = {};
+			}
 		});
 
-		var selectinput1_initial_data = {
-		 	key: "fellingType",
-		 	cols: ctx.cols
-		 };
+		component.root._beforecreate.push(function () {
+			selectinput0._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput0.get());
+		});
+
+		var selectinput1_initial_data = { key: "fellingType" };
+		if (ctx.params  !== void 0) {
+			selectinput1_initial_data.params = ctx.params ;
+			selectinput1_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput1_initial_data.cols = ctx.cols ;
+			selectinput1_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput1_initial_data.changedParams = ctx.changedParams ;
+			selectinput1_updating.changedParams = true;
+		}
 		var selectinput1 = new SelectInput({
 			root: component.root,
 			store: component.store,
-			data: selectinput1_initial_data
+			data: selectinput1_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput1_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput1_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput1_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput1_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			selectinput1._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput1.get());
 		});
 
 		return {
@@ -2311,14 +2766,39 @@ var gmxForest = (function (exports) {
 				current = true;
 			},
 
-			p: function p(changed, ctx) {
+			p: function p(changed, _ctx) {
+				ctx = _ctx;
 				var selectinput0_changes = {};
-				if (changed.cols) { selectinput0_changes.cols = ctx.cols; }
+				if (!selectinput0_updating.params && changed.params) {
+					selectinput0_changes.params = ctx.params ;
+					selectinput0_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput0_updating.cols && changed.cols) {
+					selectinput0_changes.cols = ctx.cols ;
+					selectinput0_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput0_updating.changedParams && changed.changedParams) {
+					selectinput0_changes.changedParams = ctx.changedParams ;
+					selectinput0_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput0._set(selectinput0_changes);
+				selectinput0_updating = {};
 
 				var selectinput1_changes = {};
-				if (changed.cols) { selectinput1_changes.cols = ctx.cols; }
+				if (!selectinput1_updating.params && changed.params) {
+					selectinput1_changes.params = ctx.params ;
+					selectinput1_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput1_updating.cols && changed.cols) {
+					selectinput1_changes.cols = ctx.cols ;
+					selectinput1_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput1_updating.changedParams && changed.changedParams) {
+					selectinput1_changes.changedParams = ctx.changedParams ;
+					selectinput1_updating.changedParams = ctx.changedParams  !== void 0;
+				}
 				selectinput1._set(selectinput1_changes);
+				selectinput1_updating = {};
 			},
 
 			i: function i(target, anchor) {
@@ -2348,7 +2828,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (437:0) {#if quadrantIds}
+	// (233:0) {#if quadrantIds}
 	function create_if_block_2(component, ctx) {
 		var each_anchor;
 
@@ -2378,7 +2858,7 @@ var gmxForest = (function (exports) {
 			},
 
 			p: function p(changed, ctx) {
-				if (changed.quadrantIds || changed.quadrantLayerId) {
+				if (changed.quadrantIds) {
 					each_value_2 = ctx.quadrantIds;
 
 					for (var i = 0; i < each_value_2.length; i += 1) {
@@ -2410,9 +2890,9 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (438:1) {#each quadrantIds as it}
+	// (234:1) {#each quadrantIds as it}
 	function create_each_block$2(component, ctx) {
-		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
+		var option, text_value = ctx.it.title, text, option_value_value;
 
 		return {
 			c: function c() {
@@ -2420,8 +2900,7 @@ var gmxForest = (function (exports) {
 				text = createText(text_value);
 				option.__value = option_value_value = ctx.it.id;
 				option.value = option.__value;
-				option.selected = option_selected_value = ctx.quadrantLayerId === ctx.it.id;
-				option.className = "svelte-gt11xl";
+				option.className = "svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -2439,9 +2918,6 @@ var gmxForest = (function (exports) {
 				}
 
 				option.value = option.__value;
-				if ((changed.quadrantLayerId || changed.quadrantIds) && option_selected_value !== (option_selected_value = ctx.quadrantLayerId === ctx.it.id)) {
-					option.selected = option_selected_value;
-				}
 			},
 
 			d: function d(detach) {
@@ -2452,7 +2928,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (462:0) {:else}
+	// (253:0) {:else}
 	function create_else_block$1(component, ctx) {
 		var button, text, button_class_value;
 
@@ -2465,7 +2941,7 @@ var gmxForest = (function (exports) {
 				button = createElement("button");
 				text = createText("Создать отчеты");
 				addListener(button, "click", click_handler);
-				button.className = button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-gt11xl";
+				button.className = button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -2474,7 +2950,7 @@ var gmxForest = (function (exports) {
 			},
 
 			p: function p(changed, ctx) {
-				if ((changed.Object || changed.checked) && button_class_value !== (button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-gt11xl")) {
+				if ((changed.Object || changed.checked) && button_class_value !== (button_class_value = "gmx-sidebar-button" + (ctx.Object.keys(ctx.checked).length ? '' : '-disabled') + " svelte-qidupr")) {
 					button.className = button_class_value;
 				}
 			},
@@ -2489,15 +2965,15 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (460:0) {#if report}
+	// (251:0) {#if report}
 	function create_if_block_1(component, ctx) {
 		var button;
 
 		return {
 			c: function c() {
 				button = createElement("button");
-				button.innerHTML = "<div class=\"lds-ellipsis svelte-gt11xl\"><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div><div class=\"svelte-gt11xl\"></div></div>";
-				button.className = "gmx-sidebar-button-disabled svelte-gt11xl";
+				button.innerHTML = "<div class=\"lds-ellipsis svelte-qidupr\"><div class=\"svelte-qidupr\"></div><div class=\"svelte-qidupr\"></div><div class=\"svelte-qidupr\"></div><div class=\"svelte-qidupr\"></div></div>";
+				button.className = "gmx-sidebar-button-disabled svelte-qidupr";
 			},
 
 			m: function m(target, anchor) {
@@ -2518,17 +2994,18 @@ var gmxForest = (function (exports) {
 		var this$1 = this;
 
 		init(this, options);
+		this.refs = {};
 		this._state = assign(assign({ Object : Object }, data$2()), options.data);
 		this._intro = !!options.intro;
 
-		this._handlers.state = [onstate$2];
+		this._handlers.state = [onstate$1];
+		this._handlers.update = [onupdate];
 
-		onstate$2.call(this, { changed: assignTrue({}, this._state), current: this._state });
+		onstate$1.call(this, { changed: assignTrue({}, this._state), current: this._state });
 
 		this._fragment = create_main_fragment$2(this, this._state);
 
 		this.root._oncreate.push(function () {
-			oncreate$1.call(this$1);
 			this$1.fire("update", { changed: assignTrue({}, this$1._state), current: this$1._state });
 		});
 
