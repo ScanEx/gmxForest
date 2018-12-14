@@ -48,6 +48,8 @@
 										target: node,
 										data: {
 											// meta: true,		// фильтровать списки слоев по Meta
+											templ: publicInterface.params.templ || '',
+											num_points: publicInterface.params.num_points === 'false' ? false : true,
 											stateSave: Number(publicInterface.params.stateSave) || 0,
 											format: Number(publicInterface.params.format || 2),
 											map: publicInterface.map,

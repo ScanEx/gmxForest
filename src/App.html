@@ -28,6 +28,8 @@
 				},
 				layerItems: [],
 				format: 2,
+				templ: '',
+				num_points: true,
 				limit: 0,
 				report: false,
 				drawstart: false,
@@ -61,9 +63,9 @@
 				}
 			},
 			sendReport() {
-				const {checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams} = this.get();
+				const {checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ} = this.get();
 				this.set({report: true});
-				Requests.sendReport(checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams)
+				Requests.sendReport(checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ)
 				.then(json => { this.set(json); });
 			},
 			startDrawing(ev) {

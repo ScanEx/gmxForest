@@ -165,7 +165,7 @@ const getState = () => {
 	return JSON.parse(window.localStorage.getItem('gmxForest_')) || {};
 };
 
-const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams) => {
+const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ) => {
 	let groupRequest = [],
 		features = [],
 		satLayers = getLayersParams(gmxMap);
@@ -173,7 +173,7 @@ const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxM
 	layerItems.forEach((it) => {
 		let id = it[hashCols.gmx_id];
 		if (checked[id]) {
-			let data = {featureID: id};
+			let data = {featureID: id, num_points: num_points, templ: templ};
 			for (let key in params) {
 				let val = params[key];
 				let par = changedParams[key] || {};
