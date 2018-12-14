@@ -110,6 +110,10 @@
 				const { checked } = this.get();
 				return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
 			},
+			loadState() {
+				this.set({changedParams: stateStorage});
+				this.checkState();
+			},
 			checkState() {
 				const {changedParams} = this.get();
 				let target = this.options.target;
@@ -128,15 +132,9 @@
 				}
 			}
 		},
-		onupdate({ changed, current, previous }) {
-			if (changed.cols) {
-				this.checkState();
-			}
-		},
 		onstate({ changed, current, previous }) {
 			// console.log('in onstate', changed, current);
 			if (changed.gmxMap) {
-				if (current.stateSave === 1) { this.set({changedParams: stateStorage}); }
 				Requests.getLayersIds(current.meta, current.gmxMap).then(json => { this.set(json); });
 			}
 			if (changed.layerID && current.layerID) {
@@ -148,8 +146,12 @@
 				Requests.loadFeatures(current.layerID)
 				.then(json => {
 					if (json.Status === 'ok') {
-						let cols = json.Result.fields;
-						this.set({cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values});
+						let cols = json.Result.fields,
+							attr = {cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values};
+						if (current.stateSave === 1 && Object.keys(stateStorage).length) {
+							this.refs.loadState.classList.remove('disabled');
+						}
+						this.set(attr);
 					}
 				});
 			}
@@ -175,7 +177,11 @@
 	</div>
 {#if layerID}
 	<div class="leftContent forest-plugin-content">
-			<div class="gmx-sidebar-label-medium">Ввод информации</div>
+			<div class="gmx-sidebar-label-medium">Ввод информации
+				{#if stateSave}
+				<i on:click="loadState()" ref:loadState class="material-icons loadState disabled" title="Загрузить выбор полей предыдущего отчета"></i>
+				{/if}
+			</div>
 			<div>
 				<div>
 					<div class="gmx-sidebar-labeled-block">
@@ -261,6 +267,55 @@
 </div>
 
 <style>
+.loadState {
+    transform: rotate(90deg);
+    right: 14px;
+    position: absolute;
+	cursor: pointer;
+}
+.loadState:after {
+	content: 'storage';
+}
+.disabled {
+	pointer-events: none;
+	color:#efefef;
+	cursor:default
+}
+
+.clearState {
+    right: 24px;
+    position: absolute;
+	cursor: pointer;
+}
+.clearState:after {
+	content: 'delete';
+}
+.material-icons {
+	font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-smoothing: antialiased;
+}
+
+.line-block {
+    margin-top: 20px;
+    padding: 0px 12px;
+    font-size: 13px;
+    line-height: 31px;
+    font-family: "Arial";
+    color: #777f85;
+}
+.line-block input {
+	position: relative;
+    top: 2px;
+}
 
 .gmx-button-container {width:100%;height:40px;margin:10px 0}
 .gmx-button-container  button {display:block;margin:0 auto}
