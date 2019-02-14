@@ -99,21 +99,23 @@ const getLayersParams = (gmxMap) => {
 			let props = it.getGmxProperties(),
 				metaProps = props.MetaProperties || {},
 				out = {layerId: props.name, type: 'оптическая'};
-			if (props.Temporal) {
-				var dt = it.getDateInterval();
-				if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
-				if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
+			if (props.IsRasterCatalog || props.type === 'Raster') {
+				if (props.Temporal) {
+					var dt = it.getDateInterval();
+					if (dt.beginDate) { out.beginDate = dt.beginDate.getTime()/1000; }
+					if (dt.endDate) { out.endDate = dt.endDate.getTime()/1000; }
+				}
+				if (metaProps.type) {
+					out.type = metaProps.type.Value;
+				}
+				if (metaProps.system) {
+					out.system = metaProps.system.Value;
+				}
+				if (metaProps.resolution) {
+					out.resolution = metaProps.resolution.Value;
+				}
+				satLayers.push(out);
 			}
-			if (metaProps.type) {
-				out.type = metaProps.type.Value;
-			}
-			if (metaProps.system) {
-				out.system = metaProps.system.Value;
-			}
-			if (metaProps.resolution) {
-				out.resolution = metaProps.resolution.Value;
-			}
-			satLayers.push(out);
 		}
 	});
 	return satLayers;
@@ -165,7 +167,7 @@ const getState = () => {
 	return JSON.parse(window.localStorage.getItem('gmxForest_')) || {};
 };
 
-const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ) => {
+const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ, app) => {
 	let groupRequest = [],
 		features = [],
 		satLayers = getLayersParams(gmxMap);
@@ -202,7 +204,10 @@ const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxM
 
 							window.open(serverBase + downloadFile, '_self');
 
-							modifyVectorObjects(layerID, features);
+							modifyVectorObjects(layerID, features).then(function(argv) {
+console.log('hhh', layerID, features, arguments);
+								app.loadFeatures();
+							});
 							return {report: false};
 						}
 					})

@@ -6,7 +6,7 @@
 	export default {
 		data() {
 			return {
-				stateSave: 0,
+				stateSave: 1,
 				changedParams: {},
 				params: {
 					layerID: {value: '', title: 'Выбор слоя'},
@@ -21,7 +21,7 @@
 					stratum: {value: 'Выдел'},
 					fellingForm: {value: '', title: 'Форма рубки'},
 					fellingType: {value: '', title: 'Тип рубки'},
-					recoveryEventType: {value: '', title: 'Тип мероприятия'},
+					recoveryEventType: {value: '', title: 'Тип лесовосстановительного мероприятия'},
 					siteArea: {value: 'Площадь'},
 					scale: {value: 'Масштаб'},
 					site: {value: 'Делянка'}
@@ -65,7 +65,7 @@
 			sendReport() {
 				const {checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ} = this.get();
 				this.set({report: true});
-				Requests.sendReport(checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ)
+				Requests.sendReport(checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ, this)
 				.then(json => { this.set(json); });
 			},
 			startDrawing(ev) {
@@ -132,6 +132,24 @@
 						this.set({reportType: it});
 					}
 				}
+			},
+			loadFeatures() {
+				const { gmxMap, layerID, stateSave } = this.get();
+				this.currentLayer = gmxMap.layersByID[layerID];
+				if (this.currentLayer) {
+					this.currentLayer.setStyleHook(this.styleHook.bind(this));
+				}
+				Requests.loadFeatures(layerID)
+				.then(json => {
+					if (json.Status === 'ok') {
+						let cols = json.Result.fields,
+							attr = {cols: cols, hashCols: this.colsToHash(cols),layerItems: json.Result.values};
+						if (stateSave === 1 && Object.keys(stateStorage).length) {
+							this.refs.loadState.classList.remove('disabled');
+						}
+						this.set(attr);
+					}
+				});
 			}
 		},
 		onstate({ changed, current, previous }) {
@@ -140,6 +158,8 @@
 				Requests.getLayersIds(current.meta, current.gmxMap).then(json => { this.set(json); });
 			}
 			if (changed.layerID && current.layerID) {
+				this.loadFeatures();
+				/*
 				const { gmxMap, checked } = this.get();
 				this.currentLayer = gmxMap.layersByID[current.layerID];
 				if (this.currentLayer) {
@@ -155,7 +175,7 @@
 						}
 						this.set(attr);
 					}
-				});
+				});*/
 			}
 			if (changed.checked && this.currentLayer) {
 				this.currentLayer.repaint();
@@ -395,38 +415,6 @@
 .gmx-sidebar-button-toggled {box-shadow:inset 0 1px 4px rgba(27, 31, 35, 0.55)}
 .gmx-sidebar-button-error {color:red}
 .gmx-sidebar-button-disabled {pointer-events:none;background-color:#efefef;cursor:default}
-
-.lds-ellipsis {display:inline-block;position:relative;width:64px;height:47px}
-.lds-ellipsis  div {position:absolute;top:20px;width:11px;height:11px;border-radius:50%;background:#70cbe0;animation-timing-function:cubic-bezier(0, 1, 1, 0)}
-.lds-ellipsis  div :nth-child(1){left:6px;animation:svelte-1fnf2q5-lds-ellipsis1 0.6s infinite}
-.lds-ellipsis  div :nth-child(2){left:6px;animation:svelte-1fnf2q5-lds-ellipsis2 0.6s infinite}
-.lds-ellipsis  div :nth-child(3){left:26px;animation:svelte-1fnf2q5-lds-ellipsis2 0.6s infinite}
-.lds-ellipsis  div :nth-child(4){left:45px;animation:svelte-1fnf2q5-lds-ellipsis3 0.6s infinite}
-
-@keyframes lds-ellipsis1 {
-  0% {
-    transform: scale(0);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-@keyframes lds-ellipsis3 {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(0);
-  }
-}
-@keyframes lds-ellipsis2 {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(19px, 0);
-  }
-}
 
 
 </style>
