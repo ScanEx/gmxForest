@@ -101,6 +101,9 @@
 				if (setFlag) {
 					let attr = {};
 					attr[name] = val;
+					if (name === 'layerID') {
+						this.clearChangedNodes();
+					}
 					this.set(attr);
 				}
 			},
@@ -115,6 +118,17 @@
 			loadState() {
 				this.set({changedParams: stateStorage});
 				this.checkState();
+			},
+			clearChangedNodes() {
+				const {changedParams} = this.get();
+				for(let key in changedParams) {
+					let node = this.refs[key];
+
+					if (node) {
+							node.value = '';
+					}
+				}
+				this.set({reportType: '', changedParams:{}});
 			},
 			checkState() {
 				const {changedParams} = this.get();

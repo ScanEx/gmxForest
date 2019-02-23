@@ -1369,6 +1369,9 @@ var gmxForest = (function (exports) {
 			if (setFlag) {
 				var attr = {};
 				attr[name] = val;
+				if (name === 'layerID') {
+					this.clearChangedNodes();
+				}
 				this.set(attr);
 			}
 		},
@@ -1384,6 +1387,18 @@ var gmxForest = (function (exports) {
 		loadState: function loadState() {
 			this.set({changedParams: stateStorage});
 			this.checkState();
+		},
+		clearChangedNodes: function clearChangedNodes() {
+			var ref = this.get();
+			var changedParams = ref.changedParams;
+			for(var key in changedParams) {
+				var node = this.refs[key];
+
+				if (node) {
+						node.value = '';
+				}
+			}
+			this.set({reportType: '', changedParams:{}});
 		},
 		checkState: function checkState() {
 			var ref = this.get();
@@ -1598,7 +1613,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (193:3) {#if layerIds}
+	// (207:3) {#if layerIds}
 	function create_if_block_5(component, ctx) {
 		var each_anchor;
 
@@ -1660,7 +1675,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (194:4) {#each layerIds as it}
+	// (208:4) {#each layerIds as it}
 	function create_each_block_2(component, ctx) {
 		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
 
@@ -1702,7 +1717,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (200:0) {#if layerID}
+	// (214:0) {#if layerID}
 	function create_if_block$1(component, ctx) {
 		var div19, div0, text0, text1, div12, div11, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, div4, div3, text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text6, text7, input0, input0_value_value, text8, div6, div5, text9_value = ctx.params.inn.title || ctx.params.inn.value, text9, text10, input1, input1_value_value, text11, selectinput0_updating = {}, text12, selectinput1_updating = {}, text13, selectinput2_updating = {}, text14, selectinput3_updating = {}, text15, selectinput4_updating = {}, text16, selectinput5_updating = {}, text17, selectinput6_updating = {}, text18, selectinput7_updating = {}, text19, div8, div7, text20_value = ctx.params.scale.title || ctx.params.scale.value, text20, text21, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text32, div10, div9, text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text33, text34, select2, option10, text35, div13, text37, div17, div16, div14, button, text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text38, text39, div15, text40, text41_value = ctx.Object.keys(ctx.checked).length, text41, text42, text43_value = ctx.layerItems.length, text43, text44, table_updating = {}, text45, div18, current;
 
@@ -2678,7 +2693,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (203:4) {#if stateSave}
+	// (217:4) {#if stateSave}
 	function create_if_block_4(component, ctx) {
 		var i;
 
@@ -2710,7 +2725,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (212:0) {#each params.reportType.options as it}
+	// (226:0) {#each params.reportType.options as it}
 	function create_each_block_1(component, ctx) {
 		var option, text_value = ctx.it, text, option_value_value;
 
@@ -2748,7 +2763,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (218:0) {#if reportType !== 'о воспроизводстве лесов'}
+	// (232:0) {#if reportType !== 'о воспроизводстве лесов'}
 	function create_if_block_3(component, ctx) {
 		var div, selectinput0_updating = {}, text, selectinput1_updating = {}, current;
 
@@ -2908,7 +2923,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (261:0) {#if quadrantIds}
+	// (275:0) {#if quadrantIds}
 	function create_if_block_2(component, ctx) {
 		var each_anchor;
 
@@ -2970,7 +2985,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (262:1) {#each quadrantIds as it}
+	// (276:1) {#each quadrantIds as it}
 	function create_each_block$2(component, ctx) {
 		var option, text_value = ctx.it.title, text, option_value_value;
 
@@ -3008,7 +3023,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (281:0) {:else}
+	// (295:0) {:else}
 	function create_else_block$1(component, ctx) {
 		var button, text, button_class_value;
 
@@ -3045,7 +3060,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (279:0) {#if report}
+	// (293:0) {#if report}
 	function create_if_block_1(component, ctx) {
 		var button;
 
