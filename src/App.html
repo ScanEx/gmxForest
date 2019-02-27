@@ -116,7 +116,18 @@
 				return checked[it.id] ? { strokeStyle: '#00ffff' } : {};
 			},
 			loadState() {
-				this.set({changedParams: stateStorage});
+				const {hashCols} = this.get();
+				let changedParams = {};
+				for(let key in stateStorage) {
+					let it = stateStorage[key],
+						pk = it.field;
+
+					if (pk && !hashCols[pk]) {
+						continue;
+					}
+					changedParams[key] = it;
+				}
+				this.set({changedParams: changedParams});
 				this.checkState();
 			},
 			clearChangedNodes() {
