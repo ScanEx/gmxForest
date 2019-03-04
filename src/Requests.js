@@ -14,7 +14,7 @@ const chkTask = id => {
 					const { Completed, ErrorInfo } = json.Result;
 					if (ErrorInfo) {
 						clearInterval(interval);
-						reject(json);
+						resolve(json);
 					} else if (Completed) {
 						clearInterval(interval);
 						resolve(json);
@@ -204,15 +204,15 @@ const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxM
 				return chkTask(json.Result.TaskID)
 					.then(json => {
 						if (json.Status === 'ok') {
-							let downloadFile = json.Result.Result.downloadFile;
+							if (json.Result.Result && json.Result.Result.downloadFile) {
+								window.open(serverBase + json.Result.Result.downloadFile, '_self');
 
-							window.open(serverBase + downloadFile, '_self');
-
-							modifyVectorObjects(layerID, features).then(function(argv) {
-console.log('hhh', layerID, features, arguments);
-								app.loadFeatures();
-							});
-							return {report: false};
+								modifyVectorObjects(layerID, features).then(function(argv) {
+	// console.log('hhh', layerID, features, arguments);
+									app.loadFeatures();
+								});
+							}
+							return {report: false, error: json.Result.ErrorInfo};
 						}
 					})
 					.catch(err => console.warn(err));

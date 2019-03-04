@@ -7,6 +7,7 @@
 		data() {
 			return {
 				stateSave: 1,
+				error: 0,
 				changedParams: {},
 				params: {
 					layerID: {value: '', title: 'Выбор слоя'},
@@ -63,6 +64,10 @@
 					}
 				}
 			},
+			// cancelReport() {
+				// const {error} = this.get();
+// console.log('cancelReport', error);
+			// },
 			sendReport() {
 				const {checked, layerItems, hashCols, params, format, layerID, gmxMap, changedParams, num_points, templ} = this.get();
 				this.set({report: true});
@@ -160,10 +165,13 @@
 				}
 			},
 			loadFeatures() {
-				const { gmxMap, layerID, stateSave } = this.get();
+				const { map, gmxMap, layerID, stateSave } = this.get();
 				this.currentLayer = gmxMap.layersByID[layerID];
 				if (this.currentLayer) {
 					this.currentLayer.setStyleHook(this.styleHook.bind(this));
+					if (!this.currentLayer._map) {
+						map.addLayer(this.currentLayer);
+					}
 				}
 				Requests.loadFeatures(layerID)
 				.then(json => {
@@ -296,9 +304,12 @@
 					<Table items="{layerItems}" hashCols="{hashCols}" bind:checked />
 				</div>
 			</div>
+{#if error}
+			<div class="error">Ошибка при создании отчета</div>
+{/if}
 			<div class="gmx-button-container">
 {#if report}
-				<button class="gmx-sidebar-button-disabled"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></button>
+				<div class="gmx-sidebar-button-disabled"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
 {:else}
 				<button on:click="sendReport()" class="gmx-sidebar-button{Object.keys(checked).length ? '' : '-disabled'}">Создать отчеты</button>
 {/if}
@@ -310,6 +321,20 @@
 </div>
 
 <style>
+.error {
+	color: red;
+	text-align: center;
+    font-size: 16px;
+}
+.gmx-button-container .cancel {
+    cursor: pointer;
+    position: absolute;
+    top: 6px;
+    right: 4px;
+    padding: 10px;
+    border: 1px;
+    border-radius: 4px;
+}
 .loadState {
     transform: rotate(90deg);
     right: 14px;
@@ -360,7 +385,7 @@
     top: 2px;
 }
 
-.gmx-button-container {width:100%;height:40px;margin:10px 0}
+.gmx-button-container {width:100%;height:40px;margin:10px 0; text-align: center;}
 .gmx-button-container  button {display:block;margin:0 auto}
 
 .gmx-sidebar-select-medium ,
@@ -435,7 +460,7 @@
 .gmx-sidebar-button :focus,.gmx-sidebar-button-toggled :focus,.gmx-sidebar-button-error :focus,.gmx-sidebar-button-disabled :focus{outline:none}
 .gmx-sidebar-button-toggled {box-shadow:inset 0 1px 4px rgba(27, 31, 35, 0.55)}
 .gmx-sidebar-button-error {color:red}
-.gmx-sidebar-button-disabled {pointer-events:none;background-color:#efefef;cursor:default}
+.gmx-sidebar-button-disabled {pointer-events:none;background-color:#efefef;cursor:default;}
 
 
 </style>
