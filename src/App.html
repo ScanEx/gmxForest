@@ -18,6 +18,7 @@
 					forestry: {value: '', title: 'Лесничество'},
 					sectionForestry: {value: 'Участковое лесничество'},
 					quadrant: {value: 'Квартал'},
+					dacha: {value: 'Дача'},
 					stratum: {value: 'Выдел'},
 					fellingForm: {value: '', title: 'Форма рубки'},
 					fellingType: {value: '', title: 'Тип рубки'},
@@ -246,20 +247,15 @@
 						<SelectInput key="fellingType" bind:params bind:cols bind:changedParams />
 					</div>
 {/if}
-					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label-small">{params.organizationName.title || params.organizationName.value}</div>
-						<input on:change="setNodeField(this)" name="organizationName" ref:organizationName value="{params.organizationName.value}" type="text" class="organizationName gmx-sidebar-input-large">
-					</div>
-					<div class="gmx-sidebar-labeled-block">
-						<div class="gmx-sidebar-label-small">{params.inn.title || params.inn.value}</div>
-						<input on:change="setNodeField(this)" name="inn" ref:inn value="{params.inn.value}" type="text" class="inn gmx-sidebar-input-large">
-					</div>
 
+					<SelectInput key="organizationName" bind:params bind:cols bind:changedParams />
+					<SelectInput key="inn" bind:params bind:cols bind:changedParams />
 					<SelectInput key="region" bind:params bind:cols bind:changedParams />
 					<SelectInput key="forestry" bind:params bind:cols bind:changedParams />
 					<SelectInput key="sectionForestry" bind:params bind:cols bind:changedParams />
 					<SelectInput key="quadrant" bind:params bind:cols bind:changedParams />
 					<SelectInput key="stratum" bind:params bind:cols bind:changedParams />
+					<SelectInput key="dacha" bind:params bind:cols bind:changedParams />
 					<SelectInput key="site" bind:params bind:cols bind:changedParams />
 					<SelectInput key="recoveryEventType" bind:params bind:cols bind:changedParams />
 					<SelectInput key="siteArea" bind:params bind:cols bind:changedParams />

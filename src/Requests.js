@@ -177,9 +177,13 @@ const sendReport = (checked, layerItems, hashCols, params, format, layerID, gmxM
 		if (checked[id]) {
 			let data = {featureID: id, num_points: num_points, templ: templ};
 			for (let key in params) {
-				let val = params[key];
-				let par = changedParams[key] || {};
-				data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+				if (key === 'layerID') {
+					data[key] = layerID;
+				} else {
+					let val = params[key];
+					let par = changedParams[key] || {};
+					data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+				}
 			}
 			data.satLayers = satLayers;
 			groupRequest.push(data);

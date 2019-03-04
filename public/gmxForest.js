@@ -385,9 +385,13 @@ var gmxForest = (function (exports) {
 			if (checked[id]) {
 				var data = {featureID: id, num_points: num_points, templ: templ};
 				for (var key in params) {
-					var val = params[key];
-					var par = changedParams[key] || {};
-					data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+					if (key === 'layerID') {
+						data[key] = layerID;
+					} else {
+						var val = params[key];
+						var par = changedParams[key] || {};
+						data[key] = typeof(par) === 'string' ? par : par.field ? it[hashCols[par.field]] : par.value || val.value;
+					}
 				}
 				data.satLayers = satLayers;
 				groupRequest.push(data);
@@ -1268,6 +1272,7 @@ var gmxForest = (function (exports) {
 				forestry: {value: '', title: 'Лесничество'},
 				sectionForestry: {value: 'Участковое лесничество'},
 				quadrant: {value: 'Квартал'},
+				dacha: {value: 'Дача'},
 				stratum: {value: 'Выдел'},
 				fellingForm: {value: '', title: 'Форма рубки'},
 				fellingType: {value: '', title: 'Тип рубки'},
@@ -1625,7 +1630,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (218:3) {#if layerIds}
+	// (219:3) {#if layerIds}
 	function create_if_block_5(component, ctx) {
 		var each_anchor;
 
@@ -1687,7 +1692,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (219:4) {#each layerIds as it}
+	// (220:4) {#each layerIds as it}
 	function create_each_block_2(component, ctx) {
 		var option, text_value = ctx.it.title, text, option_value_value, option_selected_value;
 
@@ -1729,9 +1734,9 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (225:0) {#if layerID}
+	// (226:0) {#if layerID}
 	function create_if_block$1(component, ctx) {
-		var div19, div0, text0, text1, div12, div11, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, div4, div3, text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value, text6, text7, input0, input0_value_value, text8, div6, div5, text9_value = ctx.params.inn.title || ctx.params.inn.value, text9, text10, input1, input1_value_value, text11, selectinput0_updating = {}, text12, selectinput1_updating = {}, text13, selectinput2_updating = {}, text14, selectinput3_updating = {}, text15, selectinput4_updating = {}, text16, selectinput5_updating = {}, text17, selectinput6_updating = {}, text18, selectinput7_updating = {}, text19, div8, div7, text20_value = ctx.params.scale.title || ctx.params.scale.value, text20, text21, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text32, div10, div9, text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text33, text34, select2, option10, text35, div13, text37, div17, div16, div14, button, text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text38, text39, div15, text40, text41_value = ctx.Object.keys(ctx.checked).length, text41, text42, text43_value = ctx.layerItems.length, text43, text44, table_updating = {}, text45, div18, current;
+		var div15, div0, text0, text1, div8, div7, div2, div1, text2_value = ctx.params.reportType.title, text2, text3, select0, text4, text5, selectinput0_updating = {}, text6, selectinput1_updating = {}, text7, selectinput2_updating = {}, text8, selectinput3_updating = {}, text9, selectinput4_updating = {}, text10, selectinput5_updating = {}, text11, selectinput6_updating = {}, text12, selectinput7_updating = {}, text13, selectinput8_updating = {}, text14, selectinput9_updating = {}, text15, selectinput10_updating = {}, text16, div4, div3, text17_value = ctx.params.scale.title || ctx.params.scale.value, text17, text18, select1, option0, option1, option2, option3, option4, option5, option6, option7, option8, option9, text29, div6, div5, text30_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value, text30, text31, select2, option10, text32, div9, text34, div13, div12, div10, button, text35_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном', text35, text36, div11, text37, text38_value = ctx.Object.keys(ctx.checked).length, text38, text39, text40_value = ctx.layerItems.length, text40, text41, table_updating = {}, text42, div14, current;
 
 		var if_block0 = (ctx.stateSave) && create_if_block_4(component, ctx);
 
@@ -1749,15 +1754,7 @@ var gmxForest = (function (exports) {
 
 		var if_block1 = (ctx.reportType !== 'о воспроизводстве лесов') && create_if_block_3(component, ctx);
 
-		function change_handler_1(event) {
-			component.setNodeField(this);
-		}
-
-		function change_handler_2(event) {
-			component.setNodeField(this);
-		}
-
-		var selectinput0_initial_data = { key: "region" };
+		var selectinput0_initial_data = { key: "organizationName" };
 		if (ctx.params  !== void 0) {
 			selectinput0_initial_data.params = ctx.params ;
 			selectinput0_updating.params = true;
@@ -1796,7 +1793,7 @@ var gmxForest = (function (exports) {
 			selectinput0._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput0.get());
 		});
 
-		var selectinput1_initial_data = { key: "forestry" };
+		var selectinput1_initial_data = { key: "inn" };
 		if (ctx.params  !== void 0) {
 			selectinput1_initial_data.params = ctx.params ;
 			selectinput1_updating.params = true;
@@ -1835,7 +1832,7 @@ var gmxForest = (function (exports) {
 			selectinput1._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput1.get());
 		});
 
-		var selectinput2_initial_data = { key: "sectionForestry" };
+		var selectinput2_initial_data = { key: "region" };
 		if (ctx.params  !== void 0) {
 			selectinput2_initial_data.params = ctx.params ;
 			selectinput2_updating.params = true;
@@ -1874,7 +1871,7 @@ var gmxForest = (function (exports) {
 			selectinput2._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput2.get());
 		});
 
-		var selectinput3_initial_data = { key: "quadrant" };
+		var selectinput3_initial_data = { key: "forestry" };
 		if (ctx.params  !== void 0) {
 			selectinput3_initial_data.params = ctx.params ;
 			selectinput3_updating.params = true;
@@ -1913,7 +1910,7 @@ var gmxForest = (function (exports) {
 			selectinput3._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput3.get());
 		});
 
-		var selectinput4_initial_data = { key: "stratum" };
+		var selectinput4_initial_data = { key: "sectionForestry" };
 		if (ctx.params  !== void 0) {
 			selectinput4_initial_data.params = ctx.params ;
 			selectinput4_updating.params = true;
@@ -1952,7 +1949,7 @@ var gmxForest = (function (exports) {
 			selectinput4._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput4.get());
 		});
 
-		var selectinput5_initial_data = { key: "site" };
+		var selectinput5_initial_data = { key: "quadrant" };
 		if (ctx.params  !== void 0) {
 			selectinput5_initial_data.params = ctx.params ;
 			selectinput5_updating.params = true;
@@ -1991,7 +1988,7 @@ var gmxForest = (function (exports) {
 			selectinput5._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput5.get());
 		});
 
-		var selectinput6_initial_data = { key: "recoveryEventType" };
+		var selectinput6_initial_data = { key: "stratum" };
 		if (ctx.params  !== void 0) {
 			selectinput6_initial_data.params = ctx.params ;
 			selectinput6_updating.params = true;
@@ -2030,7 +2027,7 @@ var gmxForest = (function (exports) {
 			selectinput6._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput6.get());
 		});
 
-		var selectinput7_initial_data = { key: "siteArea" };
+		var selectinput7_initial_data = { key: "dacha" };
 		if (ctx.params  !== void 0) {
 			selectinput7_initial_data.params = ctx.params ;
 			selectinput7_updating.params = true;
@@ -2069,13 +2066,130 @@ var gmxForest = (function (exports) {
 			selectinput7._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput7.get());
 		});
 
-		function change_handler_3(event) {
+		var selectinput8_initial_data = { key: "site" };
+		if (ctx.params  !== void 0) {
+			selectinput8_initial_data.params = ctx.params ;
+			selectinput8_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput8_initial_data.cols = ctx.cols ;
+			selectinput8_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput8_initial_data.changedParams = ctx.changedParams ;
+			selectinput8_updating.changedParams = true;
+		}
+		var selectinput8 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput8_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput8_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput8_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput8_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput8_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			selectinput8._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput8.get());
+		});
+
+		var selectinput9_initial_data = { key: "recoveryEventType" };
+		if (ctx.params  !== void 0) {
+			selectinput9_initial_data.params = ctx.params ;
+			selectinput9_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput9_initial_data.cols = ctx.cols ;
+			selectinput9_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput9_initial_data.changedParams = ctx.changedParams ;
+			selectinput9_updating.changedParams = true;
+		}
+		var selectinput9 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput9_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput9_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput9_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput9_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput9_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			selectinput9._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput9.get());
+		});
+
+		var selectinput10_initial_data = { key: "siteArea" };
+		if (ctx.params  !== void 0) {
+			selectinput10_initial_data.params = ctx.params ;
+			selectinput10_updating.params = true;
+		}
+		if (ctx.cols  !== void 0) {
+			selectinput10_initial_data.cols = ctx.cols ;
+			selectinput10_updating.cols = true;
+		}
+		if (ctx.changedParams  !== void 0) {
+			selectinput10_initial_data.changedParams = ctx.changedParams ;
+			selectinput10_updating.changedParams = true;
+		}
+		var selectinput10 = new SelectInput({
+			root: component.root,
+			store: component.store,
+			data: selectinput10_initial_data,
+			_bind: function _bind(changed, childState) {
+				var newState = {};
+				if (!selectinput10_updating.params && changed.params) {
+					newState.params = childState.params;
+				}
+
+				if (!selectinput10_updating.cols && changed.cols) {
+					newState.cols = childState.cols;
+				}
+
+				if (!selectinput10_updating.changedParams && changed.changedParams) {
+					newState.changedParams = childState.changedParams;
+				}
+				component._set(newState);
+				selectinput10_updating = {};
+			}
+		});
+
+		component.root._beforecreate.push(function () {
+			selectinput10._bind({ params: 1, cols: 1, changedParams: 1 }, selectinput10.get());
+		});
+
+		function change_handler_1(event) {
 			component.setNodeField(this, true);
 		}
 
 		var if_block2 = (ctx.quadrantIds) && create_if_block_2(component, ctx);
 
-		function change_handler_4(event) {
+		function change_handler_2(event) {
 			component.setNodeField(this, true);
 		}
 
@@ -2119,13 +2233,13 @@ var gmxForest = (function (exports) {
 
 		return {
 			c: function c() {
-				div19 = createElement("div");
+				div15 = createElement("div");
 				div0 = createElement("div");
 				text0 = createText("Ввод информации\r\n\t\t\t\t");
 				if (if_block0) { if_block0.c(); }
 				text1 = createText("\r\n\t\t\t");
-				div12 = createElement("div");
-				div11 = createElement("div");
+				div8 = createElement("div");
+				div7 = createElement("div");
 				div2 = createElement("div");
 				div1 = createElement("div");
 				text2 = createText(text2_value);
@@ -2138,39 +2252,33 @@ var gmxForest = (function (exports) {
 
 				text4 = createText("\r\n");
 				if (if_block1) { if_block1.c(); }
-				text5 = createText("\r\n\t\t\t\t\t");
+				text5 = createText("\r\n\r\n\t\t\t\t\t");
+				selectinput0._fragment.c();
+				text6 = createText("\r\n\t\t\t\t\t");
+				selectinput1._fragment.c();
+				text7 = createText("\r\n\t\t\t\t\t");
+				selectinput2._fragment.c();
+				text8 = createText("\r\n\t\t\t\t\t");
+				selectinput3._fragment.c();
+				text9 = createText("\r\n\t\t\t\t\t");
+				selectinput4._fragment.c();
+				text10 = createText("\r\n\t\t\t\t\t");
+				selectinput5._fragment.c();
+				text11 = createText("\r\n\t\t\t\t\t");
+				selectinput6._fragment.c();
+				text12 = createText("\r\n\t\t\t\t\t");
+				selectinput7._fragment.c();
+				text13 = createText("\r\n\t\t\t\t\t");
+				selectinput8._fragment.c();
+				text14 = createText("\r\n\t\t\t\t\t");
+				selectinput9._fragment.c();
+				text15 = createText("\r\n\t\t\t\t\t");
+				selectinput10._fragment.c();
+				text16 = createText("\r\n\r\n\t\t\t\t\t");
 				div4 = createElement("div");
 				div3 = createElement("div");
-				text6 = createText(text6_value);
-				text7 = createText("\r\n\t\t\t\t\t\t");
-				input0 = createElement("input");
-				text8 = createText("\r\n\t\t\t\t\t");
-				div6 = createElement("div");
-				div5 = createElement("div");
-				text9 = createText(text9_value);
-				text10 = createText("\r\n\t\t\t\t\t\t");
-				input1 = createElement("input");
-				text11 = createText("\r\n\r\n\t\t\t\t\t");
-				selectinput0._fragment.c();
-				text12 = createText("\r\n\t\t\t\t\t");
-				selectinput1._fragment.c();
-				text13 = createText("\r\n\t\t\t\t\t");
-				selectinput2._fragment.c();
-				text14 = createText("\r\n\t\t\t\t\t");
-				selectinput3._fragment.c();
-				text15 = createText("\r\n\t\t\t\t\t");
-				selectinput4._fragment.c();
-				text16 = createText("\r\n\t\t\t\t\t");
-				selectinput5._fragment.c();
-				text17 = createText("\r\n\t\t\t\t\t");
-				selectinput6._fragment.c();
-				text18 = createText("\r\n\t\t\t\t\t");
-				selectinput7._fragment.c();
-				text19 = createText("\r\n\r\n\t\t\t\t\t");
-				div8 = createElement("div");
-				div7 = createElement("div");
-				text20 = createText(text20_value);
-				text21 = createText("\r\n\t\t\t\t\t\t");
+				text17 = createText(text17_value);
+				text18 = createText("\r\n\t\t\t\t\t\t");
 				select1 = createElement("select");
 				option0 = createElement("option");
 				option0.textContent = "1:5000";
@@ -2192,33 +2300,33 @@ var gmxForest = (function (exports) {
 				option8.textContent = "1:45000";
 				option9 = createElement("option");
 				option9.textContent = "1:50000";
-				text32 = createText("\r\n\t\t\t\t\t");
-				div10 = createElement("div");
-				div9 = createElement("div");
-				text33 = createText(text33_value);
-				text34 = createText("\r\n\t\t\t\t\t\t");
+				text29 = createText("\r\n\t\t\t\t\t");
+				div6 = createElement("div");
+				div5 = createElement("div");
+				text30 = createText(text30_value);
+				text31 = createText("\r\n\t\t\t\t\t\t");
 				select2 = createElement("select");
 				option10 = createElement("option");
 				if (if_block2) { if_block2.c(); }
-				text35 = createText("\r\n\t\t\t");
+				text32 = createText("\r\n\t\t\t");
+				div9 = createElement("div");
+				div9.textContent = "Список объектов";
+				text34 = createText("\r\n\t\t\t");
 				div13 = createElement("div");
-				div13.textContent = "Список объектов";
-				text37 = createText("\r\n\t\t\t");
-				div17 = createElement("div");
-				div16 = createElement("div");
-				div14 = createElement("div");
+				div12 = createElement("div");
+				div10 = createElement("div");
 				button = createElement("button");
+				text35 = createText(text35_value);
+				text36 = createText("\r\n\t\t\t\t\t");
+				div11 = createElement("div");
+				text37 = createText("Выделено: ");
 				text38 = createText(text38_value);
-				text39 = createText("\r\n\t\t\t\t\t");
-				div15 = createElement("div");
-				text40 = createText("Выделено: ");
-				text41 = createText(text41_value);
-				text42 = createText(" / ");
-				text43 = createText(text43_value);
-				text44 = createText("\r\n\t\t\t\t\t");
+				text39 = createText(" / ");
+				text40 = createText(text40_value);
+				text41 = createText("\r\n\t\t\t\t\t");
 				table._fragment.c();
-				text45 = createText("\r\n\t\t\t");
-				div18 = createElement("div");
+				text42 = createText("\r\n\t\t\t");
+				div14 = createElement("div");
 				if_block3.c();
 				div0.className = "gmx-sidebar-label-medium svelte-ia02ks";
 				div1.className = "gmx-sidebar-label svelte-ia02ks";
@@ -2226,21 +2334,7 @@ var gmxForest = (function (exports) {
 				select0.name = "reportType";
 				select0.className = "reportType gmx-sidebar-select-large svelte-ia02ks";
 				div2.className = "gmx-sidebar-labeled-block svelte-ia02ks";
-				div3.className = "gmx-sidebar-label-small svelte-ia02ks";
-				addListener(input0, "change", change_handler_1);
-				input0.name = "organizationName";
-				input0.value = input0_value_value = ctx.params.organizationName.value;
-				setAttribute(input0, "type", "text");
-				input0.className = "organizationName gmx-sidebar-input-large svelte-ia02ks";
-				div4.className = "gmx-sidebar-labeled-block svelte-ia02ks";
-				div5.className = "gmx-sidebar-label-small svelte-ia02ks";
-				addListener(input1, "change", change_handler_2);
-				input1.name = "inn";
-				input1.value = input1_value_value = ctx.params.inn.value;
-				setAttribute(input1, "type", "text");
-				input1.className = "inn gmx-sidebar-input-large svelte-ia02ks";
-				div6.className = "gmx-sidebar-labeled-block svelte-ia02ks";
-				div7.className = "gmx-sidebar-label svelte-ia02ks";
+				div3.className = "gmx-sidebar-label svelte-ia02ks";
 				option0.__value = "5000";
 				option0.value = option0.__value;
 				option0.className = "svelte-ia02ks";
@@ -2271,37 +2365,37 @@ var gmxForest = (function (exports) {
 				option9.__value = "50000";
 				option9.value = option9.__value;
 				option9.className = "svelte-ia02ks";
-				addListener(select1, "change", change_handler_3);
+				addListener(select1, "change", change_handler_1);
 				select1.name = "scale";
 				select1.className = "scale gmx-sidebar-select-large svelte-ia02ks";
-				div8.className = "gmx-sidebar-labeled-block svelte-ia02ks";
-				div9.className = "gmx-sidebar-label svelte-ia02ks";
+				div4.className = "gmx-sidebar-labeled-block svelte-ia02ks";
+				div5.className = "gmx-sidebar-label svelte-ia02ks";
 				option10.__value = "";
 				option10.value = option10.__value;
 				option10.className = "svelte-ia02ks";
-				addListener(select2, "change", change_handler_4);
+				addListener(select2, "change", change_handler_2);
 				select2.name = "quadrantLayerId";
 				select2.className = "quadrantLayerId gmx-sidebar-select-large svelte-ia02ks";
-				div10.className = "gmx-sidebar-labeled-block svelte-ia02ks";
-				div13.className = "gmx-sidebar-label-medium svelte-ia02ks";
+				div6.className = "gmx-sidebar-labeled-block svelte-ia02ks";
+				div9.className = "gmx-sidebar-label-medium svelte-ia02ks";
 				addListener(button, "click", click_handler);
 				button.className = "gmx-sidebar-button svelte-ia02ks";
-				div14.className = "gmx-geometry-select-container svelte-ia02ks";
-				div15.className = "gmx-sidebar-label-medium svelte-ia02ks";
-				div17.className = "forest-features-block svelte-ia02ks";
-				div18.className = "gmx-button-container svelte-ia02ks";
-				div19.className = "leftContent forest-plugin-content svelte-ia02ks";
+				div10.className = "gmx-geometry-select-container svelte-ia02ks";
+				div11.className = "gmx-sidebar-label-medium svelte-ia02ks";
+				div13.className = "forest-features-block svelte-ia02ks";
+				div14.className = "gmx-button-container svelte-ia02ks";
+				div15.className = "leftContent forest-plugin-content svelte-ia02ks";
 			},
 
 			m: function m(target, anchor) {
-				insert(target, div19, anchor);
-				append(div19, div0);
+				insert(target, div15, anchor);
+				append(div15, div0);
 				append(div0, text0);
 				if (if_block0) { if_block0.m(div0, null); }
-				append(div19, text1);
-				append(div19, div12);
-				append(div12, div11);
-				append(div11, div2);
+				append(div15, text1);
+				append(div15, div8);
+				append(div8, div7);
+				append(div7, div2);
 				append(div2, div1);
 				append(div1, text2);
 				append(div2, text3);
@@ -2312,44 +2406,36 @@ var gmxForest = (function (exports) {
 				}
 
 				component.refs.reportType = select0;
-				append(div11, text4);
-				if (if_block1) { if_block1.m(div11, null); }
-				append(div11, text5);
-				append(div11, div4);
+				append(div7, text4);
+				if (if_block1) { if_block1.m(div7, null); }
+				append(div7, text5);
+				selectinput0._mount(div7, null);
+				append(div7, text6);
+				selectinput1._mount(div7, null);
+				append(div7, text7);
+				selectinput2._mount(div7, null);
+				append(div7, text8);
+				selectinput3._mount(div7, null);
+				append(div7, text9);
+				selectinput4._mount(div7, null);
+				append(div7, text10);
+				selectinput5._mount(div7, null);
+				append(div7, text11);
+				selectinput6._mount(div7, null);
+				append(div7, text12);
+				selectinput7._mount(div7, null);
+				append(div7, text13);
+				selectinput8._mount(div7, null);
+				append(div7, text14);
+				selectinput9._mount(div7, null);
+				append(div7, text15);
+				selectinput10._mount(div7, null);
+				append(div7, text16);
+				append(div7, div4);
 				append(div4, div3);
-				append(div3, text6);
-				append(div4, text7);
-				append(div4, input0);
-				component.refs.organizationName = input0;
-				append(div11, text8);
-				append(div11, div6);
-				append(div6, div5);
-				append(div5, text9);
-				append(div6, text10);
-				append(div6, input1);
-				component.refs.inn = input1;
-				append(div11, text11);
-				selectinput0._mount(div11, null);
-				append(div11, text12);
-				selectinput1._mount(div11, null);
-				append(div11, text13);
-				selectinput2._mount(div11, null);
-				append(div11, text14);
-				selectinput3._mount(div11, null);
-				append(div11, text15);
-				selectinput4._mount(div11, null);
-				append(div11, text16);
-				selectinput5._mount(div11, null);
-				append(div11, text17);
-				selectinput6._mount(div11, null);
-				append(div11, text18);
-				selectinput7._mount(div11, null);
-				append(div11, text19);
-				append(div11, div8);
-				append(div8, div7);
-				append(div7, text20);
-				append(div8, text21);
-				append(div8, select1);
+				append(div3, text17);
+				append(div4, text18);
+				append(div4, select1);
 				append(select1, option0);
 				append(select1, option1);
 				append(select1, option2);
@@ -2361,34 +2447,34 @@ var gmxForest = (function (exports) {
 				append(select1, option8);
 				append(select1, option9);
 				component.refs.scale = select1;
-				append(div11, text32);
-				append(div11, div10);
-				append(div10, div9);
-				append(div9, text33);
-				append(div10, text34);
-				append(div10, select2);
+				append(div7, text29);
+				append(div7, div6);
+				append(div6, div5);
+				append(div5, text30);
+				append(div6, text31);
+				append(div6, select2);
 				append(select2, option10);
 				if (if_block2) { if_block2.m(select2, null); }
 				component.refs.quadrantLayerId = select2;
-				append(div19, text35);
-				append(div19, div13);
-				append(div19, text37);
-				append(div19, div17);
-				append(div17, div16);
-				append(div16, div14);
-				append(div14, button);
-				append(button, text38);
-				append(div16, text39);
-				append(div16, div15);
-				append(div15, text40);
-				append(div15, text41);
+				append(div15, text32);
+				append(div15, div9);
+				append(div15, text34);
+				append(div15, div13);
+				append(div13, div12);
+				append(div12, div10);
+				append(div10, button);
+				append(button, text35);
+				append(div12, text36);
+				append(div12, div11);
+				append(div11, text37);
+				append(div11, text38);
+				append(div11, text39);
+				append(div11, text40);
+				append(div12, text41);
+				table._mount(div12, null);
 				append(div15, text42);
-				append(div15, text43);
-				append(div16, text44);
-				table._mount(div16, null);
-				append(div19, text45);
-				append(div19, div18);
-				if_block3.m(div18, null);
+				append(div15, div14);
+				if_block3.m(div14, null);
 				current = true;
 			},
 
@@ -2438,28 +2524,12 @@ var gmxForest = (function (exports) {
 						if (if_block1) { if_block1.c(); }
 					}
 
-					if_block1.i(div11, text5);
+					if_block1.i(div7, text5);
 				} else if (if_block1) {
 					if_block1.o(function() {
 						if_block1.d(1);
 						if_block1 = null;
 					});
-				}
-
-				if ((!current || changed.params) && text6_value !== (text6_value = ctx.params.organizationName.title || ctx.params.organizationName.value)) {
-					setData(text6, text6_value);
-				}
-
-				if ((!current || changed.params) && input0_value_value !== (input0_value_value = ctx.params.organizationName.value)) {
-					input0.value = input0_value_value;
-				}
-
-				if ((!current || changed.params) && text9_value !== (text9_value = ctx.params.inn.title || ctx.params.inn.value)) {
-					setData(text9, text9_value);
-				}
-
-				if ((!current || changed.params) && input1_value_value !== (input1_value_value = ctx.params.inn.value)) {
-					input1.value = input1_value_value;
 				}
 
 				var selectinput0_changes = {};
@@ -2590,12 +2660,60 @@ var gmxForest = (function (exports) {
 				selectinput7._set(selectinput7_changes);
 				selectinput7_updating = {};
 
-				if ((!current || changed.params) && text20_value !== (text20_value = ctx.params.scale.title || ctx.params.scale.value)) {
-					setData(text20, text20_value);
+				var selectinput8_changes = {};
+				if (!selectinput8_updating.params && changed.params) {
+					selectinput8_changes.params = ctx.params ;
+					selectinput8_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput8_updating.cols && changed.cols) {
+					selectinput8_changes.cols = ctx.cols ;
+					selectinput8_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput8_updating.changedParams && changed.changedParams) {
+					selectinput8_changes.changedParams = ctx.changedParams ;
+					selectinput8_updating.changedParams = ctx.changedParams  !== void 0;
+				}
+				selectinput8._set(selectinput8_changes);
+				selectinput8_updating = {};
+
+				var selectinput9_changes = {};
+				if (!selectinput9_updating.params && changed.params) {
+					selectinput9_changes.params = ctx.params ;
+					selectinput9_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput9_updating.cols && changed.cols) {
+					selectinput9_changes.cols = ctx.cols ;
+					selectinput9_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput9_updating.changedParams && changed.changedParams) {
+					selectinput9_changes.changedParams = ctx.changedParams ;
+					selectinput9_updating.changedParams = ctx.changedParams  !== void 0;
+				}
+				selectinput9._set(selectinput9_changes);
+				selectinput9_updating = {};
+
+				var selectinput10_changes = {};
+				if (!selectinput10_updating.params && changed.params) {
+					selectinput10_changes.params = ctx.params ;
+					selectinput10_updating.params = ctx.params  !== void 0;
+				}
+				if (!selectinput10_updating.cols && changed.cols) {
+					selectinput10_changes.cols = ctx.cols ;
+					selectinput10_updating.cols = ctx.cols  !== void 0;
+				}
+				if (!selectinput10_updating.changedParams && changed.changedParams) {
+					selectinput10_changes.changedParams = ctx.changedParams ;
+					selectinput10_updating.changedParams = ctx.changedParams  !== void 0;
+				}
+				selectinput10._set(selectinput10_changes);
+				selectinput10_updating = {};
+
+				if ((!current || changed.params) && text17_value !== (text17_value = ctx.params.scale.title || ctx.params.scale.value)) {
+					setData(text17, text17_value);
 				}
 
-				if ((!current || changed.params) && text33_value !== (text33_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value)) {
-					setData(text33, text33_value);
+				if ((!current || changed.params) && text30_value !== (text30_value = ctx.params.quadrantLayerId.title || ctx.params.quadrantLayerId.value)) {
+					setData(text30, text30_value);
 				}
 
 				if (ctx.quadrantIds) {
@@ -2611,16 +2729,16 @@ var gmxForest = (function (exports) {
 					if_block2 = null;
 				}
 
-				if ((!current || changed.drawstart) && text38_value !== (text38_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном')) {
+				if ((!current || changed.drawstart) && text35_value !== (text35_value = ctx.drawstart ? 'Полигон рисуется' :'Выделите участки полигоном')) {
+					setData(text35, text35_value);
+				}
+
+				if ((!current || changed.Object || changed.checked) && text38_value !== (text38_value = ctx.Object.keys(ctx.checked).length)) {
 					setData(text38, text38_value);
 				}
 
-				if ((!current || changed.Object || changed.checked) && text41_value !== (text41_value = ctx.Object.keys(ctx.checked).length)) {
-					setData(text41, text41_value);
-				}
-
-				if ((!current || changed.layerItems) && text43_value !== (text43_value = ctx.layerItems.length)) {
-					setData(text43, text43_value);
+				if ((!current || changed.layerItems) && text40_value !== (text40_value = ctx.layerItems.length)) {
+					setData(text40, text40_value);
 				}
 
 				var table_changes = {};
@@ -2639,7 +2757,7 @@ var gmxForest = (function (exports) {
 					if_block3.d(1);
 					if_block3 = current_block_type(component, ctx);
 					if_block3.c();
-					if_block3.m(div18, null);
+					if_block3.m(div14, null);
 				}
 			},
 
@@ -2652,7 +2770,7 @@ var gmxForest = (function (exports) {
 			o: function o(outrocallback) {
 				if (!current) { return; }
 
-				outrocallback = callAfter(outrocallback, 10);
+				outrocallback = callAfter(outrocallback, 13);
 
 				if (if_block1) { if_block1.o(outrocallback); }
 				else { outrocallback(); }
@@ -2665,13 +2783,16 @@ var gmxForest = (function (exports) {
 				if (selectinput5) { selectinput5._fragment.o(outrocallback); }
 				if (selectinput6) { selectinput6._fragment.o(outrocallback); }
 				if (selectinput7) { selectinput7._fragment.o(outrocallback); }
+				if (selectinput8) { selectinput8._fragment.o(outrocallback); }
+				if (selectinput9) { selectinput9._fragment.o(outrocallback); }
+				if (selectinput10) { selectinput10._fragment.o(outrocallback); }
 				if (table) { table._fragment.o(outrocallback); }
 				current = false;
 			},
 
 			d: function d(detach) {
 				if (detach) {
-					detachNode(div19);
+					detachNode(div15);
 				}
 
 				if (if_block0) { if_block0.d(); }
@@ -2681,10 +2802,6 @@ var gmxForest = (function (exports) {
 				removeListener(select0, "change", change_handler);
 				if (component.refs.reportType === select0) { component.refs.reportType = null; }
 				if (if_block1) { if_block1.d(); }
-				removeListener(input0, "change", change_handler_1);
-				if (component.refs.organizationName === input0) { component.refs.organizationName = null; }
-				removeListener(input1, "change", change_handler_2);
-				if (component.refs.inn === input1) { component.refs.inn = null; }
 				selectinput0.destroy();
 				selectinput1.destroy();
 				selectinput2.destroy();
@@ -2693,10 +2810,13 @@ var gmxForest = (function (exports) {
 				selectinput5.destroy();
 				selectinput6.destroy();
 				selectinput7.destroy();
-				removeListener(select1, "change", change_handler_3);
+				selectinput8.destroy();
+				selectinput9.destroy();
+				selectinput10.destroy();
+				removeListener(select1, "change", change_handler_1);
 				if (component.refs.scale === select1) { component.refs.scale = null; }
 				if (if_block2) { if_block2.d(); }
-				removeListener(select2, "change", change_handler_4);
+				removeListener(select2, "change", change_handler_2);
 				if (component.refs.quadrantLayerId === select2) { component.refs.quadrantLayerId = null; }
 				removeListener(button, "click", click_handler);
 				table.destroy();
@@ -2705,7 +2825,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (228:4) {#if stateSave}
+	// (229:4) {#if stateSave}
 	function create_if_block_4(component, ctx) {
 		var i;
 
@@ -2737,7 +2857,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (237:0) {#each params.reportType.options as it}
+	// (238:0) {#each params.reportType.options as it}
 	function create_each_block_1(component, ctx) {
 		var option, text_value = ctx.it, text, option_value_value;
 
@@ -2775,7 +2895,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (243:0) {#if reportType !== 'о воспроизводстве лесов'}
+	// (244:0) {#if reportType !== 'о воспроизводстве лесов'}
 	function create_if_block_3(component, ctx) {
 		var div, selectinput0_updating = {}, text, selectinput1_updating = {}, current;
 
@@ -2935,7 +3055,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (286:0) {#if quadrantIds}
+	// (282:0) {#if quadrantIds}
 	function create_if_block_2(component, ctx) {
 		var each_anchor;
 
@@ -2997,7 +3117,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (287:1) {#each quadrantIds as it}
+	// (283:1) {#each quadrantIds as it}
 	function create_each_block$2(component, ctx) {
 		var option, text_value = ctx.it.title, text, option_value_value;
 
@@ -3035,7 +3155,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (306:0) {:else}
+	// (302:0) {:else}
 	function create_else_block$1(component, ctx) {
 		var button, text, button_class_value;
 
@@ -3072,7 +3192,7 @@ var gmxForest = (function (exports) {
 		};
 	}
 
-	// (304:0) {#if report}
+	// (300:0) {#if report}
 	function create_if_block_1(component, ctx) {
 		var button;
 
